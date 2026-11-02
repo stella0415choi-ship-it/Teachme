@@ -134,6 +134,7 @@ input[type=checkbox]{accent-color:var(--pink)}
 .composer textarea{margin:0;min-height:54px}
 .composer .btn{flex:none}
 .actions{margin-top:8px}
+.keyhint{font-family:var(--px);font-size:11px;color:var(--ink-soft);text-align:right;margin:4px 0 0}
 
 /* 목차 */
 .sec{border-top:2px dashed var(--rule);padding:10px 0}
@@ -368,6 +369,7 @@ function toast(msg){
   setTimeout(function(){ t.remove(); }, 3200);
 }
 function arr(x){ return Array.isArray(x) ? x : []; }
+function coarse(){ return !!(window.matchMedia && matchMedia('(pointer: coarse)').matches); }
 function reduced(){ return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }
 
 /* ---------- AI runtime (Claude sample capability) ---------- */
@@ -440,10 +442,12 @@ function setFace(face){
   if (els.kao) els.kao.textContent = KAO[face] || KAO.neutral;
   var src = SPRITES[face] || SPRITES.neutral;
   if (!src || els.sprite.getAttribute('src') === src) return;
-  els.sprite.classList.add('fade');
+  // 0.16초 사이에 화면이 바뀌어도 에러가 나지 않게 지금 그림을 붙잡아 둬요.
+  var img = els.sprite;
+  img.classList.add('fade');
   setTimeout(function(){
-    els.sprite.src = src; els.sprite.alt = FACE_ALT[face] || '지민';
-    els.sprite.classList.remove('fade');
+    img.src = src; img.alt = FACE_ALT[face] || '지민';
+    img.classList.remove('fade');
   }, reduced() ? 0 : 160);
 }
 var FACE_BY_KIND = { ask:'think', request:'lean', misconception:'think', wrap:'happy' };
@@ -505,11 +509,13 @@ var S = {
   screen:'home', matId:null, source:'', fileName:'', analysis:null, selected:{},
   mode:'flow', charId:'harin', face:'fighting',
   ledger:[], dialog:[], misc:[], goals:{}, turn:0, wrap:false,
-  exam:null, draft:'', tab:'talk', busy:false, dev:false, logs:[]
+  exam:null, draft:'', tab:'talk', busy:false, dev:false, logs:[],
+  gen:0 // 가르치기를 새로 시작할 때마다 1씩 늘어요. 늦게 도착한 AI 대답이 새 대화에 끼어들지 않게 막아요.
 };
 var els = {};
 
 function resetTeach(){
+  S.gen++;
   S.ledger = []; S.dialog = []; S.misc = []; S.goals = {}; S.turn = 0; S.wrap = false; S.exam = null; S.draft = '';
 }
 function selectedIds(){ return Object.keys(S.selected).filter(function(k){ return S.selected[k]; }); }
@@ -868,6 +874,7 @@ function startTeach(){
 
 function applyTracker(r){
   r = r || {};
+  var fixed = 0;
   arr(r.goals).forEach(function(g){
     var lv = Math.max(0, Math.min(3, parseInt(g.level, 10) || 0));
     if (g.id) S.goals[String(g.id)] = {level:lv, note:String(g.note || '')};
@@ -876,13 +883,13 @@ function applyTracker(r){
     var m = S.misc.filter(function(x){ return x.id === String(u.id); })[0];
     if (m && m.status === 'open' && (u.status === 'corrected' || u.status === 'wrongly_corrected')) {
       m.status = u.status;
-      if (u.status === 'corrected') bump('fixed');
+      if (u.status === 'corrected') fixed++;
     }
   });
   var d = r.directive || {};
   return {
     kind:KIND[d.kind] ? d.kind : 'ask', goal:String(d.goal || ''), focus:String(d.focus || ''),
-    misconception:String(d.misconception || ''), based_on:arr(d.based_on).map(String)
+    misconception:String(d.misconception || ''), based_on:arr(d.based_on).map(String), fixed:fixed
   };
 }
 
@@ -893,12 +900,34 @@ function setLine(text, thinking){
   els.dtext.textContent = text;
 }
 
+// 캐릭터 대사 앞에 붙은 이름표("지민: ")나 따옴표를 떼요.
+function cleanLine(t){
+  var ch = CHARS[S.charId];
+  t = String(t || '').trim();
+  t = t.replace(new RegExp('^(?:' + ch.name + '|' + ch.short + ')\\s*[:：]\\s*'), '');
+  t = t.replace(/^["“”'‘’]+/, '').replace(/["“”'‘’]+$/, '').trim();
+  return t;
+}
+
+// 가르치기 화면의 버튼 상태만 다시 맞춰요. 화면이 바뀌어 버튼이 없으면 아무것도 안 해요.
+function updateTeachUi(){
+  if (S.screen !== 'teach' || !els.send) return;
+  els.send.disabled = S.busy;
+  els.exam.disabled = S.busy;
+  els.exam.className = 'btn small' + (S.wrap ? '' : ' ghost');
+  if (els.scene && !S.busy) els.scene.classList.remove('talk');
+  renderPanel();
+}
+
 function send(){
   if (S.busy) return;
   var msg = els.input.value.trim();
   if (!msg) return;
-  var ch = CHARS[S.charId];
-  S.busy = true; els.send.disabled = true; els.input.value = ''; S.draft = '';
+  var ch = CHARS[S.charId], gen = S.gen;
+  // 실패하면 보내기 전 상태로 되돌릴 수 있게 지금 상태를 기억해 둬요.
+  var snap = {ledger:S.ledger.length, dialog:S.dialog.length, turn:S.turn, wrap:S.wrap, face:S.face,
+    goals:JSON.stringify(S.goals), misc:S.misc.map(function(m){ return m.status; })};
+  S.busy = true; els.input.value = ''; S.draft = '';
   S.turn++;
   var ids = [];
   splitSentences(msg).forEach(function(t){
@@ -906,11 +935,12 @@ function send(){
     S.ledger.push({id:id, text:t, turn:S.turn}); ids.push(id);
   });
   S.dialog.push({role:'user', text:msg, ids:ids});
-  renderPanel();
+  updateTeachUi();
   setLine('생각하는 중…', true);
   setFace('neutral');
   var d, mis = null;
   AI.json(P.tracker(), {modelTier:'quick', cache:false}).then(function(raw){
+    if (gen !== S.gen) throw {code:'stale'};
     d = applyTracker(raw);
     if (d.kind === 'misconception') {
       var canMis = d.misconception && S.turn > 1 && S.misc.length < 3 && !S.misc.some(function(m){ return m.status === 'open'; });
@@ -918,7 +948,6 @@ function send(){
       else d.kind = 'ask';
     }
     S.wrap = d.kind === 'wrap';
-    recordGoals();
     updateGauge();
     addLog({layer:'이해 상태 추적기', tier:'quick', sees:['원문(선택 범위)','학습 목표','학습자 문장','대화'], blocked:[],
       note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요.', detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : (d.focus ? ' / ' + d.focus : ''))});
@@ -927,24 +956,40 @@ function send(){
     setLine('', false);
     S.face = FACE_BY_KIND[d.kind] || 'think';
     setFace(S.face);
-    els.scene.classList.add('talk');
-    return AI.text(P.character(d, mis), {modelTier:'quick', cache:false, onText:function(u){ setLine(u.text, false); }});
+    if (els.scene) els.scene.classList.add('talk');
+    return AI.text(P.character(d, mis), {modelTier:'quick', cache:false, onText:function(u){ if (gen === S.gen) setLine(u.text, false); }});
   }).then(function(res){
-    var line = res.text.trim();
+    if (gen !== S.gen) return; // 그사이 가르치기를 새로 시작했으면 늦은 대답은 버려요.
+    var line = cleanLine(res && res.text);
+    if (!line) throw {code:'empty'};
     if (mis) S.misc.push(mis);
     S.dialog.push({role:'char', text:line, kind:d.kind, mis:mis ? mis.id : null});
     setLine(line, false);
-    els.exam.className = 'btn small' + (S.wrap ? '' : ' ghost');
+    // 대답까지 성공한 턴만 기록에 남겨요.
+    recordGoals();
+    if (d.fixed) bump('fixed', d.fixed);
   }).catch(function(e){
-    setLine(errMsg(e) || '중단됐어요. 다시 보내 주세요.', false);
-    els.dbox.classList.add('err');
+    if (gen !== S.gen) return;
+    // 보내기 전 상태로 되돌리고, 쓴 글은 입력창에 다시 넣어 줘요. (공책 문장 중복 방지)
+    S.ledger.length = snap.ledger; S.dialog.length = snap.dialog; S.turn = snap.turn; S.wrap = snap.wrap;
+    S.goals = JSON.parse(snap.goals);
+    S.misc.length = Math.min(S.misc.length, snap.misc.length);
+    S.misc.forEach(function(m, i){ m.status = snap.misc[i]; });
+    S.draft = msg;
+    if (els.input) els.input.value = msg;
+    S.face = snap.face; setFace(S.face);
+    updateGauge();
+    setLine((errMsg(e) || '중단됐어요.') + ' 쓴 내용은 입력창에 그대로 남겨 뒀어요. 다시 보내 주세요.', false);
+    if (els.dbox) els.dbox.classList.add('err');
   }).then(function(){
-    S.busy = false; els.send.disabled = false; els.scene.classList.remove('talk');
-    renderPanel();
+    // 성공하든 실패하든 반드시 여기까지 와서 '바쁨' 표시를 꺼요.
+    S.busy = false;
+    updateTeachUi();
   });
 }
 
 function runExam(retry){
+  if (S.busy) { toast(CHARS[S.charId].short + '가 대답하는 중이에요. 대답이 끝나면 시험을 볼 수 있어요.'); return; }
   if (!retry) {
     if (!S.ledger.length) { toast('먼저 한 문장이라도 설명해 주세요.'); return; }
     S.exam = {qs:examQs(), beliefs:openBeliefs(), stage:0, err:''};
@@ -1454,13 +1499,22 @@ function viewTeach(){
   els.input = h('textarea', {rows:2, placeholder:ch.short + '에게 설명해 보세요', 'aria-label':'설명 입력'});
   els.input.value = S.draft;
   els.input.addEventListener('input', function(){ S.draft = els.input.value; });
-  els.input.addEventListener('keydown', function(e){ if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } });
+  // 컴퓨터: Enter로 보내기, Shift+Enter로 줄 바꿈. 폰: Enter는 줄 바꿈, 보내기 버튼으로 보내기.
+  // 한글 조합 중(isComposing)에 누른 Enter는 무시해야 마지막 글자가 두 번 보내지지 않아요.
+  var touch = coarse();
+  els.input.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+    if (e.metaKey || e.ctrlKey || (!touch && !e.shiftKey)) { e.preventDefault(); send(); }
+  });
   els.send = h('button', {class:'btn', onclick:send}, '보내기');
   els.send.disabled = S.busy;
   els.exam = h('button', {class:'btn small' + (S.wrap ? '' : ' ghost'), onclick:function(){ runExam(false); }}, '수업 끝내고 시험 보기');
+  els.exam.disabled = S.busy;
+  if (S.busy) els.scene.classList.add('talk');
   renderPanel();
   return h('section', {}, stage, els.dbox, tabs, els.panel,
     h('div', {class:'composer'}, els.input, els.send),
+    h('p', {class:'keyhint'}, touch ? '다 쓰면 보내기 버튼을 눌러요.' : 'Enter로 보내기 · Shift+Enter로 줄 바꿈'),
     h('div', {class:'row spread actions'}, h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '목차로'), els.exam));
 }
 
