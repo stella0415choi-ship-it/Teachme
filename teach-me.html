@@ -207,7 +207,8 @@ details.q summary{cursor:pointer;font-size:15px}
 .res.correct{color:var(--ok);border-color:var(--ok)}
 .res.partial{color:var(--warn);border-color:var(--warn)}
 .res.wrong{color:var(--bad);border-color:var(--bad)}
-.res.not_learned{color:var(--ink-soft);border-color:var(--ink-soft)}
+.res.not_learned,.res.ungraded{color:var(--ink-soft);border-color:var(--ink-soft)}
+.notice{font-size:14px;background:var(--yellow);color:#2F3366;border:2px solid var(--line);padding:8px 10px;margin:10px 0 0}
 .claim{font-size:14px;margin:6px 0 0;padding-left:10px;border-left:4px solid var(--ok)}
 .claim.bad{border-color:var(--bad);color:var(--ink-soft);text-decoration:line-through}
 .cite{display:inline-block;font-family:var(--px);font-size:11px;background:var(--yellow);color:#2F3366;padding:0 5px;margin-left:4px}
@@ -403,7 +404,8 @@ var CHARS = {
     blurb:'기초가 탄탄한 후배. 새 개념을 앞 내용과 연결하거나 응용하는 깊은 질문을 해요.',
     persona:'성실하고 호기심 많은 후배. 선배에게 존댓말을 쓴다. 차분하고 똑똑하다.',
     level:'기본기가 있는 학생처럼 묻는다. 개념 사이의 관계, 앞 시기와의 비교, 원인과 결과, 그렇다면 이런 경우도 그런지 같은 응용 질문을 한다. 단순 용어 질문은 거의 하지 않는다.',
-    hello:'선배, 오늘 배운 거 알려주시는 거죠? 들으면서 앞 내용이랑 연결해서 궁금한 거 여쭤볼게요!'
+    hello:'선배, 오늘 배운 거 알려주시는 거죠? 들으면서 앞 내용이랑 연결해서 궁금한 거 여쭤볼게요!',
+    unknown:'그건 안 배워서 답을 못하겠어요...'
   }
 };
 var MODES = {
@@ -414,10 +416,12 @@ var MODES = {
     prompt:'memorize — 용어, 연도, 인물과 법 이름 같은 세부 사항까지 정확히 아는 것이 목표.',
     charStyle:'정확한 용어, 연도, 이름을 확인하는 질문을 자주 섞는다.' }
 };
+// AI에게 보내는 자료 길이 한도(글자 수). analyze: 자료 분석, range: 추적기와 채점이 보는 선택 범위
+var LIMIT = {analyze:30000, range:14000};
 var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
 var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', wrap:'시험 준비 알림' };
 var TAGS = { '설명 누락':'var(--blue)', '오개념 미교정':'var(--red)', '잘못된 설명':'var(--amber)', '참고':'var(--ink-soft)' };
-var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움' };
+var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움', ungraded:'채점 안 됨' };
 
 /* 지민 표정 그림: 아래 sprites 블록에 들어 있다(tools/embed_sprites.py가 채움) */
 var SPRITES = (function(){
@@ -525,8 +529,8 @@ function goalsSel(){
 }
 function examQs(){
   var ids = selectedIds();
-  var qs = S.analysis.exam.filter(function(q){ return ids.indexOf(q.section) >= 0; });
-  return qs.length ? qs : S.analysis.exam.slice();
+  // 고른 범위의 문제만 내요. 안 가르친 범위에서 출제하면 불공정하니까요.
+  return S.analysis.exam.filter(function(q){ return ids.indexOf(q.section) >= 0; });
 }
 function selectedSource(){
   var a = S.analysis;
@@ -587,7 +591,7 @@ var P = {
       '학습 목표 모드: ' + MODES[S.mode].prompt,
       '현재 턴: ' + S.turn,
       '',
-      '[원문 — 선택 범위]', selectedSource().slice(0, 12000),
+      '[원문 — 선택 범위]', selectedSource().slice(0, LIMIT.range),
       '',
       '[학습 목표]', gs.map(function(g){ return g.id + ': ' + g.text; }).join('\n'),
       '',
@@ -627,6 +631,7 @@ var P = {
       '',
       '반드시 지킬 것',
       '- 너는 이 과목 내용을 아래 [배운 것]에 있는 학습자의 문장으로만 안다. 거기 없는 교과 지식(인물, 연도, 용어, 원인, 결과)을 네가 먼저 꺼내지 마라. 일상 상식은 써도 된다.',
+      '- 학습자가 [배운 것]에서 쓰지 않은 인물, 연도, 용어, 사건 이름을 네가 먼저 말하지 마라. 더 알고 싶으면 그다음은 어떻게 됐는지처럼 내용 없이 물어라.',
       '- 학습자가 틀리게 설명해도 지적하지 마라. 너는 정답을 모른다.',
       '- 대사만 1~3문장으로 쓴다. 지문, 따옴표, 이름표 없이.',
       '- 학습자의 마지막 말에 짧게 반응한 다음 이번 턴 지시를 수행한다.',
@@ -700,8 +705,9 @@ var P = {
       '카드 항목: title(무엇이 문제인지 한 줄), student(후배 답 요약 한 문장), missing(원문 기준으로 빠지거나 틀린 내용 1~2문장), cause(학습자 문장과 연결한 원인 한 문장), section(다시 볼 구간 id).',
       '카드는 중요한 것만 최대 5개. good은 잘 가르친 점 1~2개, S번호를 들어 구체적으로.',
       '문장은 짧고 구체적으로 쓰고, 같은 결론 문장을 반복하지 않는다.',
+      'per_question은 모든 문제에 대해 빠짐없이 쓴다. 점수는 프로그램이 계산하므로 summary에 점수 숫자를 쓰지 않는다.',
       '',
-      '[원문]', selectedSource().slice(0, 14000),
+      '[원문]', selectedSource().slice(0, LIMIT.range),
       '',
       '[구간]', a.sections.map(function(s){ return s.id + ': ' + s.title; }).join('\n'),
       '',
@@ -716,7 +722,7 @@ var P = {
       '[후배 최종 답안]', JSON.stringify(finals.map(function(f){ return {id:f.id, answer:f.final, status:f.status}; })),
       '',
       'JSON만 출력:',
-      '{"score":0,"summary":"한 문장","per_question":[{"id":"q1","result":"correct"}],"cards":[{"tag":"설명 누락","title":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
+      '{"summary":"한 문장","per_question":[{"id":"q1","result":"correct"}],"cards":[{"tag":"설명 누락","title":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
     ].join('\n');
   }
 };
@@ -778,26 +784,57 @@ function normSolve(r, qs){
     };
   });
 }
-function mergeVerify(solved, r){
+// 근거 검증 결과를 합쳐요. 원칙: 확인이 안 된 주장은 통과시키지 않아요(fail-closed).
+// AI 검증기의 판단과 별개로, 코드가 직접 확인할 수 있는 것(근거 번호가 공책에 있는지)은 코드가 확인해요.
+function mergeVerify(solved, r, beliefs){
   var list = arr(r && r.results);
+  var valid = {};
+  S.ledger.forEach(function(l){ valid[l.id] = 1; });
+  arr(beliefs).forEach(function(b){ valid[b.id] = 1; });
   return solved.map(function(s){
-    var v = list.filter(function(x){ return String(x.id) === s.id; })[0] || {};
-    var vc = arr(v.claims);
+    var v = list.filter(function(x){ return String(x.id) === s.id; })[0];
+    var vc = v ? arr(v.claims) : [];
     var claims = s.claims.map(function(c, i){
-      var bad = (vc[i] && vc[i].verdict === 'unsupported') || !c.basis.length;
-      return {text:c.text, basis:c.basis, verdict:bad ? 'unsupported' : 'ok', reason:String((vc[i] && vc[i].reason) || '')};
+      var real = c.basis.filter(function(b){ return valid[b]; });
+      var bad = true, reason;
+      if (!c.basis.length) reason = '근거 번호가 없어요.';
+      else if (!real.length) reason = '공책에 없는 번호(' + c.basis.join(', ') + ')를 근거로 썼어요.';
+      else if (!vc[i]) reason = '검증 결과가 없어서 안전하게 지웠어요.';
+      else if (vc[i].verdict !== 'ok') reason = String(vc[i].reason || '인용한 문장으로 뒷받침되지 않아요.');
+      else { bad = false; reason = String(vc[i].reason || ''); }
+      return {text:c.text, basis:real.length ? real : c.basis, verdict:bad ? 'unsupported' : 'ok', reason:reason};
     });
-    var st = ['answered','partial','not_learned'].indexOf(v.status) >= 0 ? v.status : s.status;
-    return {id:s.id, answer:s.answer, claims:claims, final:String(v.final_answer || s.answer), status:st};
+    // 남은 주장 수로 답 상태를 코드가 다시 정해요.
+    var okClaims = claims.filter(function(c){ return c.verdict === 'ok'; });
+    var status, final;
+    if (!okClaims.length) {
+      status = 'not_learned'; final = CHARS[S.charId].unknown;
+    } else if (okClaims.length < claims.length) {
+      status = 'partial';
+      final = (v && v.final_answer && v.status !== 'not_learned') ? String(v.final_answer) : okClaims.map(function(c){ return c.text; }).join(' ');
+    } else {
+      status = (s.status === 'partial' || (v && v.status === 'partial')) ? 'partial' : 'answered';
+      final = (v && v.final_answer) ? String(v.final_answer) : s.answer;
+    }
+    return {id:s.id, answer:s.answer, claims:claims, final:final, status:status};
   });
 }
-function normGrade(r, qs){
+// 점수는 AI가 따로 적은 숫자 대신 문제별 결과로 직접 계산해요. (정답 1, 부분 정답 0.5)
+function normGrade(r, qs, finals){
   r = r || {};
-  var score = Math.max(0, Math.min(100, Math.round(Number(r.score) || 0)));
-  var pq = {};
-  arr(r.per_question).forEach(function(p){ if (RESULT[p.result]) pq[String(p.id)] = p.result; });
+  var given = {};
+  arr(r.per_question).forEach(function(p){ if (RESULT[p.result] && p.result !== 'ungraded') given[String(p.id)] = p.result; });
+  var pq = {}, pts = 0, counts = {};
+  qs.forEach(function(q){
+    var f = arr(finals).filter(function(x){ return x.id === q.id; })[0];
+    var res = (f && f.status === 'not_learned') ? 'not_learned' : (given[q.id] || 'ungraded');
+    pq[q.id] = res;
+    counts[res] = (counts[res] || 0) + 1;
+    pts += res === 'correct' ? 1 : (res === 'partial' ? 0.5 : 0);
+  });
+  var score = qs.length ? Math.round(pts / qs.length * 100) : 0;
   return {
-    score:score, summary:String(r.summary || ''), per:pq,
+    score:score, summary:String(r.summary || ''), per:pq, counts:counts,
     cards:arr(r.cards).slice(0, 6).map(function(c){
       return {tag:TAGS[c.tag] ? c.tag : '설명 누락', title:String(c.title || ''), student:String(c.student || ''), missing:String(c.missing || ''), cause:String(c.cause || ''), section:String(c.section || '')};
     }),
@@ -849,8 +886,12 @@ function analyze(btn, status){
   btn.disabled = true;
   status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
   addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
-  AI.json(P.analyze(text.slice(0, 30000)), {modelTier:'default', cache:{gcTime:3600000}}).then(function(raw){
+  // AI가 실제로 읽는 만큼만 자료로 써요. 그래야 목차, 읽기, 채점 기준이 서로 맞아요.
+  var cut = text.length > LIMIT.analyze;
+  text = text.slice(0, LIMIT.analyze);
+  AI.json(P.analyze(text), {modelTier:'default', cache:{gcTime:3600000}}).then(function(raw){
     var a = normAnalysis(raw, text);
+    if (cut) toast('자료가 길어서 앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 사용해요.');
     if (!a.sections.length || !a.exam.length) throw {code:'invalid_json'};
     S.analysis = a; S.selected = {};
     S.matId = createMat(a, text, S.fileName).id;
@@ -992,6 +1033,7 @@ function runExam(retry){
   if (S.busy) { toast(CHARS[S.charId].short + '가 대답하는 중이에요. 대답이 끝나면 시험을 볼 수 있어요.'); return; }
   if (!retry) {
     if (!S.ledger.length) { toast('먼저 한 문장이라도 설명해 주세요.'); return; }
+    if (!examQs().length) { toast('고른 범위에 시험 문제가 없어요. 목차에서 범위를 다시 골라 주세요.'); return; }
     S.exam = {qs:examQs(), beliefs:openBeliefs(), stage:0, err:''};
   }
   var E = S.exam; E.err = '';
@@ -1004,12 +1046,12 @@ function runExam(retry){
   p = p.then(function(){
     if (E.stage > 1) return;
     addLog({layer:'근거 검증기', tier:'quick', sees:['학습자 문장','후배 답안과 근거 번호'], blocked:['원문','모범답안'], note:'근거 없는 주장은 지우고 안 배운 걸로 바꿔요.'});
-    return AI.json(P.verify(E.beliefs, E.solved), {modelTier:'quick', cache:false}).then(function(r){ E.finals = mergeVerify(E.solved, r); E.stage = 2; renderAll(); });
+    return AI.json(P.verify(E.beliefs, E.solved), {modelTier:'quick', cache:false}).then(function(r){ E.finals = mergeVerify(E.solved, r, E.beliefs); E.stage = 2; renderAll(); });
   });
   p = p.then(function(){
     if (E.stage > 2) return;
     addLog({layer:'채점·되짚기 계층', tier:'default', sees:['원문','모범답안','학습자 문장','후배 최종 답안'], blocked:[], note:'원인을 세 가지로 나눠 되짚기 카드를 만들어요.'});
-    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs); E.stage = 3; });
+    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs, E.finals); E.stage = 3; });
   });
   p.then(function(){
     var g = E.grade;
@@ -1402,7 +1444,10 @@ function viewUpload(){
   var ta = h('textarea', {rows:9, placeholder:'교과서, 필기, 학습지 내용을 붙여넣어도 돼요.', 'aria-label':'학습 자료 내용'});
   ta.value = S.source;
   var count = h('span', {class:'muted'});
-  function upd(){ count.textContent = ta.value.trim().length.toLocaleString() + '자'; }
+  function upd(){
+    var n = ta.value.trim().length;
+    count.textContent = n.toLocaleString() + '자' + (n > LIMIT.analyze ? ' (앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 분석해요)' : '');
+  }
   ta.addEventListener('input', function(){ S.source = ta.value; upd(); });
   upd();
   var fi = h('input', {type:'file', id:'file', class:'sr', accept:'.pdf,.txt,.md,application/pdf,text/plain'});
@@ -1447,10 +1492,18 @@ function openReader(secId){
 function viewOutline(){
   var a = S.analysis;
   var countEl = h('p', {class:'muted', style:'margin:10px 0 0'});
+  var warnEl = h('p', {class:'notice', role:'status'});
   var startBtn = h('button', {class:'btn', onclick:startTeach}, '가르치기 시작');
   function refresh(){
-    countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + examQs().length + '개';
-    startBtn.disabled = !selectedIds().length;
+    var nq = examQs().length, len = selectedSource().length;
+    countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + nq + '개';
+    var warn = '';
+    if (!selectedIds().length) warn = '가르칠 범위를 하나 이상 골라 주세요.';
+    else if (!nq) warn = '고른 범위에 시험 문제가 없어요. 범위를 하나 더 골라 주세요.';
+    else if (len > LIMIT.range) warn = '고른 범위가 길어요(' + len.toLocaleString() + '자). AI는 앞 ' + LIMIT.range.toLocaleString() + '자만 보고 판정하고 채점해요. 범위를 줄이면 더 정확해요.';
+    warnEl.textContent = warn;
+    warnEl.style.display = warn ? '' : 'none';
+    startBtn.disabled = !selectedIds().length || !nq;
   }
   var secs = a.sections.map(function(s, i){
     var cb = h('input', {type:'checkbox', id:'cb-' + s.id});
@@ -1472,7 +1525,7 @@ function viewOutline(){
     h('div', {class:'sheet', 'data-title':'목차와 범위'},
       h('div', {class:'row spread'}, h('h2', {style:'margin:0'}, a.title), h('button', {class:'btn ghost small', onclick:function(){ openReader(null); }}, '공부 모드')),
       h('p', {class:'muted', style:'margin-top:6px'}, '가르칠 범위를 고르세요. 읽기를 누르면 그 구간 자료를 다시 볼 수 있어요.'),
-      secs, countEl),
+      secs, countEl, warnEl),
     h('div', {class:'sheet', 'data-title':'이번 목표는?'},
       modes,
       a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
@@ -1617,7 +1670,7 @@ function viewReview(){
   });
   var qs = E.qs.map(function(q){
     var f = E.finals.filter(function(x){ return x.id === q.id; })[0] || {final:'', claims:[]};
-    var res = G.per[q.id] || (f.status === 'not_learned' ? 'not_learned' : 'partial');
+    var res = G.per[q.id] || 'ungraded';
     return h('details', {class:'q'},
       h('summary', {}, q.question, h('span', {class:'res ' + res}, RESULT[res])),
       h('p', {class:'qa'}, h('b', {}, ch.short + ' 최종 답: '), f.final),
@@ -1633,6 +1686,7 @@ function viewReview(){
     dbox(react).box,
     h('div', {class:'sheet', 'data-title':'시험 결과'},
       h('div', {class:'score'}, h('b', {}, G.score + '점'), h('span', {class:'muted'}, MODES[S.mode].label + ' 기준')),
+      G.counts ? h('p', {class:'muted small', style:'margin:6px 0 0'}, Object.keys(RESULT).filter(function(k){ return G.counts[k]; }).map(function(k){ return RESULT[k] + ' ' + G.counts[k]; }).join(' · ') + ' (정답 1점, 부분 정답 0.5점으로 계산)') : null,
       G.summary ? h('p', {style:'margin-top:8px'}, G.summary) : null,
       h('p', {class:'muted small'}, S.mode === 'flow' ? '흐름 이해가 목표라서 연도나 세부 명칭만 빠진 건 감점하지 않았어요.' : '완벽 암기가 목표라서 세부 사항까지 채점했어요.'),
       h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain + (E.levelUp ? ' · Lv.' + levelOf(PROFILE().aff) + ' 달성!' : '')), h('span', {}, '코인 +' + E.coinGain + ' (보유 ' + PROFILE().coins + ')')),
