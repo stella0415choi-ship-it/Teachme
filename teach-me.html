@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teach Me! 프로토타입</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<style>
+:root{
+  --paper:#EAF0F7; --sheet:#FFFFFF; --ink:#1D2A4A; --ink-soft:#5A6684; --rule:#CBD7E7; --margin:#F1A3B0;
+  --hl:#FFE45A; --hl-ink:#2C2400; --red:#D63A55; --mint:#178F72; --blue:#2F63D0; --amber:#B86A0C;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10172A; --sheet:#192340; --ink:#E6ECF6; --ink-soft:#A1AECA; --rule:#2C3A5E; --margin:#7A3F52;
+    --hl:#F2D341; --hl-ink:#1E1800; --red:#FF6F86; --mint:#4FD3AF; --blue:#86A8FF; --amber:#F0A748;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10172A; --sheet:#192340; --ink:#E6ECF6; --ink-soft:#A1AECA; --rule:#2C3A5E; --margin:#7A3F52;
+  --hl:#F2D341; --hl-ink:#1E1800; --red:#FF6F86; --mint:#4FD3AF; --blue:#86A8FF; --amber:#F0A748;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+h1,h2,h3,.jua{font-family:"Jua","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-weight:400;letter-spacing:0}
+h2{font-size:22px;margin:0 0 6px;line-height:1.3}
+h3{font-size:18px;margin:0 0 6px;line-height:1.3}
+p{margin:0 0 10px}
+.wrap{max-width:560px;margin:0 auto;padding:14px 16px 40px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:4px 0 10px}
+.brand h1{font-size:30px;margin:0;line-height:1.1;white-space:nowrap}
+.brand span{font-size:13px;color:var(--ink-soft);text-align:right}
+.steps{display:flex;gap:4px;margin:0 0 16px;padding:0;list-style:none}
+.steps li{flex:1;min-width:0;font-size:12px;text-align:center;padding:6px 0;border-bottom:3px solid var(--rule);color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps li.on{border-color:var(--ink);color:var(--ink);font-weight:700}
+.steps li.done{border-color:var(--mint);color:var(--ink)}
+.banner{background:var(--hl);color:var(--hl-ink);border-radius:12px;padding:10px 12px;font-size:14px;margin:0 0 14px}
+.sheet{background:var(--sheet);border:1.5px solid var(--rule);border-radius:16px;padding:16px;margin:0 0 14px}
+.muted{color:var(--ink-soft);font-size:14px}
+.small{font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.btn{font:inherit;font-size:15px;line-height:1.2;border-radius:12px;padding:12px 16px;border:1.5px solid var(--ink);background:var(--ink);color:var(--sheet);cursor:pointer;min-height:44px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.small{padding:7px 12px;font-size:14px;min-height:36px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+textarea{display:block;width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--sheet);border:1.5px solid var(--rule);border-radius:12px;padding:12px;resize:vertical;margin:10px 0}
+textarea:focus{border-color:var(--ink);outline:none}
+/* outline screen */
+.sec{border-top:1.5px dashed var(--rule);padding:10px 0}
+.sec:first-of-type{border-top:none}
+.sec-head{display:flex;align-items:center;gap:10px}
+.sec-head input{width:20px;height:20px;accent-color:var(--ink);flex:none}
+.sec-title{flex:1;min-width:0;font-weight:700}
+.goals{margin:6px 0 0 30px;padding:0;font-size:14px;color:var(--ink-soft)}
+.goals li{margin:2px 0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.opt{font:inherit;text-align:left;background:var(--sheet);color:var(--ink);border:1.5px solid var(--rule);border-radius:14px;padding:12px;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.opt.on{border-color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.opt-t{font-family:"Jua",sans-serif;font-size:17px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.opt-d{font-size:13px;color:var(--ink-soft);line-height:1.45}
+.rec{font-family:"Gowun Dodum",sans-serif;font-size:11px;background:var(--hl);color:var(--hl-ink);border-radius:99px;padding:1px 8px}
+.opt .mini{width:64px;height:74px}
+.reason{font-size:14px;background:var(--paper);border-radius:10px;padding:8px 10px}
+/* teach screen */
+.stage{display:flex;align-items:flex-end;gap:12px;padding:4px 2px 0}
+.av-wrap{width:96px;height:112px;flex:none}
+.av-wrap svg{width:100%;height:100%;display:block}
+.av-wrap.talk svg{animation:bob .45s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-3px)}}
+@media (prefers-reduced-motion:reduce){.av-wrap.talk svg{animation:none}}
+.who{flex:1;min-width:0;padding-bottom:8px}
+.who .nm{font-family:"Jua",sans-serif;font-size:24px;line-height:1.1}
+.aff{display:flex;align-items:center;gap:8px;margin-top:6px}
+.meter{flex:1;height:8px;border-radius:99px;background:var(--rule);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--red);border-radius:99px}
+.dbox{position:relative;background:var(--sheet);border:2px solid var(--ink);border-radius:16px;padding:22px 16px 14px;margin:16px 0 14px;min-height:92px;font-size:17px;line-height:1.65}
+.dbox .plate{position:absolute;top:-15px;left:14px;background:var(--cc);color:#fff;font-family:"Jua",sans-serif;padding:3px 12px;border-radius:8px;font-size:15px}
+.dbox.thinking .txt{color:var(--ink-soft)}
+.dbox.err .txt{color:var(--red)}
+.tabs{display:flex;border-bottom:1.5px solid var(--rule);margin:0 0 12px}
+.tabs button{flex:1;font:inherit;font-size:15px;background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-1.5px;padding:10px 4px;color:var(--ink-soft);cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--ink);font-weight:700}
+.chat{display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:10px 12px;border-radius:14px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--ink);color:var(--sheet);border-bottom-right-radius:4px}
+.msg.ch{align-self:flex-start;background:var(--sheet);border:1.5px solid var(--rule);border-bottom-left-radius:4px}
+.msg .ids{display:block;font-size:11px;opacity:.75;margin-top:4px}
+.composer{position:sticky;bottom:env(safe-area-inset-bottom,0px);background:var(--paper);padding:8px 0;display:flex;gap:8px;align-items:flex-end;margin-top:12px}
+.composer textarea{margin:0;min-height:52px}
+.composer .btn{flex:none}
+.actions{margin-top:6px}
+/* notebook */
+.note{position:relative;background-color:var(--sheet);background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);border:1.5px solid var(--rule);border-radius:12px;padding:0 12px 0 54px;line-height:32px;font-size:15px}
+.note::before{content:"";position:absolute;left:44px;top:0;bottom:0;width:2px;background:var(--margin)}
+.ln{position:relative}
+.ln .sid{position:absolute;left:-46px;width:36px;text-align:right;font-family:"Jua",sans-serif;font-weight:400;color:var(--ink-soft);font-size:14px}
+.ln.cited span{background:linear-gradient(transparent 52%,var(--hl) 52%);color:var(--ink)}
+.ln.cited .sid{color:var(--ink)}
+.ln.empty span{color:var(--ink-soft)}
+.mis-box{margin-top:16px}
+.mis{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:10px 12px;border:1.5px dashed var(--rule);border-radius:12px;margin-top:8px;font-size:15px;background:var(--sheet)}
+.mis .mid{font-family:"Jua",sans-serif;color:var(--ink-soft)}
+.mst{grid-column:2;font-size:12px;justify-self:start;border-radius:99px;padding:1px 8px;border:1px solid var(--ink-soft);color:var(--ink-soft)}
+.mst.open{border-color:var(--amber);color:var(--amber)}
+/* runtime */
+.rt{border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px;font-size:14px;background:var(--sheet);margin-top:8px}
+.rt .ly{font-family:"Jua",sans-serif;font-size:16px}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;margin:4px 4px 0 0;border:1px solid}
+.pill.see{border-color:var(--mint);color:var(--mint)}
+.pill.no{border-color:var(--red);color:var(--red);text-decoration:line-through}
+.gbar{padding:8px 0;border-bottom:1px dashed var(--rule)}
+.gbar .gt{font-size:14px}
+.segs{display:flex;gap:4px;margin-top:6px}
+.segs i{flex:1;height:7px;border-radius:99px;background:var(--rule)}
+.segs i.f{background:var(--mint)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;margin:6px 0 4px}
+.toggle input{width:18px;height:18px;accent-color:var(--ink)}
+/* exam */
+.esteps{list-style:none;margin:0;padding:0}
+.esteps li{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--rule)}
+.esteps .n{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--rule);display:grid;place-items:center;font-family:"Jua",sans-serif;font-size:14px;color:var(--ink-soft)}
+.esteps li.run .n{border-color:var(--ink);color:var(--ink);animation:pulse 1s ease-in-out infinite alternate}
+.esteps li.done .n{border-color:var(--mint);background:var(--mint);color:var(--sheet)}
+@keyframes pulse{to{box-shadow:0 0 0 5px var(--rule)}}
+@media (prefers-reduced-motion:reduce){.esteps li.run .n{animation:none}}
+.err-text{color:var(--red);font-size:14px;margin-top:10px}
+/* review */
+.score{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.score b{font-family:"Jua",sans-serif;font-weight:400;font-size:40px;line-height:1}
+.reward{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.reward span{font-size:13px;border-radius:99px;padding:3px 10px;background:var(--paper)}
+.card{--tc:var(--blue);background:var(--sheet);border:1.5px solid var(--rule);border-left:6px solid var(--tc);border-radius:12px;padding:14px;margin-top:10px}
+.chip{display:inline-block;font-size:12px;padding:2px 9px;border-radius:99px;background:var(--tc);color:var(--sheet);margin-bottom:6px}
+.card h3{font-size:17px}
+.kv{display:grid;grid-template-columns:5.6em 1fr;gap:6px 10px;font-size:14px;margin:8px 0 0}
+.kv dt{color:var(--ink-soft)}
+.kv dd{margin:0}
+.good{margin:0;padding-left:20px;font-size:15px}
+details.q{border-top:1px dashed var(--rule);padding:10px 0}
+details.q summary{cursor:pointer;font-size:15px;list-style-position:outside}
+.res{display:inline-block;font-size:12px;border-radius:99px;padding:0 8px;margin-left:6px;border:1px solid}
+.res.correct{color:var(--mint);border-color:var(--mint)}
+.res.partial{color:var(--amber);border-color:var(--amber)}
+.res.wrong{color:var(--red);border-color:var(--red)}
+.res.not_learned{color:var(--ink-soft);border-color:var(--ink-soft)}
+.claim{font-size:14px;margin:6px 0 0;padding-left:10px;border-left:3px solid var(--mint)}
+.claim.bad{border-color:var(--red);color:var(--ink-soft);text-decoration:line-through}
+.cite{display:inline-block;font-size:11px;background:var(--hl);color:var(--hl-ink);border-radius:5px;padding:0 5px;margin-left:4px}
+.qa{font-size:14px;margin:8px 0 0}
+.qa b{font-weight:700}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(8,12,26,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.mpanel{background:var(--sheet);width:100%;max-width:560px;max-height:82%;overflow:auto;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+.reading{white-space:pre-wrap;font-size:15.5px;line-height:1.8;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--sheet);padding:10px 14px;border-radius:12px;font-size:14px;max-width:90%;z-index:60}
+@media (min-width:700px){.wrap{padding-top:28px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+function h(tag, attrs){
+  var el = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function(k){
+    var v = attrs[k];
+    if (v == null || v === false) return;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.indexOf('on') === 0 && typeof v === 'function') el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  });
+  for (var i = 2; i < arguments.length; i++) add(el, arguments[i]);
+  return el;
+}
+function add(el, c){
+  if (c == null || c === false) return;
+  if (Array.isArray(c)) { c.forEach(function(x){ add(el, x); }); return; }
+  el.append(c.nodeType ? c : String(c));
+}
+function toast(msg){
+  var t = h('div', {class:'toast', role:'status'}, msg);
+  document.body.append(t);
+  setTimeout(function(){ t.remove(); }, 3200);
+}
+function arr(x){ return Array.isArray(x) ? x : []; }
+function reduced(){ return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }
+
+/* ---------- AI runtime (Claude sample capability) ---------- */
+var samplePromise = (window.claude && typeof window.claude.use === 'function')
+  ? window.claude.use('sample').catch(function(){ return null; })
+  : Promise.resolve(null);
+var aiState = 'connecting';
+samplePromise.then(function(s){ aiState = s ? 'ready' : 'none'; if (aiState === 'none') renderAll(); });
+function getSample(){ return samplePromise.then(function(s){ if (!s) throw {code:'unavailable'}; return s; }); }
+var AI = {
+  json: function(p, o){ return getSample().then(function(s){ return s.json(p, o); }); },
+  text: function(p, o){ return getSample().then(function(s){ return s(p, o); }); }
+};
+function errMsg(e){
+  var c = e && e.code;
+  if (c === 'cancelled') return '';
+  if (c === 'unavailable') return 'AI에 연결할 수 없어요. claude.ai 웹이나 앱에서 이 페이지를 열어 주세요.';
+  if (['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].indexOf(c) >= 0) return 'AI 사용이 허용되지 않았어요. 허용해야 후배가 대답할 수 있어요.';
+  if (c === 'rate_limited') return '요청이 몰렸어요. 잠시 후 다시 시도해 주세요.';
+  if (c === 'prompt_too_large') return '자료나 대화가 너무 길어요. 범위를 줄여 주세요.';
+  if (c === 'invalid_json') return 'AI 응답 형식이 맞지 않았어요. 다시 시도해 주세요.';
+  if (c === 'session_expired') return '로그인이 만료됐어요. 다시 로그인한 뒤 시도해 주세요.';
+  if (c === 'refused') return 'AI가 이 요청에 답하지 않았어요. 표현을 바꿔 다시 시도해 주세요.';
+  return '연결이 잠깐 끊겼어요. 다시 시도해 주세요.';
+}
+
+/* ---------- content ---------- */
+var CHARS = {
+  taeo: {
+    name:'강태오', short:'태오', role:'동갑 친구', color:'#B9561A',
+    blurb:'수업 시간에 자주 조는 활발한 친구. 기초가 약해서 단순하고 엉뚱한 질문을 많이 해요.',
+    persona:'수업 시간에 자주 조는 활발하고 장난기 많은 동갑 친구. 반말을 쓰고 가끔 ㅋㅋ를 쓴다. 솔직하고 엉뚱하다.',
+    level:'기초 지식이 거의 없다. 용어 뜻, 단순한 사실 확인, 엉뚱한 상상 질문을 주로 한다. 개념끼리 연결하는 어려운 질문은 하지 않는다.',
+    hello:'야 나 아까 수업 시간에 완전 잤거든ㅋㅋ 오늘 뭐 배웠는지 처음부터 알려주라. 쉽게!'
+  },
+  harin: {
+    name:'서하린', short:'하린', role:'1학년 후배', color:'#2F57B8',
+    blurb:'기초가 탄탄한 후배. 새 개념을 앞 내용과 연결하거나 응용하는 깊은 질문을 해요.',
+    persona:'성실하고 호기심 많은 후배. 선배에게 존댓말을 쓴다. 차분하고 똑똑하다.',
+    level:'기본기가 있는 학생처럼 묻는다. 개념 사이의 관계, 앞 시기와의 비교, 원인과 결과, 그렇다면 이런 경우도 그런지 같은 응용 질문을 한다. 단순 용어 질문은 거의 하지 않는다.',
+    hello:'선배, 오늘 배운 거 알려주시는 거죠? 들으면서 앞 내용이랑 연결해서 궁금한 거 여쭤볼게요!'
+  }
+};
+var MODES = {
+  flow: { label:'흐름 이해', desc:'왜 그렇게 됐는지, 앞뒤가 어떻게 이어지는지 설명하면 성공. 연도·세부 명칭은 참고로만 알려줘요.',
+    prompt:'flow — 원인과 결과, 앞뒤 연결, 개념 사이의 관계를 이해하는 것이 목표. 연도와 세부 명칭은 부차적이다.',
+    charStyle:'왜 그렇게 됐는지, 앞뒤가 어떻게 이어지는지 위주로 묻는다.' },
+  memorize: { label:'완벽 암기', desc:'용어, 연도, 이름까지 정확하게. 세부 사항이 빠지면 감점돼요.',
+    prompt:'memorize — 용어, 연도, 인물과 법 이름 같은 세부 사항까지 정확히 아는 것이 목표.',
+    charStyle:'정확한 용어, 연도, 이름을 확인하는 질문을 자주 섞는다.' }
+};
+var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
+var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', wrap:'시험 준비 알림' };
+var TAGS = { '설명 누락':'var(--blue)', '오개념 미교정':'var(--red)', '잘못된 설명':'var(--amber)', '참고':'var(--ink-soft)' };
+var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움' };
+
+var AVATAR = {
+  taeo: '<svg viewBox="0 0 96 112" aria-hidden="true"><path d="M8 112c2-22 18-34 40-34s38 12 40 34z" fill="#E8833A"/><path d="M33 80c5 9 25 9 30 0" stroke="#A9531A" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M40 90v12M56 90v12" stroke="#A9531A" stroke-width="2.5" stroke-linecap="round"/><circle cx="48" cy="50" r="27" fill="#F6D2B5"/><path d="M19 47c-3-20 12-33 29-33 18 0 33 12 30 31-5-4-9-9-11-14-4 6-10 9-17 9 2-3 3-6 2-10-7 8-18 12-33 17z" fill="#2B2B3A"/><path d="M35 55h10M53 55h10" stroke="#2B2B3A" stroke-width="2.8" stroke-linecap="round"/><path d="M40 64q8 7 16 0" stroke="#2B2B3A" stroke-width="2.8" fill="none" stroke-linecap="round"/><circle cx="32" cy="61" r="4" fill="#F2A08A" opacity=".55"/><circle cx="64" cy="61" r="4" fill="#F2A08A" opacity=".55"/></svg>',
+  harin: '<svg viewBox="0 0 96 112" aria-hidden="true"><path d="M8 112c2-22 18-34 40-34s38 12 40 34z" fill="#2F4A8A"/><path d="M38 79l10 12 10-12" fill="#FFFFFF"/><path d="M45 91l3 12 3-12z" fill="#D63A55"/><path d="M19 60c-4-28 11-44 29-44s33 16 29 44c-1 7-3 12-5 14H24c-2-2-4-7-5-14z" fill="#3B2A28"/><circle cx="48" cy="53" r="25" fill="#F7D9C4"/><path d="M23 49c0-19 12-29 25-29s25 10 25 29c-10-2-18-8-22-16-6 9-16 14-28 16z" fill="#3B2A28"/><circle cx="39" cy="56" r="6.5" fill="none" stroke="#1D2A4A" stroke-width="2"/><circle cx="57" cy="56" r="6.5" fill="none" stroke="#1D2A4A" stroke-width="2"/><path d="M45.5 56h5" stroke="#1D2A4A" stroke-width="2"/><circle cx="39" cy="56" r="2" fill="#1D2A4A"/><circle cx="57" cy="56" r="2" fill="#1D2A4A"/><path d="M43 67q5 4 10 0" stroke="#1D2A4A" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>'
+};
+
+var SAMPLE = [
+'일제의 식민 통치 방식 변화 (1910~1920년대)',
+'',
+'1. 1910년대 무단 통치',
+'1910년 국권을 빼앗은 일제는 조선 총독부를 설치하였다. 총독은 일본 육·해군 대장 가운데에서 임명되었고, 입법·사법·행정·군사권을 모두 장악하였다. 일제는 헌병이 경찰 업무를 맡는 헌병 경찰제를 실시하였다. 헌병 경찰은 재판 없이 벌금이나 태형 등을 가할 수 있는 즉결 처분권을 가졌으며, 1912년 제정된 조선 태형령은 한국인에게만 적용되었다. 일반 관리와 학교 교원까지 제복을 입고 칼을 차게 하여 공포 분위기를 조성하였다. 또한 언론·출판·집회·결사의 자유를 빼앗았다.',
+'경제적으로 일제는 토지 조사 사업(1910~1918)을 실시하였다. 정해진 기간 안에 토지를 신고하게 하는 기한부 신고제를 운영하였고, 신고되지 않은 토지와 공공 기관·왕실 소유지는 총독부 소유가 되었다. 농민이 관습적으로 인정받던 경작권은 부정되었고, 많은 농민이 기한부 계약 소작농으로 전락하였다. 1910년에는 회사를 세울 때 총독의 허가를 받게 하는 회사령을 공포하여 한국인의 기업 활동을 억눌렀다.',
+'',
+'2. 1920년대 문화 통치',
+'1919년 3·1 운동을 계기로 일제는 무력만으로는 식민 지배를 유지하기 어렵다는 것을 깨달았고, 국제 여론도 나빠졌다. 이에 일제는 이른바 문화 통치를 내세웠다. 문관도 총독에 임명될 수 있게 하였지만 실제로 문관 총독은 한 명도 임명되지 않았다. 헌병 경찰제를 보통 경찰제로 바꾸었으나 경찰 관서와 경찰 수, 경찰 예산은 오히려 늘어났다. 조선일보, 동아일보 등 한글 신문의 발행을 허가하였지만 검열을 강화하여 기사를 삭제하거나 신문을 정간·폐간하였다. 제2차 조선 교육령(1922)으로 보통학교 수업 연한을 6년으로 늘리는 등 교육 기회 확대를 내세웠으나 고등 교육 기회는 여전히 제한되었다. 도 평의회, 부·면 협의회를 두어 지방 자치를 실시하는 것처럼 보이게 했지만 대부분 결정권이 없는 자문 기구였다.',
+'문화 통치의 본질은 친일파를 키워 민족을 분열시키는 기만적인 통치였다. 일제는 1925년 치안 유지법을 제정하여 국체(천황제)를 변혁하거나 사유 재산 제도를 부인하는 것을 목적으로 결사를 조직하거나 가입한 사람을 처벌하였다. 이 법은 사회주의 운동과 독립운동을 탄압하는 데 이용되었고, 1928년 개정으로 최고형이 사형으로 높아졌다.',
+'경제적으로는 일본의 쌀 부족을 해결하기 위해 산미 증식 계획(1920~1934)을 추진하였다. 쌀 생산량은 늘었지만 증산량보다 많은 쌀이 일본으로 빠져나가 한국인의 1인당 쌀 소비량은 오히려 줄었다. 수리 조합비와 비료 대금 등 증산 비용은 농민에게 떠넘겨져 많은 농민이 몰락하였다. 또한 1920년 회사령을 폐지하여 허가제를 신고제로 바꾸면서 일본 자본이 한국에 더 쉽게 들어오게 되었다.'
+].join('\n');
+
+/* ---------- state ---------- */
+var S = {
+  screen:'upload', source:'', fileName:'', analysis:null, selected:{},
+  mode:'flow', charId:'harin',
+  ledger:[], dialog:[], misc:[], goals:{}, turn:0, wrap:false,
+  exam:null, affinity:20, coins:0, draft:'', tab:'talk', busy:false, dev:false, logs:[]
+};
+var els = {};
+
+function resetTeach(){
+  S.ledger = []; S.dialog = []; S.misc = []; S.goals = {}; S.turn = 0; S.wrap = false; S.exam = null; S.draft = '';
+}
+function selectedIds(){ return Object.keys(S.selected).filter(function(k){ return S.selected[k]; }); }
+function goalsSel(){
+  var ids = selectedIds();
+  return S.analysis.goals.filter(function(g){ return ids.indexOf(g.section) >= 0; });
+}
+function examQs(){
+  var ids = selectedIds();
+  var qs = S.analysis.exam.filter(function(q){ return ids.indexOf(q.section) >= 0; });
+  return qs.length ? qs : S.analysis.exam.slice();
+}
+function selectedSource(){
+  var a = S.analysis;
+  if (!a.sliceOk) return S.source;
+  var ids = selectedIds();
+  return a.sections.filter(function(s){ return ids.indexOf(s.id) >= 0; }).map(function(s){ return s.text; }).join('\n\n');
+}
+function openBeliefs(){
+  return S.misc.filter(function(m){ return m.status === 'open'; })
+    .map(function(m, i){ return {id:'B' + (i + 1), text:m.text, from:m.id}; });
+}
+function splitSentences(t){
+  var out = [];
+  t.replace(/\r/g, '').split(/\n+/).forEach(function(line){
+    var m = line.match(/.+?(?:[.!?。…]+(?=\s|$)|$)/g) || [];
+    m.forEach(function(s){ s = s.trim(); if (s) out.push(s); });
+  });
+  return out;
+}
+function fmtLedger(){ return S.ledger.length ? S.ledger.map(function(l){ return l.id + ': ' + l.text; }).join('\n') : '(아직 없음)'; }
+function fmtDialog(n){
+  var ch = CHARS[S.charId];
+  return S.dialog.slice(-n).map(function(d){ return (d.role === 'user' ? '학습자' : ch.name) + ': ' + d.text; }).join('\n');
+}
+function fmtBeliefs(bs){ return bs.length ? bs.map(function(b){ return b.id + ': ' + b.text; }).join('\n') : '없음'; }
+function addLog(e){
+  e.t = Date.now(); S.logs.unshift(e); S.logs = S.logs.slice(0, 40);
+  if (S.screen === 'teach' && S.tab === 'runtime' && els.panel) renderPanel();
+}
+
+/* ---------- prompts: each layer sees only what it is allowed to ---------- */
+var P = {
+  analyze: function(text){
+    return [
+      '너는 학습 플랫폼 Teach Me!의 자료 분석 계층이다. 아래 학습 자료를 읽고 목차, 학습 목표, 시험 문제를 만든다. 학생은 한국 고등학생이다.',
+      '',
+      '규칙',
+      '- sections: 자료 흐름대로 2~5개. start에는 그 구간이 시작되는 원문 문장의 앞 12~20글자를 원문 그대로 복사한다.',
+      '- goals: 구간마다 1~2개. "~을 설명할 수 있다" 형태.',
+      '- exam: 구간마다 1~2문항, 전체 4~6문항. 1~3문장으로 답할 수 있는 서술형. 인과·관계·비교를 묻는 문제는 kind "flow", 용어·연도·이름의 정확성이 핵심이면 kind "detail".',
+      '  answer는 모범답안. key_points는 흐름 이해에 꼭 필요한 요소 2~3개. detail_points는 세부 암기 요소(연도, 법 이름 등), 없으면 빈 배열.',
+      '- recommended_mode: 세부 암기가 더 중요한 자료면 "memorize", 인과와 흐름 이해가 더 중요하면 "flow". recommend_reason은 학생에게 말하듯 한 문장.',
+      '',
+      'JSON만 출력:',
+      '{"title":"","recommended_mode":"flow","recommend_reason":"","sections":[{"id":"s1","title":"","start":""}],"goals":[{"id":"g1","section":"s1","text":""}],"exam":[{"id":"q1","section":"s1","goal":"g1","kind":"flow","question":"","answer":"","key_points":[],"detail_points":[]}]}',
+      '',
+      '<자료>', text, '</자료>'
+    ].join('\n');
+  },
+  tracker: function(){
+    var ch = CHARS[S.charId], gs = goalsSel();
+    var miscText = S.misc.length ? S.misc.map(function(m){ return m.id + ' [' + m.status + '] ' + m.text; }).join('\n') : '없음';
+    return [
+      '너는 학습 플랫폼 Teach Me!의 이해 상태 추적기다. 학습자가 AI 캐릭터 ' + ch.name + '(' + ch.role + ')에게 공부 내용을 설명하고 있다. 너는 원문을 볼 수 있지만 캐릭터는 원문을 볼 수 없다.',
+      '너의 일: (1) 학습 목표별로 학습자가 지금까지 얼마나 설명했는지 판정한다. (2) 캐릭터가 다음 턴에 무엇을 할지 방향만 정한다.',
+      '',
+      '캐릭터의 질문 수준: ' + ch.level,
+      '학습 목표 모드: ' + MODES[S.mode].prompt,
+      '현재 턴: ' + S.turn,
+      '',
+      '[원문 — 선택 범위]', selectedSource().slice(0, 12000),
+      '',
+      '[학습 목표]', gs.map(function(g){ return g.id + ': ' + g.text; }).join('\n'),
+      '',
+      '[학습자 설명 장부 — 캐릭터가 아는 전부]', fmtLedger(),
+      '',
+      '[최근 대화]', fmtDialog(12),
+      '',
+      '[캐릭터의 추론 기록]', miscText,
+      '',
+      '규칙',
+      '- level: 0 아직 설명 안 함, 1 단어만 언급, 2 핵심 내용을 설명, 3 이유·관계까지 설명. 원문과 다르게 설명한 부분은 level을 올리지 않는다.',
+      '- misconception_updates: 상태가 open인 추론에 학습자의 가장 최근 메시지가 답했는지 본다. 원문 기준으로 바르게 바로잡았으면 corrected, 틀린 내용으로 답했으면 wrongly_corrected, 다루지 않았으면 open.',
+      '- directive.kind:',
+      '  ask: 이미 설명된 내용에 대해 캐릭터 수준에 맞는 질문을 하게 한다.',
+      '  request: level 0인 목표가 남아 있고 학습자가 그 내용을 건너뛰는 것 같을 때 그 주제를 알려 달라고 하게 한다.',
+      '  misconception: 어떤 목표가 level 1~2이고 중요한 관계나 조건이 빠져 있을 때, 학습자 문장만 근거로 그럴듯하지만 원문과 어긋나는 추론을 캐릭터가 말하게 한다. 현재 턴이 1이거나, open인 추론이 이미 있거나, 추론 기록이 3개 이상이면 쓰지 않는다. 3~4턴에 한 번 정도가 적당하다.',
+      '  wrap: 선택 범위의 모든 목표가 level 2 이상이면 시험 볼 준비가 됐다고 말하게 한다.',
+      '- focus에는 질문 방향만 적는다. 정답, 원문의 사실, 학습자가 아직 말하지 않은 개념어·연도·이름은 절대 넣지 않는다. 좋은 예: S3에서 말한 변화가 왜 일어났는지 묻기. 나쁜 예: 3·1 운동 때문이라는 답을 끌어내기.',
+      '- request의 focus는 주제 이름 수준까지만 허용한다. 예: 그 시기 경제 쪽은 어땠는지.',
+      '- misconception에는 캐릭터가 실제로 할 말을 한 문장 질문형으로 쓰고, based_on에 근거가 된 S번호를 넣는다. 원문과 분명히 어긋나지만, 학습자 설명만 들은 사람이 충분히 할 법한 추론이어야 한다.',
+      '',
+      'JSON만 출력:',
+      '{"goals":[{"id":"g1","level":0,"note":"한 줄 판정 근거"}],"misconception_updates":[{"id":"M1","status":"open"}],"directive":{"kind":"ask","goal":"g1","focus":"","misconception":"","based_on":[]}}'
+    ].join('\n');
+  },
+  character: function(d, mis){
+    var ch = CHARS[S.charId], instr;
+    if (d.kind === 'misconception' && mis) instr = '다음 내용을 네가 방금 배운 걸로 스스로 추론한 것처럼 반쯤 확신하며 말하고, 맞는지 물어봐. 네 말투로 바꿔도 되지만 뜻은 유지해: ' + mis.text;
+    else if (d.kind === 'request') instr = '아직 안 배운 부분을 알려 달라고 해. 방향: ' + (d.focus || '다음 내용');
+    else if (d.kind === 'wrap') instr = '이제 좀 알 것 같다며 시험 볼 준비가 됐다고 말해. 더 알려줄 게 있으면 듣겠다고 덧붙여.';
+    else instr = '다음 방향으로 질문 하나: ' + (d.focus || '방금 설명에서 궁금한 점');
+    return [
+      '너는 학습 게임 Teach Me!의 캐릭터 ' + ch.name + '(' + ch.role + ')다. 학습자가 너에게 오늘 배운 내용을 가르쳐 주고 있다.',
+      '성격과 말투: ' + ch.persona,
+      '질문 수준: ' + ch.level,
+      '학습 목표에 따른 질문 습관: ' + MODES[S.mode].charStyle,
+      '',
+      '반드시 지킬 것',
+      '- 너는 이 과목 내용을 아래 [배운 것]에 있는 학습자의 문장으로만 안다. 거기 없는 교과 지식(인물, 연도, 용어, 원인, 결과)을 네가 먼저 꺼내지 마라. 일상 상식은 써도 된다.',
+      '- 학습자가 틀리게 설명해도 지적하지 마라. 너는 정답을 모른다.',
+      '- 대사만 1~3문장으로 쓴다. 지문, 따옴표, 이름표 없이.',
+      '- 학습자의 마지막 말에 짧게 반응한 다음 이번 턴 지시를 수행한다.',
+      '',
+      '[배운 것]', fmtLedger(),
+      '',
+      '[최근 대화]', fmtDialog(12),
+      '',
+      '[이번 턴 지시]', instr
+    ].join('\n');
+  },
+  solve: function(beliefs, qs){
+    var ch = CHARS[S.charId];
+    return [
+      '너는 학습 게임 Teach Me!의 캐릭터 ' + ch.name + '(' + ch.role + ')이고 지금 시험을 본다. 말투: ' + ch.persona,
+      '이 과목에 대해 네가 아는 것은 아래 [배운 것]과 [믿게 된 것]뿐이다. 너의 원래 배경지식은 시험에 절대 쓸 수 없다. 일상 상식만 허용된다.',
+      '',
+      '규칙',
+      '- 답을 이루는 주장을 하나씩 나누고, 각 주장에 근거 번호를 붙인다. 근거는 S번호(학습자 문장) 또는 B번호(믿게 된 것)만 가능하다.',
+      '- 근거가 일부만 있으면 아는 부분만 답하고 status를 "partial"로 한다.',
+      '- 근거가 전혀 없으면 answer를 캐릭터 말투로 "그건 안 배워서 답을 못하겠어요..."로 하고, claims는 빈 배열, status는 "not_learned".',
+      '- 학습자가 틀리게 가르친 내용도 배운 그대로 답한다. 믿게 된 것(B)도 사실이라고 믿고 쓴다.',
+      '- answer는 캐릭터 말투로 1~3문장.',
+      '',
+      '[배운 것]', fmtLedger(),
+      '',
+      '[믿게 된 것]', fmtBeliefs(beliefs),
+      '',
+      '[시험 문제]', qs.map(function(q){ return q.id + ': ' + q.question; }).join('\n'),
+      '',
+      'JSON만 출력:',
+      '{"answers":[{"id":"q1","answer":"","claims":[{"text":"","basis":["S1"]}],"status":"answered"}]}'
+    ].join('\n');
+  },
+  verify: function(beliefs, solved){
+    return [
+      '너는 학습 플랫폼 Teach Me!의 근거 검증기다. 너는 원문과 정답을 모른다. 후배가 시험 답에 붙인 근거 번호가 그 주장을 실제로 뒷받침하는지만 확인한다.',
+      '',
+      '판정 기준',
+      '- ok: 인용한 문장에 그 내용이 있거나, 인용 문장과 일상 상식(예: 밤에는 어둡다)만으로 자연스럽게 나온다.',
+      '- unsupported: 인용 문장에 없는 교과 개념·용어·연도·이름·원인이 끼어들었거나, 근거 번호가 내용과 맞지 않거나, 근거 번호가 없다.',
+      '- 내용이 사실인지는 판단하지 않는다. 학습자가 틀리게 가르쳤다면 틀린 채로 ok다.',
+      '- unsupported 주장을 뺀 final_answer를 후배 말투로 다시 쓴다. 남는 주장이 없으면 "그건 안 배워서 답을 못하겠어요..."로 하고 status를 not_learned로, 일부만 남으면 partial로 한다.',
+      '- results의 claims는 후배 답안의 claims와 같은 순서, 같은 개수로 쓴다.',
+      '',
+      '[학습자 문장]', fmtLedger(),
+      '',
+      '[믿게 된 것]', fmtBeliefs(beliefs),
+      '',
+      '[후배 답안]', JSON.stringify(solved.map(function(s){ return {id:s.id, answer:s.answer, claims:s.claims}; })),
+      '',
+      'JSON만 출력:',
+      '{"results":[{"id":"q1","claims":[{"text":"","verdict":"ok","reason":"짧게"}],"final_answer":"","status":"answered"}]}'
+    ].join('\n');
+  },
+  grade: function(beliefs, qs, finals){
+    var a = S.analysis;
+    var miscText = S.misc.length ? S.misc.map(function(m){ return m.id + ' [' + m.status + '] ' + m.text; }).join('\n') : '없음';
+    return [
+      '너는 학습 플랫폼 Teach Me!의 채점·되짚기 계층이다. 원문과 모범답안을 기준으로 후배의 최종 답안을 채점하고, 후배를 가르친 학습자에게 되짚기 피드백을 준다.',
+      '',
+      '학습 목표 모드: ' + MODES[S.mode].prompt,
+      '- flow 모드: key_points가 맞으면 정답 처리한다. detail_points만 빠진 것은 감점하지 않고 tag "참고" 카드로만 알려 준다.',
+      '- memorize 모드: key_points와 detail_points가 모두 정확해야 정답이다.',
+      '',
+      '카드 tag는 원인 기준으로 고른다.',
+      '- "설명 누락": 학습자 문장에 그 내용이 없거나 부족해서 후배가 모르거나 빠뜨렸다.',
+      '- "오개념 미교정": 후배가 믿게 된 것(B)이 원인이 되어 틀렸다.',
+      '- "잘못된 설명": 학습자 문장 자체가 원문과 다르다. cause에 해당 S번호를 적는다.',
+      '- "참고": flow 모드에서 세부 사항만 빠진 경우(감점 없음).',
+      '카드 항목: title(무엇이 문제인지 한 줄), student(후배 답 요약 한 문장), missing(원문 기준으로 빠지거나 틀린 내용 1~2문장), cause(학습자 문장과 연결한 원인 한 문장), section(다시 볼 구간 id).',
+      '카드는 중요한 것만 최대 5개. good은 잘 가르친 점 1~2개, S번호를 들어 구체적으로.',
+      '문장은 짧고 구체적으로 쓰고, 같은 결론 문장을 반복하지 않는다.',
+      '',
+      '[원문]', selectedSource().slice(0, 14000),
+      '',
+      '[구간]', a.sections.map(function(s){ return s.id + ': ' + s.title; }).join('\n'),
+      '',
+      '[시험 문제와 모범답안]', JSON.stringify(qs.map(function(q){ return {id:q.id, section:q.section, kind:q.kind, question:q.question, answer:q.answer, key_points:q.key_points, detail_points:q.detail_points}; })),
+      '',
+      '[학습자 문장]', fmtLedger(),
+      '',
+      '[캐릭터 추론 기록]', miscText,
+      '',
+      '[후배가 믿게 된 것]', fmtBeliefs(beliefs),
+      '',
+      '[후배 최종 답안]', JSON.stringify(finals.map(function(f){ return {id:f.id, answer:f.final, status:f.status}; })),
+      '',
+      'JSON만 출력:',
+      '{"score":0,"summary":"한 문장","per_question":[{"id":"q1","result":"correct"}],"cards":[{"tag":"설명 누락","title":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
+    ].join('\n');
+  }
+};
+
+/* ---------- normalizers ---------- */
+function normAnalysis(r, text){
+  r = r || {};
+  var seen = {};
+  var sections = arr(r.sections).map(function(s, i){
+    var id = String(s.id || ('s' + (i + 1)));
+    if (seen[id]) id = 's' + (i + 1) + '_' + i;
+    seen[id] = 1;
+    return {id:id, title:String(s.title || ('구간 ' + (i + 1))), start:String(s.start || '')};
+  });
+  var first = sections[0] ? sections[0].id : 's1';
+  var goals = arr(r.goals).map(function(g, i){
+    var sec = String(g.section || '');
+    return {id:String(g.id || ('g' + (i + 1))), section:seen[sec] ? sec : first, text:String(g.text || '')};
+  }).filter(function(g){ return g.text; });
+  var exam = arr(r.exam).map(function(q, i){
+    var sec = String(q.section || '');
+    return {
+      id:String(q.id || ('q' + (i + 1))), section:seen[sec] ? sec : first, goal:String(q.goal || ''),
+      kind:q.kind === 'detail' ? 'detail' : 'flow', question:String(q.question || ''), answer:String(q.answer || ''),
+      key_points:arr(q.key_points).map(String), detail_points:arr(q.detail_points).map(String)
+    };
+  }).filter(function(q){ return q.question; }).slice(0, 8);
+  // cut the source into sections using the start markers
+  var pos = sections.map(function(s){
+    var st = s.start.trim(); if (!st) return -1;
+    var i = text.indexOf(st);
+    if (i < 0 && st.length > 8) i = text.indexOf(st.slice(0, 8));
+    return i;
+  });
+  var sliceOk = sections.length > 0 && pos.every(function(p, k){ return p >= 0 && (k === 0 || p > pos[k - 1]); });
+  sections.forEach(function(s, k){
+    s.text = sliceOk ? text.slice(k === 0 ? 0 : pos[k], k + 1 < pos.length ? pos[k + 1] : text.length).trim() : '';
+  });
+  return {
+    title:String(r.title || S.fileName || '학습 자료'),
+    recommended_mode:r.recommended_mode === 'memorize' ? 'memorize' : 'flow',
+    recommend_reason:String(r.recommend_reason || ''),
+    sections:sections, goals:goals, exam:exam, sliceOk:sliceOk
+  };
+}
+function normSolve(r, qs){
+  var list = arr(r && r.answers);
+  return qs.map(function(q){
+    var a = list.filter(function(x){ return String(x.id) === q.id; })[0] || {};
+    return {
+      id:q.id, answer:String(a.answer || '그건 안 배워서 답을 못하겠어요...'),
+      status:['answered','partial','not_learned'].indexOf(a.status) >= 0 ? a.status : 'not_learned',
+      claims:arr(a.claims).map(function(c){ return {text:String(c.text || ''), basis:arr(c.basis).map(String)}; })
+    };
+  });
+}
+function mergeVerify(solved, r){
+  var list = arr(r && r.results);
+  return solved.map(function(s){
+    var v = list.filter(function(x){ return String(x.id) === s.id; })[0] || {};
+    var vc = arr(v.claims);
+    var claims = s.claims.map(function(c, i){
+      var bad = (vc[i] && vc[i].verdict === 'unsupported') || !c.basis.length;
+      return {text:c.text, basis:c.basis, verdict:bad ? 'unsupported' : 'ok', reason:String((vc[i] && vc[i].reason) || '')};
+    });
+    var st = ['answered','partial','not_learned'].indexOf(v.status) >= 0 ? v.status : s.status;
+    return {id:s.id, answer:s.answer, claims:claims, final:String(v.final_answer || s.answer), status:st};
+  });
+}
+function normGrade(r, qs){
+  r = r || {};
+  var score = Math.max(0, Math.min(100, Math.round(Number(r.score) || 0)));
+  var pq = {};
+  arr(r.per_question).forEach(function(p){ if (RESULT[p.result]) pq[String(p.id)] = p.result; });
+  return {
+    score:score, summary:String(r.summary || ''), per:pq,
+    cards:arr(r.cards).slice(0, 6).map(function(c){
+      return {tag:TAGS[c.tag] ? c.tag : '설명 누락', title:String(c.title || ''), student:String(c.student || ''), missing:String(c.missing || ''), cause:String(c.cause || ''), section:String(c.section || '')};
+    }),
+    good:arr(r.good).map(String).filter(Boolean).slice(0, 3)
+  };
+}
+function citedSet(){
+  var set = {};
+  if (S.exam && S.exam.finals) S.exam.finals.forEach(function(f){
+    f.claims.forEach(function(c){ if (c.verdict === 'ok') c.basis.forEach(function(b){ set[b] = 1; }); });
+  });
+  return set;
+}
+
+/* ---------- actions ---------- */
+function onFile(file, ta, upd){
+  if (!file) return;
+  S.fileName = file.name;
+  var isPdf = /\.pdf$/i.test(file.name) || file.type === 'application/pdf';
+  var job;
+  if (isPdf) {
+    if (!window.pdfjsLib) { toast('PDF 읽기 도구가 아직 준비되지 않았어요. 잠시 후 다시 올려 주세요.'); return; }
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    job = file.arrayBuffer().then(function(buf){ return window.pdfjsLib.getDocument({data:buf}).promise; }).then(function(pdf){
+      var n = Math.min(pdf.numPages, 40), out = [], chain = Promise.resolve();
+      for (var i = 1; i <= n; i++) (function(p){
+        chain = chain.then(function(){ return pdf.getPage(p); }).then(function(pg){ return pg.getTextContent(); }).then(function(tc){
+          out.push(tc.items.map(function(it){ return it.str + (it.hasEOL ? '\n' : ' '); }).join(''));
+        });
+      })(i);
+      return chain.then(function(){ return out.join('\n\n'); });
+    });
+  } else {
+    job = file.text();
+  }
+  job.then(function(text){
+    text = text.replace(/[ \t]{2,}/g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    if (text.length < 40) throw new Error('empty');
+    S.source = text; ta.value = text; upd();
+    toast(file.name + '에서 글자를 읽었어요.');
+  }).catch(function(){
+    toast('파일에서 글자를 읽지 못했어요. 스캔한 PDF라면 내용을 복사해 붙여넣어 주세요.');
+  });
+}
+
+function analyze(btn, status){
+  var text = S.source.trim();
+  if (text.length < 80) { status.textContent = '자료가 너무 짧아요. 한 문단 이상 넣어 주세요.'; return; }
+  btn.disabled = true;
+  status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
+  addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
+  AI.json(P.analyze(text.slice(0, 30000)), {modelTier:'default', cache:{gcTime:3600000}}).then(function(raw){
+    var a = normAnalysis(raw, text);
+    if (!a.sections.length || !a.exam.length) throw {code:'invalid_json'};
+    S.analysis = a; S.selected = {};
+    a.sections.forEach(function(s){ S.selected[s.id] = true; });
+    S.mode = a.recommended_mode;
+    resetTeach(); go('outline');
+  }).catch(function(e){
+    status.textContent = errMsg(e) || '중단됐어요.';
+    btn.disabled = false;
+  });
+}
+
+function startTeach(){
+  resetTeach();
+  S.dialog.push({role:'char', text:CHARS[S.charId].hello});
+  S.tab = 'talk';
+  go('teach');
+}
+
+function applyTracker(r){
+  r = r || {};
+  arr(r.goals).forEach(function(g){
+    var lv = Math.max(0, Math.min(3, parseInt(g.level, 10) || 0));
+    if (g.id) S.goals[String(g.id)] = {level:lv, note:String(g.note || '')};
+  });
+  arr(r.misconception_updates).forEach(function(u){
+    var m = S.misc.filter(function(x){ return x.id === String(u.id); })[0];
+    if (m && m.status === 'open' && (u.status === 'corrected' || u.status === 'wrongly_corrected')) m.status = u.status;
+  });
+  var d = r.directive || {};
+  return {
+    kind:KIND[d.kind] ? d.kind : 'ask', goal:String(d.goal || ''), focus:String(d.focus || ''),
+    misconception:String(d.misconception || ''), based_on:arr(d.based_on).map(String)
+  };
+}
+
+function setLine(text, thinking){
+  if (!els.dtext) return;
+  els.dbox.classList.toggle('thinking', !!thinking);
+  els.dbox.classList.remove('err');
+  els.dtext.textContent = text;
+}
+
+function send(){
+  if (S.busy) return;
+  var msg = els.input.value.trim();
+  if (!msg) return;
+  var ch = CHARS[S.charId];
+  S.busy = true; els.send.disabled = true; els.input.value = ''; S.draft = '';
+  S.turn++;
+  var ids = [];
+  splitSentences(msg).forEach(function(t){
+    var id = 'S' + (S.ledger.length + 1);
+    S.ledger.push({id:id, text:t, turn:S.turn}); ids.push(id);
+  });
+  S.dialog.push({role:'user', text:msg, ids:ids});
+  renderPanel();
+  setLine('생각하는 중…', true);
+  var d, mis = null;
+  AI.json(P.tracker(), {modelTier:'quick', cache:false}).then(function(raw){
+    d = applyTracker(raw);
+    if (d.kind === 'misconception') {
+      var canMis = d.misconception && S.turn > 1 && S.misc.length < 3 && !S.misc.some(function(m){ return m.status === 'open'; });
+      if (canMis) mis = {id:'M' + (S.misc.length + 1), text:d.misconception, based_on:d.based_on, status:'open', turn:S.turn};
+      else d.kind = 'ask';
+    }
+    S.wrap = d.kind === 'wrap';
+    addLog({layer:'이해 상태 추적기', tier:'quick', sees:['원문(선택 범위)','학습 목표','학습자 문장','대화'], blocked:[],
+      note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요.', detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : (d.focus ? ' / ' + d.focus : ''))});
+    addLog({layer:'후배 캐릭터 · ' + ch.short, tier:'quick', sees:['학습자 문장 ' + S.ledger.length + '개','대화 기록','이번 턴 지시'], blocked:['원문','정답','시험 문제'],
+      note:'지시 범위 안에서 대사만 만들어요.'});
+    setLine('', false);
+    els.av.classList.add('talk');
+    return AI.text(P.character(d, mis), {modelTier:'quick', cache:false, onText:function(u){ setLine(u.text, false); }});
+  }).then(function(res){
+    var line = res.text.trim();
+    if (mis) S.misc.push(mis);
+    S.dialog.push({role:'char', text:line, kind:d.kind, mis:mis ? mis.id : null});
+    setLine(line, false);
+    els.exam.className = 'btn small' + (S.wrap ? '' : ' ghost');
+  }).catch(function(e){
+    setLine(errMsg(e) || '중단됐어요. 다시 보내 주세요.', false);
+    els.dbox.classList.add('err');
+  }).then(function(){
+    S.busy = false; els.send.disabled = false; els.av.classList.remove('talk');
+    renderPanel();
+  });
+}
+
+function runExam(retry){
+  if (!retry) {
+    if (!S.ledger.length) { toast('먼저 한 문장이라도 설명해 주세요.'); return; }
+    S.exam = {qs:examQs(), beliefs:openBeliefs(), stage:0, err:''};
+  }
+  var E = S.exam; E.err = '';
+  go('exam');
+  var p = Promise.resolve();
+  if (E.stage <= 0) p = p.then(function(){
+    addLog({layer:'후배 캐릭터 · 시험', tier:'default', sees:['학습자 문장 ' + S.ledger.length + '개','믿게 된 추론 ' + E.beliefs.length + '개','시험 문제(질문만)'], blocked:['원문','모범답안'], note:'공책만 보고 풀고, 주장마다 근거 번호를 붙여요.'});
+    return AI.json(P.solve(E.beliefs, E.qs), {modelTier:'default', cache:false}).then(function(r){ E.solved = normSolve(r, E.qs); E.stage = 1; renderAll(); });
+  });
+  p = p.then(function(){
+    if (E.stage > 1) return;
+    addLog({layer:'근거 검증기', tier:'quick', sees:['학습자 문장','후배 답안과 근거 번호'], blocked:['원문','모범답안'], note:'근거 없는 주장은 지우고 안 배운 걸로 바꿔요.'});
+    return AI.json(P.verify(E.beliefs, E.solved), {modelTier:'quick', cache:false}).then(function(r){ E.finals = mergeVerify(E.solved, r); E.stage = 2; renderAll(); });
+  });
+  p = p.then(function(){
+    if (E.stage > 2) return;
+    addLog({layer:'채점·되짚기 계층', tier:'default', sees:['원문','모범답안','학습자 문장','후배 최종 답안'], blocked:[], note:'원인을 세 가지로 나눠 되짚기 카드를 만들어요.'});
+    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs); E.stage = 3; });
+  });
+  p.then(function(){
+    var g = E.grade;
+    E.affGain = Math.round(g.score / 10); E.coinGain = g.score;
+    S.affinity = Math.min(100, S.affinity + E.affGain); S.coins += E.coinGain;
+    go('review');
+  }).catch(function(e){
+    E.err = errMsg(e) || '중단됐어요.';
+    renderAll();
+  });
+}
+
+function go(screen){
+  S.screen = screen; renderAll();
+  window.scrollTo({top:0, behavior:reduced() ? 'auto' : 'smooth'});
+}
+
+/* ---------- views ---------- */
+var STEPS = [['upload','자료'],['outline','목차'],['teach','가르치기'],['exam','시험'],['review','되짚기']];
+function header(){
+  var idx = STEPS.map(function(s){ return s[0]; }).indexOf(S.screen);
+  return [
+    h('div', {class:'brand'}, h('h1', {}, 'Teach Me!'), h('span', {}, 'AI 후배를 가르치며 내 이해의 빈틈 찾기')),
+    h('ol', {class:'steps', 'aria-label':'진행 단계'}, STEPS.map(function(s, i){
+      return h('li', {class:i === idx ? 'on' : (i < idx ? 'done' : ''), 'aria-current':i === idx ? 'step' : null}, (i + 1) + '. ' + s[1]);
+    }))
+  ];
+}
+
+function renderAll(){
+  var app = document.getElementById('app');
+  app.innerHTML = ''; els = {};
+  var wrap = h('div', {class:'wrap'}, header());
+  if (aiState === 'none') wrap.append(h('div', {class:'banner', role:'status'}, '이 화면에서는 AI를 부를 수 없어요. claude.ai 웹이나 앱에서 이 페이지를 열면 후배가 대답해요.'));
+  var view = {upload:viewUpload, outline:viewOutline, teach:viewTeach, exam:viewExam, review:viewReview}[S.screen];
+  wrap.append(view());
+  app.append(wrap);
+}
+
+function viewUpload(){
+  var ta = h('textarea', {rows:9, placeholder:'교과서, 필기, 학습지 내용을 붙여넣어도 돼요.', 'aria-label':'학습 자료 내용'});
+  ta.value = S.source;
+  var count = h('span', {class:'muted'});
+  function upd(){ count.textContent = ta.value.trim().length.toLocaleString() + '자'; }
+  ta.addEventListener('input', function(){ S.source = ta.value; upd(); });
+  upd();
+  var fi = h('input', {type:'file', id:'file', class:'sr', accept:'.pdf,.txt,.md,application/pdf,text/plain'});
+  fi.addEventListener('change', function(){ onFile(fi.files[0], ta, upd); fi.value = ''; });
+  var status = h('p', {class:'muted', 'aria-live':'polite', style:'margin-top:10px'});
+  var btn = h('button', {class:'btn', onclick:function(){ analyze(btn, status); }}, '자료 분석하기');
+  return h('section', {},
+    h('div', {class:'sheet'},
+      h('h2', {}, '무엇을 가르칠 건가요?'),
+      h('p', {class:'muted'}, '자료를 올리면 목차, 학습 목표, 시험 문제를 만들어요. 이 내용은 후배에게 전달되지 않아요.'),
+      h('div', {class:'row'},
+        h('label', {for:'file', class:'btn ghost small', tabindex:'0', onkeydown:function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fi.click(); } }}, 'PDF·텍스트 파일 올리기'),
+        h('button', {class:'btn ghost small', onclick:function(){ ta.value = SAMPLE; S.source = SAMPLE; S.fileName = '예시 자료'; upd(); }}, '예시 자료 넣기')),
+      fi, ta,
+      h('div', {class:'row spread'}, count, btn),
+      status),
+    h('p', {class:'muted small'}, '프로토타입이라 웹 주소로 자료 등록하기는 아직 빠져 있어요. 스캔한 PDF는 글자를 못 읽으니 내용을 붙여넣어 주세요.')
+  );
+}
+
+function openReader(secId){
+  var a = S.analysis;
+  var s = a.sections.filter(function(x){ return x.id === secId; })[0];
+  var title = s ? s.title : '전체 자료';
+  var body = (s && a.sliceOk && s.text) ? s.text : S.source;
+  var prev = document.activeElement, m;
+  function close(){ m.remove(); document.removeEventListener('keydown', esc); if (prev && prev.focus) prev.focus(); }
+  function esc(e){ if (e.key === 'Escape') close(); }
+  var closeBtn = h('button', {class:'btn ghost small', onclick:close}, '닫기');
+  m = h('div', {class:'modal', onclick:function(e){ if (e.target === m) close(); }},
+    h('div', {class:'mpanel', role:'dialog', 'aria-modal':'true', 'aria-label':title},
+      h('div', {class:'row spread'}, h('h3', {style:'margin:0'}, title), closeBtn),
+      s && !a.sliceOk ? h('p', {class:'muted small', style:'margin-top:8px'}, '구간을 정확히 나누지 못해 전체 자료를 보여 줘요.') : null,
+      h('div', {class:'reading'}, body)));
+  document.body.append(m);
+  document.addEventListener('keydown', esc);
+  closeBtn.focus();
+}
+
+function viewOutline(){
+  var a = S.analysis;
+  var countEl = h('p', {class:'muted', style:'margin:10px 0 0'});
+  var startBtn = h('button', {class:'btn', onclick:startTeach}, '가르치기 시작');
+  function refresh(){
+    countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + examQs().length + '개';
+    startBtn.disabled = !selectedIds().length;
+  }
+  var secs = a.sections.map(function(s, i){
+    var cb = h('input', {type:'checkbox', id:'cb-' + s.id});
+    cb.checked = !!S.selected[s.id];
+    cb.addEventListener('change', function(){ S.selected[s.id] = cb.checked; refresh(); });
+    var gs = a.goals.filter(function(g){ return g.section === s.id; });
+    return h('div', {class:'sec'},
+      h('div', {class:'sec-head'}, cb, h('label', {for:'cb-' + s.id, class:'sec-title'}, (i + 1) + '. ' + s.title),
+        h('button', {class:'btn ghost small', onclick:function(){ openReader(s.id); }}, '읽기')),
+      gs.length ? h('ul', {class:'goals'}, gs.map(function(g){ return h('li', {}, g.text); })) : null);
+  });
+  var modes = h('div', {class:'opts', role:'radiogroup', 'aria-label':'학습 목표'}, ['flow','memorize'].map(function(m){
+    return h('button', {class:'opt' + (S.mode === m ? ' on' : ''), role:'radio', 'aria-checked':String(S.mode === m), onclick:function(){ S.mode = m; renderAll(); }},
+      h('span', {class:'opt-t'}, MODES[m].label, a.recommended_mode === m ? h('span', {class:'rec'}, 'AI 추천') : null),
+      h('span', {class:'opt-d'}, MODES[m].desc));
+  }));
+  var chars = h('div', {class:'opts', role:'radiogroup', 'aria-label':'가르칠 캐릭터'}, ['taeo','harin'].map(function(id){
+    var c = CHARS[id];
+    return h('button', {class:'opt' + (S.charId === id ? ' on' : ''), role:'radio', 'aria-checked':String(S.charId === id), onclick:function(){ S.charId = id; renderAll(); }},
+      h('span', {class:'mini', html:AVATAR[id]}),
+      h('span', {class:'opt-t'}, c.name), h('span', {class:'muted small'}, c.role),
+      h('span', {class:'opt-d'}, c.blurb));
+  }));
+  refresh();
+  return h('section', {},
+    h('div', {class:'sheet'},
+      h('div', {class:'row spread'}, h('h2', {style:'margin:0'}, a.title), h('button', {class:'btn ghost small', onclick:function(){ openReader(null); }}, '공부 모드')),
+      h('p', {class:'muted', style:'margin-top:6px'}, '가르칠 범위를 고르세요. 읽기를 누르면 그 구간 자료를 다시 볼 수 있어요.'),
+      secs, countEl),
+    h('div', {class:'sheet'},
+      h('h3', {}, '이번 목표는?'),
+      modes,
+      a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
+    h('div', {class:'sheet'},
+      h('h3', {}, '누구를 가르칠까요?'),
+      chars),
+    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'), startBtn)
+  );
+}
+
+function viewTeach(){
+  var ch = CHARS[S.charId];
+  var last = S.dialog.slice().reverse().filter(function(d){ return d.role === 'char'; })[0];
+  els.av = h('div', {class:'av-wrap', html:AVATAR[S.charId]});
+  els.dtext = h('div', {class:'txt', 'aria-live':'polite'}, last ? last.text : '');
+  els.dbox = h('div', {class:'dbox', style:'--cc:' + ch.color}, h('span', {class:'plate'}, ch.name), els.dtext);
+  var stage = h('div', {class:'stage'}, els.av,
+    h('div', {class:'who'},
+      h('div', {class:'nm'}, ch.name),
+      h('div', {class:'muted small'}, ch.role + ', ' + MODES[S.mode].label + ' 목표'),
+      h('div', {class:'aff'}, h('span', {class:'muted small'}, '호감도'), h('div', {class:'meter', role:'img', 'aria-label':'호감도 ' + S.affinity}, h('i', {style:'width:' + S.affinity + '%'})))));
+  var tabDefs = [['talk','대화'],['note',ch.short + '의 공책'],['runtime','런타임']];
+  var tabs = h('div', {class:'tabs', role:'tablist'}, tabDefs.map(function(t){
+    return h('button', {role:'tab', 'aria-selected':String(S.tab === t[0]), onclick:function(){
+      S.tab = t[0];
+      Array.prototype.forEach.call(tabs.children, function(b, i){ b.setAttribute('aria-selected', String(tabDefs[i][0] === S.tab)); });
+      renderPanel();
+    }}, t[1]);
+  }));
+  els.panel = h('div', {role:'tabpanel'});
+  els.input = h('textarea', {rows:2, placeholder:ch.short + '에게 설명해 보세요', 'aria-label':'설명 입력'});
+  els.input.value = S.draft;
+  els.input.addEventListener('input', function(){ S.draft = els.input.value; });
+  els.input.addEventListener('keydown', function(e){ if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } });
+  els.send = h('button', {class:'btn', onclick:send}, '보내기');
+  els.send.disabled = S.busy;
+  els.exam = h('button', {class:'btn small' + (S.wrap ? '' : ' ghost'), onclick:function(){ runExam(false); }}, '수업 끝내고 시험 보기');
+  renderPanel();
+  return h('section', {}, stage, els.dbox, tabs, els.panel,
+    h('div', {class:'composer'}, els.input, els.send),
+    h('div', {class:'row spread actions'}, h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '목차로'), els.exam));
+}
+
+function renderPanel(){
+  if (!els.panel) return;
+  els.panel.innerHTML = '';
+  if (S.tab === 'talk') els.panel.append(viewChat());
+  else if (S.tab === 'note') els.panel.append(viewNote());
+  else els.panel.append(viewRuntime());
+}
+
+function viewChat(){
+  return h('div', {class:'chat'}, S.dialog.map(function(d){
+    if (d.role === 'user') return h('div', {class:'msg me'}, d.text,
+      d.ids && d.ids.length ? h('span', {class:'ids'}, '공책에 ' + (d.ids.length > 1 ? d.ids[0] + '~' + d.ids[d.ids.length - 1] : d.ids[0]) + '로 적힘') : null);
+    return h('div', {class:'msg ch'}, d.text);
+  }));
+}
+
+function viewNote(){
+  var ch = CHARS[S.charId], cited = citedSet();
+  var lines = S.ledger.length ? S.ledger.map(function(l){
+    return h('div', {class:'ln' + (cited[l.id] ? ' cited' : '')}, h('b', {class:'sid'}, l.id), h('span', {}, l.text));
+  }) : [h('div', {class:'ln empty'}, h('span', {}, '아직 비어 있어요. 설명한 문장이 여기 적혀요.'))];
+  return h('div', {},
+    h('p', {class:'muted'}, ch.short + '는 이 공책에 적힌 것만 알아요. 시험도 이 공책만 보고 풀어요.' + (S.exam && S.exam.finals ? ' 형광펜은 시험에서 근거로 쓰인 문장이에요.' : '')),
+    h('div', {class:'note'}, lines),
+    S.misc.length ? h('div', {class:'mis-box'},
+      h('h3', {}, ch.short + '가 혼자 추론한 것'),
+      h('p', {class:'muted'}, '맞는지 틀린지는 시험이 끝나면 알려 줘요. 답하지 않고 넘어가면 이대로 믿고 시험을 봐요.'),
+      S.misc.map(function(m){
+        return h('div', {class:'mis'}, h('span', {class:'mid'}, m.id), h('span', {}, m.text),
+          h('span', {class:'mst' + (m.status === 'open' ? ' open' : '')}, m.status === 'open' ? '확인 필요' : '답변 반영됨'));
+      })) : null);
+}
+
+function viewRuntime(){
+  var gs = S.analysis ? goalsSel() : [];
+  var dev = h('input', {type:'checkbox', id:'devt'});
+  dev.checked = S.dev;
+  dev.addEventListener('change', function(){ S.dev = dev.checked; renderPanel(); });
+  return h('div', {},
+    h('p', {class:'muted'}, '심사·개발용 화면이에요. 계층마다 무엇을 보고 무엇이 차단됐는지 기록돼요.'),
+    h('label', {class:'toggle', for:'devt'}, dev, '개발자 보기 (켜면 질문 의도가 보여서 공부 효과가 줄어요)'),
+    h('h3', {style:'margin-top:12px'}, '목표별 이해 상태'),
+    gs.map(function(g){
+      var st = S.goals[g.id] || {level:0, note:''};
+      return h('div', {class:'gbar'}, h('div', {class:'gt'}, g.text),
+        h('div', {class:'segs', role:'img', 'aria-label':LEVELS[st.level]}, [0,1,2].map(function(i){ return h('i', {class:i < st.level ? 'f' : ''}); })),
+        h('div', {class:'muted small'}, LEVELS[st.level] + (S.dev && st.note ? ', ' + st.note : '')));
+    }),
+    h('h3', {style:'margin-top:16px'}, '호출 기록'),
+    S.logs.length ? S.logs.map(function(l){
+      return h('div', {class:'rt'},
+        h('div', {class:'row spread'}, h('span', {class:'ly'}, l.layer), h('span', {class:'muted small'}, l.tier + ' 모델')),
+        h('div', {}, l.sees.map(function(x){ return h('span', {class:'pill see'}, x); }), l.blocked.map(function(x){ return h('span', {class:'pill no'}, x); })),
+        h('div', {class:'muted small', style:'margin-top:4px'}, l.note),
+        S.dev && l.detail ? h('div', {class:'small', style:'margin-top:4px'}, l.detail) : null);
+    }) : h('p', {class:'muted'}, '아직 호출이 없어요.'));
+}
+
+function viewExam(){
+  var E = S.exam, ch = CHARS[S.charId];
+  var stepsDef = [
+    [ch.short + '가 공책만 보고 시험 푸는 중', '원문과 모범답안은 받지 않아요. 주장마다 근거 번호를 붙여요.'],
+    ['근거 검증기가 근거 번호 확인하는 중', '근거가 없는 주장은 지우고, 안 배운 걸로 바꿔요.'],
+    ['채점하고 되짚기 카드 만드는 중', MODES[S.mode].label + ' 기준으로 채점해요.']
+  ];
+  return h('section', {},
+    h('div', {class:'sheet'},
+      h('h2', {}, '시험 보는 중'),
+      h('p', {class:'muted'}, ch.short + '가 아는 것: 학습자 문장 ' + S.ledger.length + '개, 혼자 믿게 된 추론 ' + E.beliefs.length + '개, 시험 문제 ' + E.qs.length + '개'),
+      h('ol', {class:'esteps'}, stepsDef.map(function(s, i){
+        var cls = i < E.stage ? 'done' : (i === E.stage && !E.err ? 'run' : '');
+        return h('li', {class:cls}, h('span', {class:'n', 'aria-hidden':'true'}, i < E.stage ? '✓' : String(i + 1)),
+          h('div', {}, h('div', {}, s[0]), h('div', {class:'muted small'}, s[1])));
+      })),
+      E.err ? h('div', {}, h('p', {class:'err-text'}, E.err), h('button', {class:'btn small', onclick:function(){ runExam(true); }}, '이어서 다시 시도')) : null),
+    h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'));
+}
+
+function viewReview(){
+  var E = S.exam, G = E.grade, ch = CHARS[S.charId], a = S.analysis;
+  var react = G.score >= 80 ? (S.charId === 'taeo' ? '와 나 이거 거의 다 맞았어ㅋㅋ 너 설명 진짜 잘한다' : '선배 덕분에 거의 다 풀었어요! 머릿속에서 연결이 잘 돼요.')
+    : G.score >= 50 ? (S.charId === 'taeo' ? '반은 알겠는데 몇 개는 진짜 모르겠더라. 거기만 다시 알려주라' : '큰 흐름은 알겠는데 몇 문제는 근거가 부족했어요.')
+    : (S.charId === 'taeo' ? '야… 나 시험 망한 것 같은데? 처음부터 다시 설명해 주라ㅠ' : '죄송해요 선배… 배운 게 부족해서 많이 못 풀었어요. 다시 알려 주세요!');
+  var secTitle = function(id){ var s = a.sections.filter(function(x){ return x.id === id; })[0]; return s ? s.title : ''; };
+  var cards = G.cards.map(function(c){
+    var st = secTitle(c.section);
+    return h('div', {class:'card', style:'--tc:' + TAGS[c.tag]},
+      h('span', {class:'chip'}, c.tag + (c.tag === '참고' ? ' (감점 없음)' : '')),
+      h('h3', {}, c.title),
+      h('dl', {class:'kv'},
+        c.student ? [h('dt', {}, '후배 답'), h('dd', {}, c.student)] : null,
+        c.missing ? [h('dt', {}, '빠진 것'), h('dd', {}, c.missing)] : null,
+        c.cause ? [h('dt', {}, '원인'), h('dd', {}, c.cause)] : null,
+        st ? [h('dt', {}, '다시 볼 곳'), h('dd', {}, h('button', {class:'btn ghost small', onclick:function(){ openReader(c.section); }}, st + ' 읽기'))] : null));
+  });
+  var qs = E.qs.map(function(q){
+    var f = E.finals.filter(function(x){ return x.id === q.id; })[0] || {final:'', claims:[]};
+    var res = G.per[q.id] || (f.status === 'not_learned' ? 'not_learned' : 'partial');
+    return h('details', {class:'q'},
+      h('summary', {}, q.question, h('span', {class:'res ' + res}, RESULT[res])),
+      h('p', {class:'qa'}, h('b', {}, ch.short + ' 최종 답: '), f.final),
+      f.claims.map(function(c){
+        return h('div', {class:'claim' + (c.verdict === 'ok' ? '' : ' bad'), title:c.reason || null}, c.text,
+          c.basis.map(function(b){ return h('span', {class:'cite'}, b); }),
+          c.verdict === 'ok' ? null : h('span', {class:'muted small'}, ' 근거 없음, 삭제'));
+      }),
+      h('p', {class:'qa'}, h('b', {}, '모범답안: '), q.answer));
+  });
+  return h('section', {},
+    h('div', {class:'stage'}, h('div', {class:'av-wrap', html:AVATAR[S.charId]}),
+      h('div', {class:'who'}, h('div', {class:'nm'}, ch.name), h('div', {class:'muted small'}, '시험 결과'))),
+    h('div', {class:'dbox', style:'--cc:' + ch.color}, h('span', {class:'plate'}, ch.name), h('div', {class:'txt'}, react)),
+    h('div', {class:'sheet'},
+      h('div', {class:'score'}, h('b', {}, G.score + '점'), h('span', {class:'muted'}, MODES[S.mode].label + ' 기준')),
+      G.summary ? h('p', {style:'margin-top:8px'}, G.summary) : null,
+      h('p', {class:'muted small'}, S.mode === 'flow' ? '흐름 이해가 목표라서 연도나 세부 명칭만 빠진 건 감점하지 않았어요.' : '완벽 암기가 목표라서 세부 사항까지 채점했어요.'),
+      h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain), h('span', {}, '코인 +' + E.coinGain + ' (보유 ' + S.coins + ')'))),
+    h('h2', {style:'margin:18px 0 0'}, '되짚기'),
+    cards.length ? cards : h('p', {class:'muted'}, '되짚을 구멍이 없어요. 완벽하게 가르쳤어요!'),
+    G.good.length ? h('div', {class:'sheet', style:'margin-top:14px'}, h('h3', {}, '잘 가르친 점'), h('ul', {class:'good'}, G.good.map(function(g){ return h('li', {}, g); }))) : null,
+    h('div', {class:'sheet', style:'margin-top:14px'}, h('h3', {}, '문제별 답안과 근거'), h('p', {class:'muted small'}, '형광펜 번호는 후배가 근거로 쓴 공책 문장이에요. 줄 그어진 주장은 검증기가 지운 거예요.'), qs),
+    h('div', {class:'row spread'},
+      h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '범위 다시 고르기'),
+      h('button', {class:'btn', onclick:function(){ S.tab = 'talk'; S.dialog.push({role:'char', text:react}); go('teach'); }}, '이어서 다시 가르치기'))
+  );
+}
+
+renderAll();
+})();
+</script>
+</body>
+</html>
