@@ -516,6 +516,47 @@ var SAMPLE = [
 '경제적으로는 일본의 쌀 부족을 해결하기 위해 산미 증식 계획(1920~1934)을 추진하였다. 쌀 생산량은 늘었지만 증산량보다 많은 쌀이 일본으로 빠져나가 한국인의 1인당 쌀 소비량은 오히려 줄었다. 수리 조합비와 비료 대금 등 증산 비용은 농민에게 떠넘겨져 많은 농민이 몰락하였다. 또한 1920년 회사령을 폐지하여 허가제를 신고제로 바꾸면서 일본 자본이 한국에 더 쉽게 들어오게 되었다.'
 ].join('\n');
 
+// 예시 자료는 시연 때 기다리지 않도록 분석 결과를 미리 만들어 뒀어요. (AI 호출 없이 바로 목차로)
+var SAMPLE_ANALYSIS = {
+  title:'일제의 식민 통치 방식 변화 (1910~1920년대)',
+  recommended_mode:'flow',
+  recommend_reason:'통치 방식이 왜 바뀌었는지, 겉으로 내세운 것과 실제가 어떻게 달랐는지가 핵심이라 연도보다 원인과 결과를 설명하는 연습이 더 도움이 돼요.',
+  sections:[
+    {id:'s1', title:'1910년대 무단 통치', start:'1. 1910년대 무단 통치'},
+    {id:'s2', title:'1910년대 경제 수탈: 토지 조사 사업과 회사령', start:'경제적으로 일제는 토지 조사 사업'},
+    {id:'s3', title:'1920년대 문화 통치의 내용과 본질', start:'2. 1920년대 문화 통치'},
+    {id:'s4', title:'1920년대 경제 정책: 산미 증식 계획', start:'경제적으로는 일본의 쌀 부족을'}
+  ],
+  goals:[
+    {id:'g1', section:'s1', text:'헌병 경찰제와 즉결 처분권 등 무단 통치의 특징을 설명할 수 있다'},
+    {id:'g2', section:'s2', text:'토지 조사 사업이 농민에게 끼친 영향을 설명할 수 있다'},
+    {id:'g3', section:'s2', text:'회사령의 내용과 목적을 설명할 수 있다'},
+    {id:'g4', section:'s3', text:'3·1 운동 이후 일제가 통치 방식을 바꾼 이유를 설명할 수 있다'},
+    {id:'g5', section:'s3', text:'문화 통치가 기만적이었던 이유를 구체적인 사례로 설명할 수 있다'},
+    {id:'g6', section:'s4', text:'산미 증식 계획의 결과를 설명할 수 있다'}
+  ],
+  exam:[
+    {id:'q1', section:'s1', goal:'g1', kind:'detail', question:'1910년대 일제가 실시한 헌병 경찰제란 무엇이고, 헌병 경찰은 어떤 권한을 가졌나요?',
+      answer:'헌병이 경찰 업무를 맡는 제도로, 헌병 경찰은 재판 없이 벌금이나 태형 등을 가할 수 있는 즉결 처분권을 가졌다.',
+      key_points:['헌병이 경찰 업무를 맡음','재판 없이 처벌할 수 있는 즉결 처분권'], detail_points:['조선 태형령(1912)은 한국인에게만 적용']},
+    {id:'q2', section:'s2', goal:'g2', kind:'flow', question:'토지 조사 사업으로 많은 농민의 처지가 어떻게 바뀌었고, 그 이유는 무엇인가요?',
+      answer:'기한부 신고제로 신고되지 않은 토지가 총독부 소유가 되고 농민이 관습적으로 인정받던 경작권이 부정되어, 많은 농민이 기한부 계약 소작농으로 전락했다.',
+      key_points:['신고되지 않은 토지는 총독부 소유','관습적 경작권이 부정됨','기한부 계약 소작농으로 전락'], detail_points:['1910~1918년','기한부 신고제']},
+    {id:'q3', section:'s2', goal:'g3', kind:'detail', question:'1910년 일제가 공포한 회사령은 어떤 법이고, 무엇을 노렸나요?',
+      answer:'회사를 세울 때 총독의 허가를 받게 한 법으로, 한국인의 기업 활동을 억누르려는 것이었다.',
+      key_points:['회사 설립에 총독의 허가가 필요','한국인의 기업 활동 억압'], detail_points:['1910년 공포']},
+    {id:'q4', section:'s3', goal:'g4', kind:'flow', question:'일제가 1920년대에 무단 통치에서 문화 통치로 방식을 바꾼 까닭은 무엇인가요?',
+      answer:'1919년 3·1 운동을 계기로 무력만으로는 식민 지배를 유지하기 어렵다는 것을 깨달았고, 국제 여론도 나빠졌기 때문이다.',
+      key_points:['3·1 운동이 계기','무력만으로는 지배를 유지하기 어렵다고 판단','국제 여론 악화'], detail_points:['1919년']},
+    {id:'q5', section:'s3', goal:'g5', kind:'flow', question:'문화 통치가 기만적인 통치라고 불리는 이유를 사례를 들어 설명해 보세요.',
+      answer:'겉으로는 문관 총독 임명 허용, 보통 경찰제 전환, 한글 신문 허가를 내세웠지만 실제로 문관 총독은 한 명도 없었고 경찰 수와 예산은 늘었으며 신문은 검열로 통제했다. 본질은 친일파를 키워 민족을 분열시키는 것이었다.',
+      key_points:['겉으로 내세운 정책과 실제가 달랐던 사례','친일파를 키워 민족을 분열'], detail_points:['치안 유지법(1925)','보통 경찰제로 바꾼 뒤 경찰 수와 예산 증가']},
+    {id:'q6', section:'s4', goal:'g6', kind:'flow', question:'산미 증식 계획으로 쌀 생산량은 늘었는데도 한국인의 생활이 어려워진 이유는 무엇인가요?',
+      answer:'증산량보다 많은 쌀이 일본으로 빠져나가 한국인의 1인당 쌀 소비량이 줄었고, 수리 조합비와 비료 대금 같은 증산 비용이 농민에게 떠넘겨져 많은 농민이 몰락했기 때문이다.',
+      key_points:['증산량보다 많은 쌀이 일본으로 유출','1인당 쌀 소비량 감소','증산 비용을 농민이 부담'], detail_points:['1920~1934년','수리 조합비, 비료 대금']}
+  ]
+};
+
 /* ---------- state ---------- */
 var S = {
   screen:'home', matId:null, source:'', fileName:'', analysis:null, selected:{},
@@ -891,34 +932,49 @@ function onFile(file, ta, upd){
 function analyze(btn, status){
   var text = S.source.trim();
   if (text.length < 80) { status.textContent = '자료가 너무 짧아요. 한 문단 이상 넣어 주세요.'; return; }
-  btn.disabled = true;
-  status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
-  addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
   // AI가 실제로 읽는 만큼만 자료로 써요. 그래야 목차, 읽기, 채점 기준이 서로 맞아요.
   var cut = text.length > LIMIT.analyze;
   text = text.slice(0, LIMIT.analyze);
-  AI.json(P.analyze(text), {modelTier:'default', cache:{gcTime:3600000}}).then(function(raw){
+  // 전에 올린 자료와 똑같으면 AI를 다시 부르지 않고 그 폴더를 열어요. (사용량 절약)
+  var same = Object.keys(STORE.mats).map(function(k){ return STORE.mats[k]; }).filter(function(m){ return m.source === text; })[0];
+  if (same) { toast('전에 올린 자료예요. 내 학습에 있는 폴더를 열게요.'); openMat(same.id); return; }
+  function finish(raw){
     var a = normAnalysis(raw, text);
-    if (cut) toast('자료가 길어서 앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 사용해요.');
     if (!a.sections.length || !a.exam.length) throw {code:'invalid_json'};
+    S.source = text;
     S.analysis = a; S.selected = {};
     S.matId = createMat(a, text, S.fileName).id;
     a.sections.forEach(function(s){ S.selected[s.id] = true; });
     S.mode = a.recommended_mode;
     resetTeach(); go('outline');
-  }).catch(function(e){
+    if (cut) toast('자료가 길어서 앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 사용해요.');
+  }
+  if (text === SAMPLE) {
+    addLog({layer:'자료 분석 계층', tier:'없음', sees:['원문 전체'], blocked:[], note:'예시 자료라서 미리 만들어 둔 분석 결과를 써요. AI 호출 없음.'});
+    finish(clone(SAMPLE_ANALYSIS));
+    return;
+  }
+  btn.disabled = true;
+  status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
+  addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
+  AI.json(P.analyze(text), {modelTier:'default', cache:{gcTime:3600000}}).then(finish).catch(function(e){
     status.textContent = errMsg(e) || '중단됐어요.';
     btn.disabled = false;
   });
 }
 
 function startTeach(){
-  resetTeach();
-  S.dialog.push({role:'char', text:CHARS[S.charId].hello});
-  S.face = 'fighting';
-  bump('lessons');
-  S.tab = 'talk';
-  go('teach');
+  function begin(){
+    resetTeach();
+    S.dialog.push({role:'char', text:CHARS[S.charId].hello});
+    S.face = 'fighting';
+    bump('lessons');
+    S.tab = 'talk';
+    saveSession();
+    go('teach');
+  }
+  if (S.ledger.length) ask('처음부터 다시 가르칠까요?', '지금까지 가르친 공책과 대화가 지워져요.', '처음부터 하기', begin);
+  else begin();
 }
 
 function applyTracker(r){
@@ -1033,6 +1089,7 @@ function send(){
   }).then(function(){
     // 성공하든 실패하든 반드시 여기까지 와서 '바쁨' 표시를 꺼요.
     S.busy = false;
+    if (gen === S.gen) saveSession();
     updateTeachUi();
   });
 }
@@ -1071,6 +1128,7 @@ function runExam(retry){
     if (m) { m.exams = (m.exams || []).concat([{score:g.score, mode:S.mode, ts:Date.now()}]).slice(-30); saveMat(m); }
     E.levelUp = addAff(E.affGain);
     S.misc.forEach(function(m){ m.revealed = true; }); // 시험이 끝났으니 정답 공개
+    saveSession();
     go('review');
   }).catch(function(e){
     E.err = errMsg(e) || '중단됐어요.';
@@ -1240,6 +1298,22 @@ function checkAch(){
   if (got.length) { saveProfile(); setTimeout(function(){ toast('업적 달성: ' + got.join(', ')); }, 900); }
 }
 
+/* ---------- 확인 창: "정말 지울까요?" 같은 질문을 화면 안에서 띄워요 ---------- */
+function ask(title, msg, okLabel, onOk){
+  var prev = document.activeElement, m;
+  function close(){ m.remove(); document.removeEventListener('keydown', esc); if (prev && prev.focus) prev.focus(); }
+  function esc(e){ if (e.key === 'Escape') close(); }
+  var cancel = h('button', {class:'btn ghost small', onclick:close}, '취소');
+  var ok = h('button', {class:'btn small', onclick:function(){ close(); onOk(); }}, okLabel);
+  m = h('div', {class:'modal', onclick:function(e){ if (e.target === m) close(); }},
+    h('div', {class:'mpanel', role:'alertdialog', 'aria-modal':'true', 'aria-label':title},
+      h('h3', {}, title), h('p', {class:'muted'}, msg),
+      h('div', {class:'row', style:'justify-content:flex-end'}, cancel, ok)));
+  document.body.append(m);
+  document.addEventListener('keydown', esc);
+  cancel.focus();
+}
+
 /* ---------- 내 학습 자료 ---------- */
 function curMat(){ return S.matId ? STORE.mats[S.matId] : null; }
 function packAnalysis(a){
@@ -1264,7 +1338,27 @@ function openMat(id){
   S.analysis = sliceSections(clone(m.analysis), m.source);
   S.selected = {}; S.analysis.sections.forEach(function(s){ S.selected[s.id] = true; });
   S.mode = S.analysis.recommended_mode || 'flow';
-  resetTeach(); go('outline');
+  resetTeach();
+  if (restoreSession(m)) toast('가르치던 내용이 있어요. 이어서 가르칠 수 있어요.');
+  go('outline');
+}
+// 가르치던 대화(공책, 대화, 오개념, 이해 수준)를 그 자료 문서에 함께 저장해요.
+// 새로고침하거나 홈에 다녀와도 내 학습에서 그 자료를 열면 이어서 가르칠 수 있어요.
+var SESSION_FIELDS = ['ledger','dialog','misc','goals','turn','wrap','selected','mode','face','draft'];
+function saveSession(){
+  var m = curMat(); if (!m) return;
+  if (!S.ledger.length) { if (m.session) { delete m.session; saveMat(m); } return; }
+  var keep = {};
+  SESSION_FIELDS.forEach(function(k){ keep[k] = clone(S[k]); });
+  keep.dialog = keep.dialog.slice(-60);
+  m.session = keep;
+  saveMat(m);
+}
+function restoreSession(m){
+  var ss = m && m.session;
+  if (!ss || !arr(ss.ledger).length) return false;
+  SESSION_FIELDS.forEach(function(k){ if (ss[k] !== undefined) S[k] = clone(ss[k]); });
+  return true;
 }
 function recordGoals(){
   var m = curMat(); if (!m) return;
@@ -1502,7 +1596,10 @@ function viewOutline(){
   var a = S.analysis;
   var countEl = h('p', {class:'muted', style:'margin:10px 0 0'});
   var warnEl = h('p', {class:'notice', role:'status'});
-  var startBtn = h('button', {class:'btn', onclick:startTeach}, '가르치기 시작');
+  // 가르치던 대화가 있으면 '이어서'를 먼저 보여 줘요.
+  var canResume = S.ledger.length > 0;
+  var startBtn = h('button', {class:'btn' + (canResume ? ' ghost' : ''), onclick:startTeach}, canResume ? '처음부터 가르치기' : '가르치기 시작');
+  var resumeBtn = canResume ? h('button', {class:'btn', onclick:function(){ S.tab = 'talk'; go('teach'); }}, '이어서 가르치기') : null;
   function refresh(){
     var nq = examQs().length, len = selectedSource().length;
     countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + nq + '개';
@@ -1513,6 +1610,7 @@ function viewOutline(){
     warnEl.textContent = warn;
     warnEl.style.display = warn ? '' : 'none';
     startBtn.disabled = !selectedIds().length || !nq;
+    if (resumeBtn) resumeBtn.disabled = startBtn.disabled;
   }
   var secs = a.sections.map(function(s, i){
     var cb = h('input', {type:'checkbox', id:'cb-' + s.id});
@@ -1538,7 +1636,8 @@ function viewOutline(){
     h('div', {class:'sheet', 'data-title':'이번 목표는?'},
       modes,
       a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
-    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'), startBtn)
+    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'),
+      h('div', {class:'row'}, startBtn, resumeBtn))
   );
 }
 
@@ -1560,7 +1659,7 @@ function viewTeach(){
   els.panel = h('div', {role:'tabpanel'});
   els.input = h('textarea', {rows:2, placeholder:ch.short + '에게 설명해 보세요', 'aria-label':'설명 입력'});
   els.input.value = S.draft;
-  els.input.addEventListener('input', function(){ S.draft = els.input.value; });
+  els.input.addEventListener('input', function(){ S.draft = els.input.value; saveSession(); });
   // 컴퓨터: Enter로 보내기, Shift+Enter로 줄 바꿈. 폰: Enter는 줄 바꿈, 보내기 버튼으로 보내기.
   // 한글 조합 중(isComposing)에 누른 Enter는 무시해야 마지막 글자가 두 번 보내지지 않아요.
   var touch = coarse();
