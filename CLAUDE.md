@@ -67,7 +67,8 @@ UI는 캐릭터 중심의 비주얼노벨 스타일(큰 스탠딩 그림 + 겹�
 
 | 이름 | 쓰는 곳 |
 |---|---|
-| fighting | 첫 인사, 설명 요청(request), 다시 가르치기 시작 |
+| fighting | 첫 인사, 다시 가르치기 시작 |
+| lean | 설명 요청(request): 아직 안 배운 부분을 알려 달라고 할 때 |
 | neutral | 학습자 설명을 받고 생각하는 동안 |
 | think | 질문(ask), 오개념 추론(misconception) |
 | happy | 시험 준비 완료(wrap), 80점 이상 |
@@ -77,7 +78,7 @@ UI는 캐릭터 중심의 비주얼노벨 스타일(큰 스탠딩 그림 + 겹�
 | cafe | 80점 이상 보상 일러스트(배경 있음) |
 
 - 그림은 HTML 안의 `<!-- SPRITES:START -->` 블록에 base64로 들어 있다. 이 블록은 손으로 고치지 말고 `python3 tools/embed_sprites.py`로 다시 채운다.
-- 새 원본 그림(흰 배경)은 `python3 tools/cutout.py 원본.png 이름`으로 배경을 지운다. 흰 종이·흰 옷이 가장자리에 닿으면 `--protect bottom:0-1`처럼 그 변을 보호한다.
+- 지금 그림은 개발자가 직접 누끼를 딴 투명 PNG를 높이 900px webp로 줄인 것이다. 새 원본이 흰 배경이면 `python3 tools/cutout.py 원본.png 이름`으로 배경을 지운다. 흰 종이·흰 옷이 가장자리에 닿으면 `--protect bottom:0-1`처럼 그 변을 보호한다.
 - 표정 바꾸기는 `setFace(이름)`, 장면 만들기는 `scene(이름, small)`.
 
 ## 오개념 규칙
