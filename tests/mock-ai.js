@@ -1,0 +1,45 @@
+// 테스트 전용 가짜 AI. claude.ai 밖에서는 window.claude가 없어서 진짜 AI가 안 돌기 때문에,
+// 각 계층 프롬프트를 알아보고 미리 정해둔 답을 돌려준다. 게시용 teach-me.html에는 넣지 않는다.
+window.claude = { use: function (name) {
+  if (name !== 'sample') return Promise.resolve(null);
+  var line = '알겠어요 선배! 근데 헌병 경찰이 바뀌었으면 이제 경찰이 줄어든 거예요?';
+  var f = function (p, o) {
+    if (o && o.onText) o.onText({ text: line, delta: line });
+    return Promise.resolve({ text: line, truncated: false, modelTierApplied: 'quick' });
+  };
+  f.json = function (p) {
+    if (p.indexOf('자료 분석 계층') >= 0) return Promise.resolve({
+      title: '일제의 식민 통치 방식 변화', recommended_mode: 'flow',
+      recommend_reason: '통치 방식이 왜 바뀌었는지 흐름이 중요해서 흐름 이해를 추천해요.',
+      sections: [
+        { id: 's1', title: '1910년대 무단 통치', start: '1. 1910년대 무단 통치' },
+        { id: 's2', title: '1920년대 문화 통치', start: '2. 1920년대 문화 통치' }],
+      goals: [
+        { id: 'g1', section: 's1', text: '무단 통치의 특징을 설명할 수 있다' },
+        { id: 'g2', section: 's2', text: '문화 통치의 기만성을 설명할 수 있다' }],
+      exam: [
+        { id: 'q1', section: 's1', goal: 'g1', kind: 'flow', question: '무단 통치의 특징은?', answer: '헌병 경찰제로 강압적으로 지배했다.', key_points: ['헌병 경찰제'], detail_points: [] },
+        { id: 'q2', section: 's2', goal: 'g2', kind: 'flow', question: '문화 통치가 기만적인 이유는?', answer: '보통 경찰제로 바꿨지만 경찰 수는 늘었다.', key_points: ['경찰 수 증가'], detail_points: [] }]
+    });
+    if (p.indexOf('이해 상태 추적기') >= 0) return Promise.resolve({
+      goals: [{ id: 'g1', level: 2, note: '헌병 경찰제 설명함' }, { id: 'g2', level: 1, note: '언급만' }],
+      misconception_updates: [],
+      directive: { kind: 'misconception', goal: 'g2', focus: '', misconception: '헌병 경찰제를 보통 경찰제로 바꿨으면 경찰이 줄어든 거죠?', based_on: ['S2'] }
+    });
+    if (p.indexOf('지금 시험을 본다') >= 0) return Promise.resolve({ answers: [
+      { id: 'q1', answer: '헌병이 경찰 일을 했어요.', claims: [{ text: '헌병이 경찰 업무를 맡았다', basis: ['S1'] }], status: 'answered' },
+      { id: 'q2', answer: '경찰이 줄었어요.', claims: [{ text: '경찰이 줄었다', basis: ['B1'] }, { text: '신문을 검열했다', basis: [] }], status: 'partial' }] });
+    if (p.indexOf('근거 검증기') >= 0) return Promise.resolve({ results: [
+      { id: 'q1', claims: [{ verdict: 'ok' }], final_answer: '헌병이 경찰 일을 했어요.', status: 'answered' },
+      { id: 'q2', claims: [{ verdict: 'ok' }, { verdict: 'unsupported', reason: '근거 번호 없음' }], final_answer: '경찰이 줄었어요.', status: 'partial' }] });
+    return Promise.resolve({
+      score: 55, summary: '무단 통치는 잘 가르쳤지만 문화 통치의 기만성이 전달되지 않았어요.',
+      per_question: [{ id: 'q1', result: 'correct' }, { id: 'q2', result: 'wrong' }],
+      cards: [
+        { tag: '오개념 미교정', title: '보통 경찰제 전환 후 경찰 수', student: '경찰이 줄었다고 답함', missing: '경찰 관서, 경찰 수, 예산은 오히려 늘었다.', cause: 'M1 추론을 바로잡지 않고 넘어갔어요.', section: 's2' },
+        { tag: '참고', title: '치안 유지법 1928년 개정', student: '언급 없음', missing: '1928년 개정으로 최고형이 사형이 됐다.', cause: '세부 사항이라 감점하지 않았어요.', section: 's2' }],
+      good: ['S1에서 헌병 경찰제를 정확히 설명했어요.']
+    });
+  };
+  return Promise.resolve(f);
+} };
