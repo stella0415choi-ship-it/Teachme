@@ -220,6 +220,59 @@ details.q summary{cursor:pointer;font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#2F3366;border:3px solid var(--pink);font-family:var(--px);padding:10px 14px;font-size:14px;max-width:90%;z-index:60}
 @media (min-width:700px){.wrap{padding-top:24px}}
 
+/* ===== 메인 홈 ===== */
+.homebtn{font-family:var(--px-b);font-size:13px;background:#fff;color:#2F3366;border:2px solid #2F3366;padding:4px 9px;cursor:pointer;box-shadow:2px 2px 0 #2F3366}
+.homebtn:active{transform:translate(2px,2px);box-shadow:none}
+.dbox.tap{cursor:pointer}
+.dbox.tap:hover{box-shadow:5px 5px 0 var(--yellow)}
+.dbox.wait .next{visibility:hidden}
+.choices{display:flex;flex-direction:column;gap:9px;margin:-4px 14px 6px 8px}
+.choice{font-family:var(--px);font-size:15px;text-align:left;background:#fff;color:#2F3366;border:3px solid #2F3366;padding:10px 14px;cursor:pointer;box-shadow:4px 4px 0 var(--pink)}
+.choice::before{content:"▶ ";color:var(--pink)}
+.choice:hover{background:var(--pink-soft)}
+.choice:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--pink)}
+.hint{font-family:var(--px);font-size:12px;color:#2F3366;text-align:center;margin:4px 0 14px}
+.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 6px 12px 0}
+.menu .btn{flex-direction:column;gap:4px;min-height:74px;font-size:15px}
+.menu .ic{font-size:22px;line-height:1}
+.center{text-align:center}
+.plus{position:absolute;z-index:4;left:50%;top:38%;transform:translateX(-50%);font-family:var(--px-b);font-size:22px;color:#E25A98;
+  text-shadow:2px 0 0 #fff,-2px 0 0 #fff,0 2px 0 #fff,0 -2px 0 #fff;animation:rise 1.2s ease-out forwards;pointer-events:none}
+@keyframes rise{from{opacity:0;margin-top:10px}20%{opacity:1}to{opacity:0;margin-top:-50px}}
+@media (prefers-reduced-motion:reduce){.plus{animation:none;opacity:1}}
+/* 공부: 새 학습 / 내 학습 */
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:4px 6px 16px 0}
+.pick-card{text-align:left;cursor:pointer;background:#fff;color:#2F3366;border:3px solid #2F3366;box-shadow:5px 5px 0 #2F3366;padding:16px 14px;display:flex;flex-direction:column;gap:6px;min-height:110px}
+.pick-card:first-child{background:var(--pink)}
+.pick-card b{font-family:var(--px-b);font-weight:400;font-size:19px}
+.pick-card span{font-size:13px;line-height:1.45}
+.pick-card:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #2F3366}
+.folders{display:grid;gap:14px}
+.folder{position:relative;text-align:left;cursor:pointer;background:#FFF6C9;color:#2F3366;border:3px solid #2F3366;box-shadow:4px 4px 0 #2F3366;padding:16px 14px 12px;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.folder::before{content:"";position:absolute;left:-3px;top:-15px;width:40%;height:12px;background:#FFF6C9;border:3px solid #2F3366;border-bottom:none}
+.folder:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #2F3366}
+.f-title{font-family:var(--px-b);font-size:16px;line-height:1.35}
+.f-bar{display:block;height:12px;background:#fff;border:2px solid #2F3366}
+.f-bar i{display:block;height:100%;background:var(--pink)}
+.f-meta{font-family:var(--px);font-size:12px;color:#5A5E8E}
+/* 업적 */
+.achs{display:grid;gap:10px}
+.ach{display:flex;gap:12px;align-items:center;padding:10px 12px;border:2px dashed #A9A6C6;background:#F4F3F8;color:#8A88A6}
+.ach.on{border:3px solid #2F3366;background:#FFF6C9;color:#2F3366;box-shadow:3px 3px 0 var(--pink)}
+.a-ic{flex:none;width:34px;height:34px;display:grid;place-items:center;font-size:18px;background:#fff;border:2px solid currentColor}
+.ach.on .a-ic{color:#E2A800;border-color:#2F3366}
+.ach b{display:block;font-family:var(--px-b);font-weight:400;font-size:15px}
+.ach span{font-size:13px;line-height:1.4}
+/* 설정: 의상 */
+.outfits{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.outfit{cursor:pointer;background:#fff;color:#2F3366;border:3px solid #2F3366;box-shadow:4px 4px 0 #2F3366;padding:0 0 10px;display:flex;flex-direction:column;align-items:stretch;gap:4px;text-align:center;overflow:hidden}
+.outfit img{display:block;width:100%;height:150px;object-fit:cover;object-position:top;background:#F7B9DE;border-bottom:3px solid #2F3366}
+.outfit b{font-family:var(--px-b);font-weight:400;font-size:15px;margin-top:6px}
+.outfit span{font-size:12px;line-height:1.4;padding:0 8px}
+.outfit.on{background:var(--pink-soft);box-shadow:4px 4px 0 var(--pink)}
+.outfit.locked{cursor:not-allowed;filter:grayscale(.85);opacity:.75}
+.outfit.locked img{filter:brightness(.55)}
+
 /* ---------- 타이틀 화면 (Canva 썸네일과 같은 720x1280 무대를 화면 크기에 맞춰 축소) ---------- */
 .title{position:fixed;inset:0;z-index:80;overflow:hidden;cursor:pointer;
   background:#F2A9C9;transition:opacity .45s ease}
@@ -403,26 +456,29 @@ function understanding(){
   var sum = gs.reduce(function(t, g){ return t + ((S.goals[g.id] || {}).level || 0); }, 0);
   return Math.round(sum / (gs.length * 3) * 100);
 }
-function gauge(){
-  var u = understanding();
+function gauge(kind){
+  var u = kind === 'aff' ? null : understanding();
   var box = h('div', {class:'gauge'});
   if (u == null) {
-    box.append(h('div', {}, '호감도'), h('div', {class:'hrt', 'aria-label':'호감도 ' + S.affinity}, hearts(S.affinity)), h('div', {class:'pct'}, '코인 ' + S.coins));
+    var g = levelProgress(PROFILE().aff), n = Math.round(g.ratio * 5);
+    box.append(h('div', {}, '호감도 Lv.' + g.lv),
+      h('div', {class:'segs', role:'img', 'aria-label':'다음 레벨까지 ' + Math.round(g.ratio * 100) + '%'}, [0,1,2,3,4].map(function(i){ return h('i', {class:i < n ? 'f' : ''}); })),
+      h('div', {class:'pct hrt'}, g.need ? '♥ ' + g.now + '/' + g.need : '♥ MAX'));
     return box;
   }
-  var n = Math.round(u / 20);
+  var k = Math.round(u / 20);
   box.append(h('div', {}, '지민이의 이해도'),
-    h('div', {class:'segs', role:'img', 'aria-label':'이해도 ' + u + '%'}, [0,1,2,3,4].map(function(i){ return h('i', {class:i < n ? 'f' : ''}); })),
-    h('div', {class:'pct'}, h('span', {class:'hrt'}, hearts(S.affinity)), ' ' + u + '%'));
+    h('div', {class:'segs', role:'img', 'aria-label':'이해도 ' + u + '%'}, [0,1,2,3,4].map(function(i){ return h('i', {class:i < k ? 'f' : ''}); })),
+    h('div', {class:'pct'}, h('span', {class:'hrt'}, '♥Lv.' + levelOf(PROFILE().aff)), ' ' + u + '%'));
   return box;
 }
 function updateGauge(){
-  if (els.gauge && els.gauge.parentNode) { var g = gauge(); els.gauge.replaceWith(g); els.gauge = g; }
+  if (els.gauge && els.gauge.parentNode) { var g = gauge(els.gaugeKind); els.gauge.replaceWith(g); els.gauge = g; }
 }
-function scene(face, small){
+function scene(face, small, kind){
   els.sprite = sprite(face);
   els.kao = h('div', {class:'kao', 'aria-hidden':'true'}, KAO[face] || KAO.neutral);
-  els.gauge = gauge();
+  els.gaugeKind = kind; els.gauge = gauge(kind);
   return h('div', {class:'scene' + (small ? ' small' : '')}, els.sprite, els.kao, els.gauge);
 }
 function dbox(text, extra){
@@ -446,10 +502,10 @@ var SAMPLE = [
 
 /* ---------- state ---------- */
 var S = {
-  screen:'upload', source:'', fileName:'', analysis:null, selected:{},
+  screen:'home', matId:null, source:'', fileName:'', analysis:null, selected:{},
   mode:'flow', charId:'harin', face:'fighting',
   ledger:[], dialog:[], misc:[], goals:{}, turn:0, wrap:false,
-  exam:null, affinity:20, coins:0, draft:'', tab:'talk', busy:false, dev:false, logs:[]
+  exam:null, draft:'', tab:'talk', busy:false, dev:false, logs:[]
 };
 var els = {};
 
@@ -682,23 +738,28 @@ function normAnalysis(r, text){
       key_points:arr(q.key_points).map(String), detail_points:arr(q.detail_points).map(String)
     };
   }).filter(function(q){ return q.question; }).slice(0, 8);
-  // cut the source into sections using the start markers
+  return sliceSections({
+    title:String(r.title || S.fileName || '학습 자료'),
+    recommended_mode:r.recommended_mode === 'memorize' ? 'memorize' : 'flow',
+    recommend_reason:String(r.recommend_reason || ''),
+    sections:sections, goals:goals, exam:exam
+  }, text);
+}
+/* 구간 시작 표시(start)로 원문을 구간별로 자른다. 저장했다 다시 열 때도 쓴다. */
+function sliceSections(a, text){
+  var sections = a.sections;
   var pos = sections.map(function(s){
-    var st = s.start.trim(); if (!st) return -1;
+    var st = String(s.start || '').trim(); if (!st) return -1;
     var i = text.indexOf(st);
     if (i < 0 && st.length > 8) i = text.indexOf(st.slice(0, 8));
     return i;
   });
-  var sliceOk = sections.length > 0 && pos.every(function(p, k){ return p >= 0 && (k === 0 || p > pos[k - 1]); });
+  var ok = sections.length > 0 && pos.every(function(p, k){ return p >= 0 && (k === 0 || p > pos[k - 1]); });
   sections.forEach(function(s, k){
-    s.text = sliceOk ? text.slice(k === 0 ? 0 : pos[k], k + 1 < pos.length ? pos[k + 1] : text.length).trim() : '';
+    s.text = ok ? text.slice(k === 0 ? 0 : pos[k], k + 1 < pos.length ? pos[k + 1] : text.length).trim() : '';
   });
-  return {
-    title:String(r.title || S.fileName || '학습 자료'),
-    recommended_mode:r.recommended_mode === 'memorize' ? 'memorize' : 'flow',
-    recommend_reason:String(r.recommend_reason || ''),
-    sections:sections, goals:goals, exam:exam, sliceOk:sliceOk
-  };
+  a.sliceOk = ok;
+  return a;
 }
 function normSolve(r, qs){
   var list = arr(r && r.answers);
@@ -786,6 +847,7 @@ function analyze(btn, status){
     var a = normAnalysis(raw, text);
     if (!a.sections.length || !a.exam.length) throw {code:'invalid_json'};
     S.analysis = a; S.selected = {};
+    S.matId = createMat(a, text, S.fileName).id;
     a.sections.forEach(function(s){ S.selected[s.id] = true; });
     S.mode = a.recommended_mode;
     resetTeach(); go('outline');
@@ -799,6 +861,7 @@ function startTeach(){
   resetTeach();
   S.dialog.push({role:'char', text:CHARS[S.charId].hello});
   S.face = 'fighting';
+  bump('lessons');
   S.tab = 'talk';
   go('teach');
 }
@@ -811,7 +874,10 @@ function applyTracker(r){
   });
   arr(r.misconception_updates).forEach(function(u){
     var m = S.misc.filter(function(x){ return x.id === String(u.id); })[0];
-    if (m && m.status === 'open' && (u.status === 'corrected' || u.status === 'wrongly_corrected')) m.status = u.status;
+    if (m && m.status === 'open' && (u.status === 'corrected' || u.status === 'wrongly_corrected')) {
+      m.status = u.status;
+      if (u.status === 'corrected') bump('fixed');
+    }
   });
   var d = r.directive || {};
   return {
@@ -852,6 +918,7 @@ function send(){
       else d.kind = 'ask';
     }
     S.wrap = d.kind === 'wrap';
+    recordGoals();
     updateGauge();
     addLog({layer:'이해 상태 추적기', tier:'quick', sees:['원문(선택 범위)','학습 목표','학습자 문장','대화'], blocked:[],
       note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요.', detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : (d.focus ? ' / ' + d.focus : ''))});
@@ -902,7 +969,12 @@ function runExam(retry){
   p.then(function(){
     var g = E.grade;
     E.affGain = Math.round(g.score / 10); E.coinGain = g.score;
-    S.affinity = Math.min(100, S.affinity + E.affGain); S.coins += E.coinGain;
+    var P = PROFILE();
+    P.coins += E.coinGain;
+    P.stats.exams += 1; P.stats.best = Math.max(P.stats.best, g.score);
+    var m = curMat();
+    if (m) { m.exams = (m.exams || []).concat([{score:g.score, mode:S.mode, ts:Date.now()}]).slice(-30); saveMat(m); }
+    E.levelUp = addAff(E.affGain);
     go('review');
   }).catch(function(e){
     E.err = errMsg(e) || '중단됐어요.';
@@ -913,6 +985,196 @@ function runExam(retry){
 function go(screen){
   S.screen = screen; renderAll();
   window.scrollTo({top:0, behavior:reduced() ? 'auto' : 'smooth'});
+}
+
+/* ---------- 메인 홈 잡담 대사 (AI 호출 없음) ----------
+   t: 지민이 대사, face: 교복일 때 표정, c: 선택지 [선배 답, 호감도 +p, 지민이 반응] */
+var CHATS = [
+  {t:'선배, 오늘 날씨 진짜 좋지 않아요? 창밖 보다가 수업 놓칠 뻔했어요.', face:'happy', c:[['그러게, 이따 같이 산책할래?',3,'정말요? 그럼 공부 끝나고 꼭 가요!'],['수업은 들어야지~',2,'헤헤, 들켰네요… 다음엔 집중할게요.'],['응, 좋네.',1,'네! 기분까지 좋아지는 날이에요.']]},
+  {t:'배고파요… 아까 급식 반찬이 너무 적었어요.', face:'neutral', c:[['매점 가서 빵 사 줄게.',3,'헉, 진짜요? 선배 최고예요!'],['조금만 참아, 곧 저녁이야.',1,'네… 꼬르륵 소리 안 나게 버텨 볼게요.'],['나도 배고파 ㅋㅋ',2,'역시 선배도 그렇죠? 동지네요!']]},
+  {t:'오늘따라 좀 지치네요… 수행평가가 세 개나 겹쳤거든요.', face:'neutral', c:[['많이 힘들었구나. 하나씩 같이 해 보자.',3,'선배가 그렇게 말해 주니까 힘이 나요.'],['나도 그랬어, 다 지나가.',2,'선배도 겪었구나… 조금 안심돼요.'],['일찍 자.',1,'네, 오늘은 일찍 잘게요.']]},
+  {t:'선배 덕분에 요즘 배우는 게 정말 많아요.', face:'happy', c:[['나도 지민이 가르치면서 많이 배워.',3,'정말요? 그럼 우리 서로 도움이 되는 거네요!'],['에이, 네가 열심히 해서 그래.',2,'헤헤… 칭찬 들으니까 더 열심히 하고 싶어요.'],['고마워.',1,'제가 더 고맙죠!']]},
+  {t:'선배는 공부할 때 음악 들어요? 저는 가사 없는 노래만 들어요.', face:'think', c:[['나도! 추천 리스트 공유할까?',3,'좋아요! 선배 취향 궁금했어요.'],['난 조용한 게 좋아.',1,'그것도 집중 잘 되겠네요.'],['난 아이돌 노래 틀어 ㅋㅋ',2,'우와, 그러면서 집중이 돼요? 신기해요!']]},
+  {t:'어제 시험 공부하다가 책상에 엎드려서 잠들었어요…', face:'reading', c:[['피곤했구나. 오늘은 무리하지 마.',3,'네… 선배 말 들을게요.'],['안경 안 깨졌어? ㅋㅋ',2,'다행히 멀쩡해요! 자국은 좀 남았지만요.'],['그럴 때도 있지.',1,'맞아요, 오늘은 정신 차릴게요.']]},
+  {t:'선배, 제 안경 어때요? 새로 맞췄는데 아무도 몰라봐요.', face:'fighting', c:[['완전 잘 어울려! 동그란 게 귀엽다.',3,'헉… 알아봐 줘서 고마워요!'],['어? 바꿨어? 몰랐다…',1,'선배도 몰랐군요… 조금 서운해요.'],['전보다 똑똑해 보여.',2,'정말요? 그럼 성적도 오르겠죠?']]},
+  {t:'요즘 도서관 창가 자리가 제일 좋아요. 햇빛이 딱 좋거든요.', face:'happy', c:[['다음엔 나도 옆에서 공부할게.',3,'좋아요! 자리 맡아 둘게요.'],['거기 졸리지 않아?',2,'가끔요… 그래서 선배가 깨워 주면 좋겠어요.'],['좋겠다.',1,'선배도 한번 와 보세요!']]},
+  {t:'선배는 왜 공부 열심히 해요? 저는 아직 꿈이 확실하지 않아서요.', face:'think', c:[['나도 찾는 중이야. 같이 찾아보자.',3,'같이라니까 덜 불안해요.'],['일단 성적은 선택지를 넓혀 주니까.',2,'아, 그렇게 생각하면 되겠네요.'],['그냥 하는 거지.',1,'그것도 멋있는 것 같아요.']]},
+  {t:'방금 복도에서 넘어질 뻔했어요. 아무도 못 봤겠죠…?', face:'panic', c:[['안 다쳤어? 괜찮아?',3,'괜찮아요! 걱정해 줘서 고마워요.'],['내가 봤는데 ㅋㅋ',2,'으악, 잊어 주세요…!'],['조심해.',1,'네, 앞을 잘 보고 다닐게요.']]},
+  {t:'편의점 신상 딸기 우유 먹어 봤어요? 진짜 맛있어요.', face:'happy', c:[['이따 같이 사러 가자.',3,'좋아요! 제가 하나 사 드릴게요.'],['딸기 우유파였구나.',2,'네! 바나나보다 딸기예요.'],['아직 안 먹어 봤어.',1,'꼭 드셔 보세요!']]},
+  {t:'공책 정리하는데 형광펜 색을 너무 많이 써서 무지개가 됐어요.', face:'reading', c:[['색마다 의미를 정해 보면 어때?',3,'오, 중요도별로 나누면 되겠다! 해 볼게요.'],['예쁘면 됐지 ㅋㅋ',2,'그쵸? 보기에는 예뻐요!'],['나도 그래.',1,'선배도 무지개파군요.']]},
+  {t:'선배, 저 오늘 발표했는데 목소리 떨렸어요…', face:'panic', c:[['떨려도 끝까지 한 게 대단한 거야.',3,'선배 말 들으니까 뿌듯해졌어요.'],['다음엔 나 앞에서 연습해 봐.',3,'진짜요? 그럼 꼭 들어 주세요!'],['다들 떨려.',1,'그렇겠죠? 조금 위로돼요.']]},
+  {t:'요즘 밤에 별 보는 게 취미예요. 어제는 금성 봤어요!', face:'happy', c:[['멋지다! 나도 알려 줘.',3,'좋아요, 다음에 별자리 앱 같이 봐요!'],['그게 금성인지 어떻게 알아?',2,'제일 밝게 빛나서요! 앱으로 확인했어요.'],['낭만 있네.',1,'헤헤, 그쵸?']]},
+  {t:'선배는 아침형이에요, 저녁형이에요?', face:'think', c:[['밤에 집중이 잘 돼.',2,'저도요! 그래서 아침이 힘들어요…'],['아침에 일찍 일어나는 편이야.',2,'우와, 존경스러워요.'],['그날그날 달라.',1,'그것도 맞는 말이네요.']]},
+  {t:'오늘 체육 시간에 피구 했는데 제가 마지막까지 살아남았어요!', face:'fighting', c:[['대박! 완전 에이스네.',3,'헤헤, 다음엔 공도 잡아 볼게요!'],['피하기만 잘하는 거 아니야? ㅋㅋ',2,'그것도 실력이라고요!'],['잘했네.',1,'감사합니다!']]},
+  {t:'선배, 고양이 좋아해요, 강아지 좋아해요?', face:'think', c:[['둘 다! 고를 수가 없어.',2,'저도요… 너무 어려운 질문이었네요.'],['고양이! 너랑 좀 닮았어.',3,'제가요? 어디가요?! 궁금해요.'],['강아지.',1,'강아지도 귀엽죠!']]},
+  {t:'모르는 문제 있으면 선배한테 물어봐도 돼요?', face:'fighting', c:[['당연하지, 언제든 물어봐.',3,'든든해요! 그럼 저도 선배한테 질문 많이 할게요.'],['나도 모를 수도 있어 ㅋㅋ',2,'그럼 같이 찾아봐요!'],['응.',1,'감사합니다!']]},
+  {t:'비 오는 날엔 왠지 공부가 더 잘 되는 것 같아요.', face:'neutral', c:[['빗소리가 집중에 좋대.',2,'그래서 그런 거구나! 새로 알았어요.'],['나는 오히려 졸리던데.',2,'그것도 공감돼요… 양쪽 다 있네요.'],['그렇구나.',1,'선배는 어떤 날이 좋아요?']]},
+  {t:'선배, 이번 주말에 뭐 해요?', face:'think', c:[['밀린 공부… 같이 할래?',3,'좋아요! 스터디 카페 갈까요?'],['푹 쉴 거야.',2,'쉬는 것도 중요하죠!'],['아직 몰라.',1,'정해지면 알려 주세요.']]},
+  {t:'노트에 낙서하다가 선배 얼굴 그렸어요. 보여 줄까요?', face:'happy', c:[['보여 줘! 궁금해.',3,'짜잔! …안경이 좀 크게 그려졌네요.'],['나 못생기게 그린 거 아니지?',2,'아니에요! 엄청 멋있게 그렸어요.'],['수업 시간엔 집중하자.',1,'네… 쉬는 시간에만 그릴게요.']]},
+  {t:'요즘 제일 어려운 과목이 뭐예요? 저는 수학이요…', face:'reading', c:[['나도 수학. 같이 극복하자.',3,'동지가 있으니까 힘나요!'],['수학은 나한테 가르쳐 봐.',3,'제가 선배를 가르친다고요? 재밌겠다!'],['다 어려워.',1,'맞아요, 다 어려워요…']]},
+  {t:'선배가 설명해 준 거, 친구한테 다시 설명해 줬더니 친구가 이해했어요!', face:'happy', c:[['와, 그게 진짜 이해한 거야.',3,'그쵸? 가르쳐 보니까 저도 더 확실해졌어요.'],['나보다 설명 잘했겠다.',2,'에이, 다 선배 덕분이에요.'],['잘했네.',1,'헤헤, 칭찬 감사해요!']]},
+  {t:'오늘 급식에 떡볶이 나왔어요! 행복해요.', face:'happy', c:[['좋겠다! 나는 늦어서 못 먹었어.',2,'헉, 다음엔 제가 하나 챙겨 둘게요!'],['급식 떡볶이 최고지.',3,'역시 선배는 뭘 아시네요!'],['맛있었겠다.',1,'네, 진짜 맛있었어요!']]},
+  {t:'시험 끝나면 하고 싶은 거 있어요? 저는 하루 종일 자고 싶어요.', face:'neutral', c:[['같이 맛있는 거 먹으러 가자.',3,'좋아요! 파르페 가게 알아 둘게요.'],['나도 잠부터 잘래.',2,'역시 잠이 최고죠.'],['아직 생각 안 해 봤어.',1,'그럼 같이 생각해 봐요!']]},
+  {t:'선배, 제가 질문 너무 많이 해서 귀찮지는 않아요?', face:'panic', c:[['전혀! 질문해 줘서 나도 공부돼.',3,'다행이다… 앞으로도 많이 물어볼게요!'],['조금? 농담이야 ㅋㅋ',2,'깜짝이야! 놀랐잖아요.'],['괜찮아.',1,'네, 감사해요.']]},
+  {t:'방금 창밖에 고양이 지나갔어요! 노란 고양이요.', face:'happy', c:[['어디? 같이 보자!',3,'저기 화단 쪽이요! 귀엽죠?'],['수업 중에 창밖 봤구나 ㅋㅋ',2,'쉬는 시간이었어요! 진짜예요!'],['귀엽겠다.',1,'완전 귀여웠어요.']]},
+  {t:'요즘 아침마다 단어 열 개씩 외우는 중이에요.', face:'fighting', c:[['멋지다. 나도 같이 할래.',3,'좋아요! 서로 퀴즈 내 줘요.'],['한 달 뒤면 300개네.',2,'헉, 그렇게 생각하니까 뿌듯해요.'],['꾸준하네.',1,'계속 해 볼게요!']]},
+  {t:'선배 필통 귀엽다! 어디서 샀어요?', face:'happy', c:[['너도 하나 사 줄까?',3,'정말요? 그럼 저는 핑크로요!'],['오래된 건데 ㅋㅋ',2,'그래도 귀여워요!'],['그냥 문구점.',1,'저도 가 봐야겠어요.']]},
+  {t:'오늘은 왠지 공부가 잘 될 것 같은 날이에요!', face:'fighting', c:[['좋아, 그 기세로 바로 시작하자!',3,'네! 오늘은 뭐든 다 이해할 수 있을 것 같아요.'],['그런 날 꼭 놀고 싶어지더라 ㅋㅋ',2,'앗, 그 유혹은 참아 볼게요.'],['좋겠다.',1,'선배도 그런 날이에요?']]}
+];
+var ASK_LINE = '그런데 오늘은 어떤 걸 가르쳐 주실 거예요?';
+var HOME_LINE = '선배, 오늘은 뭐 가르쳐 주실 거예요?';
+
+/* ---------- 호감도 10단계, 의상, 업적 ---------- */
+var LV = [0, 10, 25, 45, 70, 100, 135, 175, 220, 270];      // Lv.1~10에 필요한 누적 호감도
+function levelOf(p){ var l = 1; for (var i = 1; i < LV.length; i++) if (p >= LV[i]) l = i + 1; return l; }
+function levelProgress(p){
+  var l = levelOf(p);
+  if (l >= LV.length) return {lv:l, now:0, need:0, ratio:1};
+  var a = LV[l - 1], b = LV[l];
+  return {lv:l, now:p - a, need:b - a, ratio:(p - a) / (b - a)};
+}
+var OUTFITS = [
+  {id:'uniform', name:'교복', lv:1, face:null, desc:'기본 의상. 표정이 대사에 따라 바뀌어요.'},
+  {id:'knit', name:'니트 (사복)', lv:5, face:'casual', desc:'주말에 만난 지민이. 메인 홈에서만 입어요.'}
+];
+var ACHS = [
+  {id:'first_exam', name:'첫 수업 완료', desc:'지민이에게 처음으로 시험을 보게 했어요.', ok:function(P){ return P.stats.exams >= 1; }},
+  {id:'score80', name:'우등생 후배', desc:'시험에서 80점 이상을 받았어요.', ok:function(P){ return P.stats.best >= 80; }},
+  {id:'score100', name:'만점 선생님', desc:'시험에서 100점을 받았어요.', ok:function(P){ return P.stats.best >= 100; }},
+  {id:'fix3', name:'오개념 사냥꾼', desc:'지민이의 오개념을 3번 바로잡았어요.', ok:function(P){ return P.stats.fixed >= 3; }},
+  {id:'master', name:'완벽 정리', desc:'한 자료의 진행률을 100%로 채웠어요.', ok:function(){ return Object.keys(STORE.mats).some(function(k){ return matProgress(STORE.mats[k]).pct >= 100; }); }},
+  {id:'mat5', name:'다독 선배', desc:'자료 5개를 공부했어요.', ok:function(){ return Object.keys(STORE.mats).length >= 5; }},
+  {id:'chat30', name:'수다 친구', desc:'지민이와 잡담을 30번 나눴어요.', ok:function(P){ return P.stats.chats >= 30; }},
+  {id:'lv5', name:'친한 선후배', desc:'호감도 Lv.5를 달성했어요.', ok:function(P){ return levelOf(P.aff) >= 5; }},
+  {id:'lv10', name:'최고의 선배', desc:'호감도 Lv.10을 달성했어요.', ok:function(P){ return levelOf(P.aff) >= 10; }}
+];
+
+/* ---------- 저장: 아티팩트 db(사람마다 따로) → 안 되면 브라우저 저장 → 그것도 안 되면 저장 없이 ---------- */
+var LSKEY = 'teachme-v1';
+function defaultProfile(){ return {aff:0, coins:0, outfit:'uniform', ach:{}, stats:{chats:0, lessons:0, exams:0, best:0, fixed:0}}; }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function mergeProfile(d){
+  var p = defaultProfile(); d = d || {};
+  p.aff = Number(d.aff) || 0; p.coins = Number(d.coins) || 0;
+  p.outfit = OUTFITS.some(function(o){ return o.id === d.outfit; }) ? d.outfit : 'uniform';
+  p.ach = (d.ach && typeof d.ach === 'object') ? clone(d.ach) : {};
+  Object.keys(p.stats).forEach(function(k){ p.stats[k] = Number(d.stats && d.stats[k]) || 0; });
+  return p;
+}
+var STORE = {kind:'memory', db:null, uid:null, profile:defaultProfile(), mats:{}, ready:false};
+var PROFILE = function(){ return STORE.profile; };
+function localLoad(){
+  try {
+    var raw = localStorage.getItem(LSKEY);
+    STORE.kind = 'local';
+    if (!raw) return;
+    var o = JSON.parse(raw);
+    STORE.profile = mergeProfile(o.profile);
+    STORE.mats = (o.mats && typeof o.mats === 'object') ? o.mats : {};
+  } catch (e) { STORE.kind = 'memory'; }
+}
+function localSave(){
+  if (STORE.kind !== 'local') return;
+  try { localStorage.setItem(LSKEY, JSON.stringify({profile:STORE.profile, mats:STORE.mats})); } catch (e) {}
+}
+function storeInit(){
+  var use = window.claude && typeof window.claude.use === 'function';
+  var done = function(){ STORE.ready = true; };
+  if (!use) { localLoad(); done(); return Promise.resolve(); }
+  return Promise.all([
+    window.claude.use('db').catch(function(){ return null; }),
+    window.claude.use('user').catch(function(){ return null; })
+  ]).then(function(r){
+    var db = r[0], user = r[1];
+    if (!db || !user) { localLoad(); return; }
+    return user.id().then(function(uid){
+      if (!uid) { localLoad(); return; }
+      var pref = db.doc('data/users/' + uid + '/profile');
+      return Promise.all([pref.get(), pref.collection('materials').get()]).then(function(x){
+        STORE.db = db; STORE.uid = uid; STORE.kind = 'db';
+        if (x[0].exists) STORE.profile = mergeProfile(x[0].data());
+        x[1].docs.forEach(function(d){ STORE.mats[d.id] = clone(d.data()); });
+      });
+    });
+  }).catch(function(){ localLoad(); }).then(done);
+}
+function profileRef(){ return STORE.db.doc('data/users/' + STORE.uid + '/profile'); }
+var saveTimers = {};
+function later1(key, fn){ clearTimeout(saveTimers[key]); saveTimers[key] = setTimeout(fn, 500); }
+function saveProfile(){
+  later1('profile', function(){
+    if (STORE.kind === 'db') profileRef().set(clone(STORE.profile)).catch(function(){});
+    else localSave();
+  });
+}
+function saveMat(m){
+  if (!m) return;
+  m.updated = Date.now();
+  later1('mat-' + m.id, function(){
+    if (STORE.kind === 'db') profileRef().collection('materials').doc(m.id).set(clone(m)).catch(function(){});
+    else localSave();
+  });
+}
+function wipeAll(){
+  var ids = Object.keys(STORE.mats);
+  if (STORE.kind === 'db') {
+    ids.forEach(function(id){ profileRef().collection('materials').doc(id).delete().catch(function(){}); });
+    profileRef().set(defaultProfile()).catch(function(){});
+  }
+  STORE.profile = defaultProfile(); STORE.mats = {};
+  localSave();
+}
+
+/* ---------- 호감도·통계·업적 ---------- */
+function addAff(n){
+  var P = PROFILE(), before = levelOf(P.aff);
+  P.aff += n; saveProfile();
+  var after = levelOf(P.aff);
+  if (after > before) {
+    var un = OUTFITS.filter(function(o){ return o.lv > before && o.lv <= after; });
+    toast('호감도 Lv.' + after + ' 달성!' + (un.length ? ' 새 의상: ' + un.map(function(o){ return o.name; }).join(', ') : ''));
+  }
+  checkAch();
+  return after > before;
+}
+function bump(stat, n){ var P = PROFILE(); P.stats[stat] = (P.stats[stat] || 0) + (n || 1); saveProfile(); checkAch(); }
+function checkAch(){
+  var P = PROFILE(), got = [];
+  ACHS.forEach(function(a){ if (!P.ach[a.id] && a.ok(P)) { P.ach[a.id] = Date.now(); got.push(a.name); } });
+  if (got.length) { saveProfile(); setTimeout(function(){ toast('업적 달성: ' + got.join(', ')); }, 900); }
+}
+
+/* ---------- 내 학습 자료 ---------- */
+function curMat(){ return S.matId ? STORE.mats[S.matId] : null; }
+function packAnalysis(a){
+  return {title:a.title, recommended_mode:a.recommended_mode, recommend_reason:a.recommend_reason,
+    sections:a.sections.map(function(s){ return {id:s.id, title:s.title, start:s.start}; }), goals:a.goals, exam:a.exam};
+}
+function matProgress(m){
+  var gs = (m && m.analysis && m.analysis.goals) || [];
+  var done = gs.filter(function(g){ return (m.best && m.best[g.id] || 0) >= 2; }).length;
+  return {done:done, total:gs.length, pct:gs.length ? Math.round(done / gs.length * 100) : 0};
+}
+function createMat(a, source, fileName){
+  var id = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  var m = {id:id, title:a.title, fileName:fileName || '', source:source.slice(0, 60000), analysis:packAnalysis(a),
+    best:{}, exams:[], created:Date.now(), updated:Date.now()};
+  STORE.mats[id] = m; saveMat(m); checkAch();
+  return m;
+}
+function openMat(id){
+  var m = STORE.mats[id]; if (!m) return;
+  S.matId = id; S.source = m.source; S.fileName = m.fileName;
+  S.analysis = sliceSections(clone(m.analysis), m.source);
+  S.selected = {}; S.analysis.sections.forEach(function(s){ S.selected[s.id] = true; });
+  S.mode = S.analysis.recommended_mode || 'flow';
+  resetTeach(); go('outline');
+}
+function recordGoals(){
+  var m = curMat(); if (!m) return;
+  m.best = m.best || {};
+  Object.keys(S.goals).forEach(function(id){ m.best[id] = Math.max(m.best[id] || 0, S.goals[id].level || 0); });
+  saveMat(m); checkAch();
 }
 
 /* ---------- views ---------- */
@@ -928,14 +1190,168 @@ function header(){
 function renderAll(){
   var app = document.getElementById('app');
   app.innerHTML = ''; els = {};
-  var top = h('header', {class:'topbar'}, h('b', {}, 'TEACH_ME.EXE'), h('div', {class:'wbtns', 'aria-hidden':'true'}, h('i'), h('i'), h('i')));
+  var top = h('header', {class:'topbar'}, h('b', {}, 'TEACH_ME.EXE'),
+    h('div', {class:'row', style:'gap:10px'},
+      S.screen !== 'home' ? h('button', {class:'homebtn', onclick:function(){ go('home'); }}, '◀ 홈') : null,
+      h('div', {class:'wbtns', 'aria-hidden':'true'}, h('i'), h('i'), h('i'))));
   var wrap = h('main', {class:'wrap'}, header());
   if (aiState === 'none') wrap.append(h('div', {class:'banner', role:'status'}, '이 화면에서는 AI를 부를 수 없어요. claude.ai 웹이나 앱에서 이 페이지를 열면 지민이가 대답해요.'));
-  var view = {upload:viewUpload, outline:viewOutline, teach:viewTeach, exam:viewExam, review:viewReview}[S.screen];
+  var view = {home:viewHome, study:viewStudy, library:viewLibrary, achv:viewAchv, settings:viewSettings,
+    upload:viewUpload, outline:viewOutline, teach:viewTeach, exam:viewExam, review:viewReview}[S.screen];
   wrap.append(view());
   app.append(top, wrap, h('footer', {class:'footbar'}, '© 2026 Teach me!'));
 }
 
+
+/* ---------- 메인 홈: 지민이와 잡담 ---------- */
+var HOME = {phase:'idle', idx:-1, turns:0, recent:[], text:HOME_LINE, face:null, reply:null};
+function homeFace(face){
+  var o = OUTFITS.filter(function(x){ return x.id === PROFILE().outfit; })[0];
+  return (o && o.face) ? o.face : (face || 'neutral');
+}
+function pickChat(){
+  var pool = CHATS.map(function(_, i){ return i; }).filter(function(i){ return HOME.recent.indexOf(i) < 0; });
+  var i = pool[Math.floor(Math.random() * pool.length)];
+  HOME.recent.push(i); if (HOME.recent.length > 12) HOME.recent.shift();
+  return i;
+}
+function homeNext(){
+  if (HOME.phase === 'line' || HOME.phase === 'ask') return;          // 선택지를 골라야 넘어감
+  if (HOME.turns >= 4) { HOME.phase = 'ask'; HOME.text = ASK_LINE; HOME.face = 'fighting'; }
+  else { HOME.idx = pickChat(); HOME.phase = 'line'; HOME.text = CHATS[HOME.idx].t; HOME.face = CHATS[HOME.idx].face; }
+  renderHomeTalk();
+}
+function homeChoose(k){
+  if (HOME.phase === 'ask') {
+    if (k === 0) { HOME.phase = 'idle'; HOME.turns = 0; HOME.text = HOME_LINE; HOME.face = null; go('study'); return; }
+    HOME.turns = 0; HOME.phase = 'reply'; HOME.text = '좋아요! 그럼 조금 더 얘기해요.'; HOME.face = 'happy';
+    renderHomeTalk(); return;
+  }
+  var c = CHATS[HOME.idx].c[k];
+  HOME.phase = 'reply'; HOME.text = c[2]; HOME.face = c[1] >= 3 ? 'happy' : (c[1] >= 2 ? 'fighting' : 'neutral');
+  HOME.turns++;
+  bump('chats');
+  addAff(c[1]);
+  renderHomeTalk();
+  floatPlus('+' + c[1] + ' ♥');
+}
+function floatPlus(t){
+  if (!els.homeScene) return;
+  var f = h('div', {class:'plus', 'aria-hidden':'true'}, t);
+  els.homeScene.append(f);
+  setTimeout(function(){ f.remove(); }, 1200);
+}
+function renderHomeTalk(){
+  if (!els.htxt) return;
+  els.htxt.textContent = HOME.text;
+  setFace(homeFace(HOME.face));
+  updateGauge();
+  els.hlv.textContent = lvText();
+  els.choices.innerHTML = '';
+  var opts = HOME.phase === 'line' ? CHATS[HOME.idx].c.map(function(c){ return c[0]; })
+    : HOME.phase === 'ask' ? ['공부하러 가기', '계속 대화하기'] : [];
+  opts.forEach(function(t, k){
+    els.choices.append(h('button', {class:'choice', onclick:function(){ homeChoose(k); }}, t));
+  });
+  els.hdbox.classList.toggle('wait', opts.length > 0);
+  els.hint.textContent = opts.length ? '답할 말을 골라 주세요' : '대사를 누르면 지민이가 말을 걸어요';
+}
+function lvText(){
+  var g = levelProgress(PROFILE().aff);
+  return '호감도 Lv.' + g.lv + (g.need ? ' (' + g.now + '/' + g.need + ')' : ' (최고)');
+}
+function viewHome(){
+  var sc = scene(homeFace(HOME.face), false, 'aff');
+  els.homeScene = sc;
+  var d = dbox(HOME.text, {live:true});
+  els.htxt = d.txt; els.hdbox = d.box;
+  d.box.classList.add('tap');
+  d.box.setAttribute('role', 'button'); d.box.setAttribute('tabindex', '0');
+  d.box.setAttribute('aria-label', '지민이 대사. 누르면 다음 대사');
+  d.box.addEventListener('click', homeNext);
+  d.box.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); homeNext(); } });
+  els.choices = h('div', {class:'choices'});
+  els.hint = h('p', {class:'hint'});
+  els.hlv = h('span', {});
+  var menu = h('nav', {class:'menu', 'aria-label':'메뉴'},
+    h('button', {class:'btn', onclick:function(){ go('study'); }}, h('span', {class:'ic', 'aria-hidden':'true'}, '✎'), '공부'),
+    h('button', {class:'btn ghost', onclick:function(){ go('achv'); }}, h('span', {class:'ic', 'aria-hidden':'true'}, '★'), '업적'),
+    h('button', {class:'btn ghost', onclick:function(){ go('settings'); }}, h('span', {class:'ic', 'aria-hidden':'true'}, '⚙'), '설정'));
+  setTimeout(renderHomeTalk, 0);
+  return h('section', {}, sc, d.box, els.choices, els.hint, menu,
+    h('p', {class:'muted small center'}, els.hlv, ' · ', saveText()));
+}
+function saveText(){
+  return STORE.kind === 'db' ? '내 계정에 자동 저장돼요' : STORE.kind === 'local' ? '이 브라우저에 저장돼요' : '저장이 안 되는 화면이에요';
+}
+
+/* ---------- 공부: 새 학습 / 내 학습 ---------- */
+function viewStudy(){
+  var n = Object.keys(STORE.mats).length;
+  return h('section', {},
+    scene('fighting', true),
+    dbox('오늘은 새로운 걸 배울까요, 아니면 전에 하던 걸 이어서 할까요?').box,
+    h('div', {class:'pick'},
+      h('button', {class:'pick-card', onclick:function(){ S.matId = null; S.source = ''; S.fileName = ''; S.analysis = null; resetTeach(); go('upload'); }},
+        h('b', {}, '새 학습'), h('span', {}, '자료를 올리고 처음부터 가르치기')),
+      h('button', {class:'pick-card', onclick:function(){ go('library'); }},
+        h('b', {}, '내 학습'), h('span', {}, n ? '올린 자료 ' + n + '개 이어서 하기' : '아직 올린 자료가 없어요'))));
+}
+function viewLibrary(){
+  var list = Object.keys(STORE.mats).map(function(k){ return STORE.mats[k]; })
+    .sort(function(a, b){ return (b.updated || 0) - (a.updated || 0); });
+  var body = list.length ? h('div', {class:'folders'}, list.map(function(m){
+    var pr = matProgress(m), best = (m.exams || []).reduce(function(t, e){ return Math.max(t, e.score || 0); }, 0);
+    var d = new Date(m.updated || m.created || Date.now());
+    return h('button', {class:'folder', onclick:function(){ openMat(m.id); }},
+      h('span', {class:'f-title'}, m.title || '학습 자료'),
+      h('span', {class:'f-bar', role:'img', 'aria-label':'진행률 ' + pr.pct + '%'}, h('i', {style:'width:' + pr.pct + '%'})),
+      h('span', {class:'f-meta'}, '진행률 ' + pr.pct + '% · 목표 ' + pr.done + '/' + pr.total + (m.exams && m.exams.length ? ' · 최고 ' + best + '점' : '') + ' · ' + (d.getMonth() + 1) + '.' + d.getDate()));
+  })) : h('p', {class:'muted'}, '아직 올린 자료가 없어요. 새 학습에서 자료를 올리면 여기에 폴더로 쌓여요.');
+  return h('section', {},
+    h('div', {class:'sheet', 'data-title':'내 학습'},
+      h('p', {class:'muted'}, '진행률은 학습 목표 중 핵심 설명 이상까지 가르친 목표의 비율이에요.'),
+      body),
+    h('button', {class:'btn', onclick:function(){ S.matId = null; S.source = ''; S.analysis = null; resetTeach(); go('upload'); }}, '새 학습 시작'));
+}
+
+/* ---------- 업적 ---------- */
+function viewAchv(){
+  var P = PROFILE(), n = ACHS.filter(function(a){ return P.ach[a.id]; }).length;
+  return h('section', {},
+    h('div', {class:'sheet', 'data-title':'업적 ' + n + ' / ' + ACHS.length},
+      h('div', {class:'achs'}, ACHS.map(function(a){
+        var on = !!P.ach[a.id];
+        return h('div', {class:'ach' + (on ? ' on' : '')},
+          h('span', {class:'a-ic', 'aria-hidden':'true'}, on ? '★' : '🔒'),
+          h('div', {}, h('b', {}, a.name), h('span', {}, on ? a.desc : '아직 잠겨 있어요. ' + a.desc)));
+      }))));
+}
+
+/* ---------- 설정: 의상 ---------- */
+var wipeArmed = false;
+function viewSettings(){
+  var P = PROFILE(), lv = levelOf(P.aff);
+  var wipe = h('button', {class:'btn ghost small', onclick:function(){
+    if (!wipeArmed) { wipeArmed = true; wipe.textContent = '정말 지울까요? 한 번 더 누르세요'; return; }
+    wipeArmed = false; wipeAll(); toast('처음 상태로 돌아갔어요.'); go('home');
+  }}, '기록 모두 지우기');
+  wipeArmed = false;
+  return h('section', {},
+    h('div', {class:'sheet', 'data-title':'의상'},
+      h('p', {class:'muted'}, '고른 의상은 메인 홈에서만 보여요. 지금 ' + lvText()),
+      h('div', {class:'outfits'}, OUTFITS.map(function(o){
+        var open = lv >= o.lv, on = P.outfit === o.id;
+        return h('button', {class:'outfit' + (on ? ' on' : '') + (open ? '' : ' locked'), disabled:!open, 'aria-pressed':String(on),
+          onclick:function(){ P.outfit = o.id; saveProfile(); renderAll(); toast(o.name + '(으)로 갈아입었어요.'); }},
+          h('img', {src:SPRITES[o.face || 'neutral'] || null, alt:''}),
+          h('b', {}, o.name),
+          h('span', {}, open ? (on ? '입는 중' : o.desc) : '🔒 호감도 Lv.' + o.lv + '에 해금'));
+      }))),
+    h('div', {class:'sheet', 'data-title':'저장'},
+      h('p', {}, saveText() + '. 호감도, 업적, 의상, 내 학습이 저장돼요.'),
+      wipe));
+}
 
 function viewUpload(){
   var ta = h('textarea', {rows:9, placeholder:'교과서, 필기, 학습지 내용을 붙여넣어도 돼요.', 'aria-label':'학습 자료 내용'});
@@ -949,8 +1365,8 @@ function viewUpload(){
   var status = h('p', {class:'muted', 'aria-live':'polite', style:'margin-top:10px'});
   var btn = h('button', {class:'btn', onclick:function(){ analyze(btn, status); }}, '자료 분석하기');
   return h('section', {},
-    scene('casual', true),
-    dbox('선배, 오늘은 뭐 가르쳐 주실 거예요? 공부한 자료를 올려 주세요!').box,
+    scene('fighting', true),
+    dbox('새로 배울 자료를 올려 주세요! 꼼꼼히 들을게요.').box,
     h('div', {class:'sheet', 'data-title':'자료 등록'},
       h('h2', {}, '무엇을 가르칠 건가요?'),
       h('p', {class:'muted'}, '자료를 올리면 목차, 학습 목표, 시험 문제를 만들어요. 이 내용은 후배에게 전달되지 않아요.'),
@@ -1165,7 +1581,7 @@ function viewReview(){
       h('div', {class:'score'}, h('b', {}, G.score + '점'), h('span', {class:'muted'}, MODES[S.mode].label + ' 기준')),
       G.summary ? h('p', {style:'margin-top:8px'}, G.summary) : null,
       h('p', {class:'muted small'}, S.mode === 'flow' ? '흐름 이해가 목표라서 연도나 세부 명칭만 빠진 건 감점하지 않았어요.' : '완벽 암기가 목표라서 세부 사항까지 채점했어요.'),
-      h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain), h('span', {}, '코인 +' + E.coinGain + ' (보유 ' + S.coins + ')')),
+      h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain + (E.levelUp ? ' · Lv.' + levelOf(PROFILE().aff) + ' 달성!' : '')), h('span', {}, '코인 +' + E.coinGain + ' (보유 ' + PROFILE().coins + ')')),
       G.score >= 80 && SPRITES.cafe ? [
         h('img', {class:'reward-art', src:SPRITES.cafe, alt:'카페에서 딸기 파르페를 먹는 지민'}),
         h('p', {class:'muted small', style:'margin-top:6px'}, '80점 넘으면 받는 보상 일러스트예요. 지민이가 시험 끝나고 파르페 먹으러 갔대요.')] : null),
@@ -1258,6 +1674,7 @@ function showTitle(){
 
 renderAll();
 showTitle();
+storeInit().then(function(){ checkAch(); if (['home','study','library','achv','settings'].indexOf(S.screen) >= 0) renderAll(); });
 })();
 </script>
 </body>
