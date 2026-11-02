@@ -224,6 +224,8 @@ details.q summary{cursor:pointer;font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#2F3366;border:3px solid var(--pink);font-family:var(--px);padding:10px 14px;font-size:14px;max-width:90%;z-index:60}
 @media (min-width:700px){.wrap{padding-top:24px}}
 
+/* 쪽 번호 표시 */
+.pg{display:inline-block;margin-left:8px;font-family:var(--px);font-size:11px;color:#2F3366;background:var(--yellow);border:2px solid #2F3366;padding:0 5px;vertical-align:2px}
 /* ===== 메인 홈 ===== */
 .homebtn{font-family:var(--px-b);font-size:13px;background:#fff;color:#2F3366;border:2px solid #2F3366;padding:4px 9px;cursor:pointer;box-shadow:2px 2px 0 #2F3366}
 .homebtn:active{transform:translate(2px,2px);box-shadow:none}
@@ -419,7 +421,7 @@ var MODES = {
     charStyle:'정확한 용어, 연도, 이름을 확인하는 질문을 자주 섞는다.' }
 };
 // AI에게 보내는 자료 길이 한도(글자 수). analyze: 자료 분석, range: 추적기와 채점이 보는 선택 범위
-var LIMIT = {analyze:30000, range:14000};
+var LIMIT = {analyze:200000, range:14000, batch:28000, pages:300};
 var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
 var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', wrap:'시험 준비 알림' };
 var TAGS = { '설명 누락':'var(--blue)', '오개념 미교정':'var(--red)', '잘못된 설명':'var(--amber)', '참고':'var(--ink-soft)' };
@@ -610,11 +612,187 @@ function addLog(e){
   if (S.screen === 'teach' && S.tab === 'runtime' && els.panel) renderPanel();
 }
 
+/* ---------- 검색 색인(BM25): 원문 전체 대신 관련 조각만 AI에 보낸다 ----------
+   임베딩 API 없이 브라우저 안에서 돈다. 한국어는 단어를 글자 2개씩 겹쳐 자른 조각(바이그램)으로 비교한다.
+   색인은 저장하지 않고 자료를 열 때 다시 만든다(100쪽 자료도 순식간). */
+var RAG = {key:'', chunks:[], df:{}, avg:1, n:0};
+var RAG_CFG = {chunk:520, small:5000, tracker:4200, grade:9000, head:220};
+function ragTokens(text){
+  var out = [];
+  String(text).toLowerCase().split(/[^0-9a-zㄱ-ㆎ가-힣]+/).forEach(function(w){
+    if (!w) return;
+    if (/[가-힣]/.test(w)) {
+      if (w.length <= 2) out.push(w);
+      for (var i = 0; i + 1 < w.length; i++) out.push(w.slice(i, i + 2));
+    } else if (w.length > 1 || /\d/.test(w)) out.push(w);
+  });
+  return out;
+}
+/* 원문 위치(글자 번호) → PDF 쪽 번호. 붙여 넣은 글이면 null */
+function pageAt(off){
+  var ps = S.pageStarts;
+  if (!ps || !ps.length) return null;
+  var lo = 0, hi = ps.length - 1;
+  while (lo < hi) { var mid = (lo + hi + 1) >> 1; if (ps[mid] <= off) lo = mid; else hi = mid - 1; }
+  return lo + 1;
+}
+function pageLabel(from, to){
+  var a = pageAt(from), b = pageAt(Math.max(from, (to || from) - 1));
+  if (a == null) return '';
+  return a === b ? 'p.' + a : 'p.' + a + '~' + b;
+}
+/* 문단을 모아 520자 안팎 조각으로 자른다. PDF는 쪽 경계를 넘지 않게 자른다. */
+function ragChunks(text){
+  var out = [], ps = S.pageStarts || [];
+  var bounds = ps.length ? ps.concat([text.length]) : [0, text.length];
+  for (var b = 0; b + 1 < bounds.length; b++) {
+    var seg = text.slice(bounds[b], bounds[b + 1]), base = bounds[b];
+    var re = /[^\n]+/g, m, cur = null;
+    while ((m = re.exec(seg))) {
+      var st = base + m.index, en = st + m[0].length;
+      if (cur && en - cur.start > RAG_CFG.chunk) { out.push(cur); cur = null; }
+      if (!cur) cur = {start:st, end:en}; else cur.end = en;
+      while (cur.end - cur.start > RAG_CFG.chunk * 1.6) {       // 줄바꿈 없이 긴 글은 강제로 자른다
+        out.push({start:cur.start, end:cur.start + RAG_CFG.chunk});
+        cur = {start:cur.start + RAG_CFG.chunk, end:cur.end};
+      }
+    }
+    if (cur) out.push(cur);
+  }
+  return out.map(function(c){ c.text = text.slice(c.start, c.end).trim(); c.page = pageAt(c.start); return c; })
+    .filter(function(c){ return c.text; });
+}
+function ragIndex(){
+  var key = (S.matId || 'new') + ':' + S.source.length + ':' + (S.pageStarts ? S.pageStarts.length : 0);
+  if (RAG.key === key) return RAG;
+  var chunks = ragChunks(S.source), df = {}, total = 0;
+  chunks.forEach(function(c){
+    var tf = {}, toks = ragTokens(c.text);
+    toks.forEach(function(t){ tf[t] = (tf[t] || 0) + 1; });
+    c.tf = tf; c.len = toks.length || 1; total += c.len;
+    Object.keys(tf).forEach(function(t){ df[t] = (df[t] || 0) + 1; });
+  });
+  RAG = {key:key, chunks:chunks, df:df, avg:chunks.length ? total / chunks.length : 1, n:chunks.length};
+  return RAG;
+}
+function ragSearch(query, inRange){
+  var R = ragIndex(), q = {}, k1 = 1.2, b = 0.75;
+  ragTokens(query).forEach(function(t){ q[t] = 1; });
+  var terms = Object.keys(q).filter(function(t){ return R.df[t]; });
+  return R.chunks.filter(function(c){ return !inRange || inRange(c); }).map(function(c){
+    var s = 0;
+    terms.forEach(function(t){
+      var f = c.tf[t]; if (!f) return;
+      var idf = Math.log(1 + (R.n - R.df[t] + 0.5) / (R.df[t] + 0.5));
+      s += idf * f * (k1 + 1) / (f + k1 * (1 - b + b * c.len / R.avg));
+    });
+    return {c:c, s:s};
+  }).filter(function(x){ return x.s > 0; }).sort(function(x, y){ return y.s - x.s; }).map(function(x){ return x.c; });
+}
+/* 고른 구간 안에 있는 조각만 */
+function inSelected(){
+  var a = S.analysis;
+  if (!a || !a.sliceOk) return null;
+  var ids = selectedIds();
+  var rs = a.sections.filter(function(s){ return ids.indexOf(s.id) >= 0; }).map(function(s){ return [s.from, s.to]; });
+  return function(c){ return rs.some(function(r){ return c.start < r[1] && c.end > r[0]; }); };
+}
+/* 조각들을 원문 순서대로 [p.N] 표시와 함께 묶는다 */
+function ragJoin(list){
+  return list.slice().sort(function(x, y){ return x.start - y.start; }).map(function(c){
+    return (c.page ? '[p.' + c.page + '] ' : '') + c.text;
+  }).join('\n…\n');
+}
+/* 안전장치: 고른 구간마다 첫 부분은 항상 넣는다 */
+function sectionHeads(){
+  var a = S.analysis, ids = selectedIds();
+  if (!a || !a.sliceOk) return [];
+  return a.sections.filter(function(s){ return ids.indexOf(s.id) >= 0; }).map(function(s){
+    return {start:s.from, end:s.from + RAG_CFG.head, text:S.source.slice(s.from, s.from + RAG_CFG.head).trim() + '…', page:pageAt(s.from)};
+  });
+}
+function ragPack(queries, budget){
+  var heads = sectionHeads(), used = heads.reduce(function(t, c){ return t + c.text.length; }, 0);
+  var pick = heads.slice(), seen = {}, filter = inSelected();
+  queries.forEach(function(qs){
+    var n = 0;
+    ragSearch(qs.q, filter).some(function(c){
+      if (n >= qs.k) return true;
+      if (seen[c.start]) return false;
+      if (used + c.text.length > budget) return true;
+      seen[c.start] = 1; pick.push(c); used += c.text.length; n++;
+      return false;
+    });
+  });
+  RAG.last = {count:pick.length, chars:used, pages:pick.map(function(c){ return c.page; }).filter(Boolean)};
+  return ragJoin(pick);
+}
+/* 추적기에게 보낼 원문: 짧으면 통째로, 길면 방금 설명 + 아직 덜 된 목표로 검색한 조각만 */
+function trackerSource(){
+  var full = selectedSource();
+  if (full.length <= RAG_CFG.small) { RAG.last = {count:0, chars:full.length, pages:[], full:true}; return full; }
+  var lastUser = S.dialog.filter(function(d){ return d.role === 'user'; }).slice(-1)[0];
+  var lastChar = S.dialog.filter(function(d){ return d.role === 'char'; }).slice(-1)[0];
+  var weak = goalsSel().filter(function(g){ return ((S.goals[g.id] || {}).level || 0) < 2; });
+  return ragPack([
+    {q:(lastUser ? lastUser.text : '') + ' ' + (lastChar ? lastChar.text : ''), k:5},
+    {q:weak.map(function(g){ return g.text; }).join(' '), k:3}
+  ], RAG_CFG.tracker);
+}
+/* 채점에게 보낼 원문: 문제마다 관련 조각 2개씩 */
+function gradeSource(qs){
+  var full = selectedSource();
+  if (full.length <= RAG_CFG.grade) { RAG.last = {count:0, chars:full.length, pages:[], full:true}; return full; }
+  return ragPack(qs.map(function(q){
+    return {q:[q.question, q.answer].concat(q.key_points || [], q.detail_points || []).join(' '), k:2};
+  }), RAG_CFG.grade);
+}
+/* 되짚기 카드의 다시 볼 쪽: 빠진 내용으로 검색해서 가장 맞는 조각의 쪽 */
+function cardPage(c){
+  if (!S.pageStarts) return null;
+  var a = S.analysis, sec = a && a.sections.filter(function(s){ return s.id === c.section; })[0];
+  var hit = ragSearch(c.missing + ' ' + c.title, sec && a.sliceOk ? function(x){ return x.start < sec.to && x.end > sec.from; } : null)[0];
+  return hit ? hit.page : null;
+}
+/* 긴 자료는 묶음(약 2만 8천 자)으로 나눠 분석한다. 쪽 경계나 문단에서 자른다. */
+function analysisBatches(text){
+  var max = LIMIT.batch, out = [], pos = 0;
+  while (pos < text.length) {
+    var end = Math.min(text.length, pos + max);
+    if (end < text.length) {
+      var cut = -1, ps = S.pageStarts || [];
+      for (var i = ps.length - 1; i >= 0; i--) if (ps[i] > pos + max * 0.6 && ps[i] <= end) { cut = ps[i]; break; }
+      if (cut < 0) { var nl = text.lastIndexOf('\n', end); if (nl > pos + max * 0.6) cut = nl; }
+      if (cut > pos) end = cut;
+    }
+    out.push(text.slice(pos, end)); pos = end;
+  }
+  return out;
+}
+/* 묶음별 분석 결과를 하나로 합친다. id는 새로 매긴다. */
+function mergeAnalyses(parts){
+  var merged = {title:'', recommended_mode:'flow', recommend_reason:'', sections:[], goals:[], exam:[]}, vote = {flow:0, memorize:0};
+  parts.forEach(function(r, pi){
+    r = r || {};
+    if (!merged.title && r.title) merged.title = r.title;
+    if (!merged.recommend_reason && r.recommend_reason) merged.recommend_reason = r.recommend_reason;
+    vote[r.recommended_mode === 'memorize' ? 'memorize' : 'flow']++;
+    var sid = {}, gid = {};
+    arr(r.sections).forEach(function(s){ var id = 's' + (merged.sections.length + 1); sid[s.id] = id; merged.sections.push({id:id, title:s.title, start:s.start}); });
+    arr(r.goals).forEach(function(g){ var id = 'g' + (merged.goals.length + 1); gid[g.id] = id; merged.goals.push({id:id, section:sid[g.section] || '', text:g.text}); });
+    arr(r.exam).forEach(function(q){ var c = clone(q); c.id = 'q' + (merged.exam.length + 1); c.section = sid[q.section] || ''; c.goal = gid[q.goal] || ''; merged.exam.push(c); });
+    void pi;
+  });
+  merged.recommended_mode = vote.memorize > vote.flow ? 'memorize' : 'flow';
+  return merged;
+}
+
 /* ---------- prompts: each layer sees only what it is allowed to ---------- */
 var P = {
-  analyze: function(text){
+  analyze: function(text, part){
     return [
       '너는 학습 플랫폼 Teach Me!의 자료 분석 계층이다. 아래 학습 자료를 읽고 목차, 학습 목표, 시험 문제를 만든다. 학생은 한국 고등학생이다.',
+      part ? '이 자료는 긴 자료를 ' + part.total + '묶음으로 나눈 것 중 ' + part.i + '번째 묶음이다. 이 묶음 안에서만 sections 1~3개, exam 1~3문항을 만든다. 다른 묶음 내용은 신경 쓰지 않는다.' : '',
       '',
       '규칙',
       '- sections: 자료 흐름대로 2~5개. start에는 그 구간이 시작되는 원문 문장의 앞 12~20글자를 원문 그대로 복사한다.',
@@ -640,7 +818,7 @@ var P = {
       '학습 목표 모드: ' + MODES[S.mode].prompt,
       '현재 턴: ' + S.turn,
       '',
-      '[원문 — 선택 범위]', selectedSource().slice(0, LIMIT.range),
+      '[원문 — 선택 범위에서 이번 판정에 관련된 부분. [p.N]은 쪽 번호, …은 생략된 곳]', trackerSource(),
       '',
       '[학습 목표]', gs.map(function(g){ return g.id + ': ' + g.text; }).join('\n'),
       '',
@@ -652,6 +830,7 @@ var P = {
       '',
       '규칙',
       '- level: 0 아직 설명 안 함, 1 단어만 언급, 2 핵심 내용을 설명, 3 이유·관계까지 설명. 원문과 다르게 설명한 부분은 level을 올리지 않는다.',
+      '- 원문은 관련 부분만 발췌돼 있다. 발췌에 안 보이는 내용이라는 이유만으로 학습자 설명을 틀렸다고 판단하지 않는다.',
       '- misconception_updates: 상태가 open인 추론에 학습자의 가장 최근 메시지가 답했는지 본다. 원문 기준으로 바르게 바로잡았으면 corrected, 틀린 내용으로 답했으면 wrongly_corrected, 다루지 않았으면 open.',
       '- directive.kind:',
       '  ask: 이미 설명된 내용에 대해 캐릭터 수준에 맞는 질문을 하게 한다.',
@@ -756,7 +935,7 @@ var P = {
       '문장은 짧고 구체적으로 쓰고, 같은 결론 문장을 반복하지 않는다.',
       'per_question은 모든 문제에 대해 빠짐없이 쓴다. 점수는 프로그램이 계산하므로 summary에 점수 숫자를 쓰지 않는다.',
       '',
-      '[원문]', selectedSource().slice(0, LIMIT.range),
+      '[원문 — 시험 문제와 관련된 부분. [p.N]은 쪽 번호, …은 생략된 곳]', gradeSource(qs),
       '',
       '[구간]', a.sections.map(function(s){ return s.id + ': ' + s.title; }).join('\n'),
       '',
@@ -798,7 +977,7 @@ function normAnalysis(r, text){
       kind:q.kind === 'detail' ? 'detail' : 'flow', question:String(q.question || ''), answer:String(q.answer || ''),
       key_points:arr(q.key_points).map(String), detail_points:arr(q.detail_points).map(String)
     };
-  }).filter(function(q){ return q.question; }).slice(0, 8);
+  }).filter(function(q){ return q.question; }).slice(0, 12);
   return sliceSections({
     title:String(r.title || S.fileName || '학습 자료'),
     recommended_mode:r.recommended_mode === 'memorize' ? 'memorize' : 'flow',
@@ -817,7 +996,9 @@ function sliceSections(a, text){
   });
   var ok = sections.length > 0 && pos.every(function(p, k){ return p >= 0 && (k === 0 || p > pos[k - 1]); });
   sections.forEach(function(s, k){
-    s.text = ok ? text.slice(k === 0 ? 0 : pos[k], k + 1 < pos.length ? pos[k + 1] : text.length).trim() : '';
+    s.from = ok ? (k === 0 ? 0 : pos[k]) : 0;
+    s.to = ok ? (k + 1 < pos.length ? pos[k + 1] : text.length) : text.length;
+    s.text = ok ? text.slice(s.from, s.to).trim() : '';
   });
   a.sliceOk = ok;
   return a;
@@ -899,6 +1080,25 @@ function citedSet(){
 }
 
 /* ---------- actions ---------- */
+/* PDF 글자 조각을 이어 붙인다. 조각 사이가 실제로 떨어져 있을 때만 띄어 쓴다
+   (글자마다 조각이 따로 나오는 PDF에서 '광 합 성'처럼 벌어지지 않게). 줄이 바뀌면 줄바꿈. */
+function pdfItemsToText(items){
+  var s = '', prev = null;
+  items.forEach(function(it){
+    var str = it.str || '';
+    var tr = it.transform || [1, 0, 0, 1, 0, 0];
+    var x = tr[4], y = tr[5], hgt = Math.abs(tr[3]) || it.height || 10;
+    if (prev && str) {
+      if (Math.abs(y - prev.y) > hgt * 0.5) s += '\n';
+      else if (x - prev.endX > hgt * 0.18 && !/\s$/.test(s) && !/^\s/.test(str)) s += ' ';
+    }
+    s += str;
+    if (str) prev = {y:y, endX:x + (it.width || 0)};
+    if (it.hasEOL) { s += '\n'; prev = null; }
+  });
+  return s;
+}
+function tidy(t){ return String(t).replace(/\r/g, '').replace(/[ \t]{2,}/g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim(); }
 function onFile(file, ta, upd){
   if (!file) return;
   S.fileName = file.name;
@@ -907,23 +1107,30 @@ function onFile(file, ta, upd){
   if (isPdf) {
     if (!window.pdfjsLib) { toast('PDF 읽기 도구가 아직 준비되지 않았어요. 잠시 후 다시 올려 주세요.'); return; }
     window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // 쪽마다 따로 글자를 뽑아 두고, 각 쪽이 원문 어디서 시작하는지(pageStarts) 기억해요.
+    toast('PDF를 쪽별로 읽는 중이에요…');
     job = file.arrayBuffer().then(function(buf){ return window.pdfjsLib.getDocument({data:buf}).promise; }).then(function(pdf){
-      var n = Math.min(pdf.numPages, 40), out = [], chain = Promise.resolve();
+      var n = Math.min(pdf.numPages, LIMIT.pages), out = [], chain = Promise.resolve();
       for (var i = 1; i <= n; i++) (function(p){
         chain = chain.then(function(){ return pdf.getPage(p); }).then(function(pg){ return pg.getTextContent(); }).then(function(tc){
-          out.push(tc.items.map(function(it){ return it.str + (it.hasEOL ? '\n' : ' '); }).join(''));
+          out.push(tidy(pdfItemsToText(tc.items)));
         });
       })(i);
-      return chain.then(function(){ return out.join('\n\n'); });
+      return chain.then(function(){ return {pages:out, more:pdf.numPages > n, total:pdf.numPages}; });
     });
   } else {
-    job = file.text();
+    job = file.text().then(function(t){ return {pages:null, text:tidy(t)}; });
   }
-  job.then(function(text){
-    text = text.replace(/[ \t]{2,}/g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  job.then(function(r){
+    var text, starts = null;
+    if (r.pages) {
+      text = ''; starts = [];
+      r.pages.forEach(function(pg){ starts.push(text.length); text += pg + '\n\n'; });
+      text = text.replace(/\s+$/, '');
+    } else text = r.text;
     if (text.length < 40) throw new Error('empty');
-    S.source = text; ta.value = text; upd();
-    toast(file.name + '에서 글자를 읽었어요.');
+    S.source = text; S.pageStarts = starts; ta.value = text; upd();
+    toast(file.name + (starts ? ' ' + starts.length + '쪽' : '') + '에서 글자를 읽었어요.' + (r.more ? ' (' + LIMIT.pages + '쪽까지만)' : ''));
   }).catch(function(){
     toast('파일에서 글자를 읽지 못했어요. 스캔한 PDF라면 내용을 복사해 붙여넣어 주세요.');
   });
@@ -936,7 +1143,8 @@ function analyze(btn, status){
   var cut = text.length > LIMIT.analyze;
   text = text.slice(0, LIMIT.analyze);
   // 전에 올린 자료와 똑같으면 AI를 다시 부르지 않고 그 폴더를 열어요. (사용량 절약)
-  var same = Object.keys(STORE.mats).map(function(k){ return STORE.mats[k]; }).filter(function(m){ return m.source === text; })[0];
+  var hash = textHash(text);
+  var same = Object.keys(STORE.mats).map(function(k){ return STORE.mats[k]; }).filter(function(m){ return m.source === text || (m.srcHash && m.srcHash === hash); })[0];
   if (same) { toast('전에 올린 자료예요. 내 학습에 있는 폴더를 열게요.'); openMat(same.id); return; }
   function finish(raw){
     var a = normAnalysis(raw, text);
@@ -947,7 +1155,7 @@ function analyze(btn, status){
     a.sections.forEach(function(s){ S.selected[s.id] = true; });
     S.mode = a.recommended_mode;
     resetTeach(); go('outline');
-    if (cut) toast('자료가 길어서 앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 사용해요.');
+    if (cut) toast('자료가 너무 길어서 앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 사용해요.');
   }
   if (text === SAMPLE) {
     addLog({layer:'자료 분석 계층', tier:'없음', sees:['원문 전체'], blocked:[], note:'예시 자료라서 미리 만들어 둔 분석 결과를 써요. AI 호출 없음.'});
@@ -955,12 +1163,36 @@ function analyze(btn, status){
     return;
   }
   btn.disabled = true;
-  status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
-  addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
-  AI.json(P.analyze(text), {modelTier:'default', cache:{gcTime:3600000}}).then(finish).catch(function(e){
+  // 길면 묶음으로 나눠 차례로 분석하고 합쳐요. 앞부분만 잘라 쓰지 않아요.
+  var batches = text.length > LIMIT.batch ? analysisBatches(text) : [text];
+  if (batches.length > 1) S.source = text;          // 묶음을 쪽 경계에 맞춰 자르려면 지금 원문이 필요해요
+  status.textContent = batches.length > 1
+    ? '자료가 길어서 ' + batches.length + '묶음으로 나눠 읽어요. 묶음마다 30초쯤 걸려요.'
+    : '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
+  addLog({layer:'자료 분석 계층', tier:'default', sees:[batches.length > 1 ? '원문 전체(' + batches.length + '묶음)' : '원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
+  var parts = [], chain = Promise.resolve();
+  batches.forEach(function(bt, i){
+    chain = chain.then(function(){
+      if (batches.length > 1) status.textContent = '자료를 읽는 중이에요… ' + (i + 1) + ' / ' + batches.length + '묶음';
+      return AI.json(P.analyze(bt, batches.length > 1 ? {i:i + 1, total:batches.length} : null), {modelTier:'default', cache:{gcTime:3600000}})
+        .then(function(r){ parts.push(r); });
+    });
+  });
+  chain.then(function(){ return finish(parts.length > 1 ? mergeAnalyses(parts) : parts[0]); }).catch(function(e){
     status.textContent = errMsg(e) || '중단됐어요.';
     btn.disabled = false;
   });
+}
+function textHash(t){
+  var h1 = 5381, h2 = 52711;
+  for (var i = 0; i < t.length; i++) { var c = t.charCodeAt(i); h1 = (h1 * 33) ^ c; h2 = (h2 * 33) ^ c; }
+  return t.length + '-' + (h1 >>> 0).toString(36) + (h2 >>> 0).toString(36);
+}
+function ragNote(){
+  var r = RAG.last || {};
+  if (r.full) return '원문 선택 범위 전체(' + r.chars.toLocaleString() + '자)';
+  var pg = (r.pages || []).filter(function(v, i, a){ return a.indexOf(v) === i; }).sort(function(x, y){ return x - y; });
+  return '원문 관련 조각 ' + (r.count || 0) + '개(' + (r.chars || 0).toLocaleString() + '자' + (pg.length ? ', p.' + pg.slice(0, 8).join('·') + (pg.length > 8 ? '…' : '') : '') + ')';
 }
 
 function startTeach(){
@@ -1054,7 +1286,7 @@ function send(){
     }
     S.wrap = d.kind === 'wrap';
     updateGauge();
-    addLog({layer:'이해 상태 추적기', tier:'quick', sees:['원문(선택 범위)','학습 목표','학습자 문장','대화'], blocked:[],
+    addLog({layer:'이해 상태 추적기', tier:'quick', sees:[ragNote(),'학습 목표','학습자 문장','대화'], blocked:[],
       note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요.', detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : (d.focus ? ' / ' + d.focus : ''))});
     addLog({layer:'후배 캐릭터 · ' + ch.short, tier:'quick', sees:['학습자 문장 ' + S.ledger.length + '개','대화 기록','이번 턴 지시'], blocked:['원문','정답','시험 문제'],
       note:'지시 범위 안에서 대사만 만들어요.'});
@@ -1115,7 +1347,7 @@ function runExam(retry){
   });
   p = p.then(function(){
     if (E.stage > 2) return;
-    addLog({layer:'채점·되짚기 계층', tier:'default', sees:['원문','모범답안','학습자 문장','후배 최종 답안'], blocked:[], note:'원인을 세 가지로 나눠 되짚기 카드를 만들어요.'});
+    addLog({layer:'채점·되짚기 계층', tier:'default', sees:['원문(문제 관련 부분)','모범답안','학습자 문장','후배 최종 답안'], blocked:[], note:'원인을 세 가지로 나눠 되짚기 카드를 만들어요.'});
     return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs, E.finals); E.stage = 3; });
   });
   p.then(function(){
@@ -1261,18 +1493,42 @@ function saveProfile(){
     else localSave();
   });
 }
+/* 문서 하나는 256KB까지라 긴 원문(6만 자 넘게)은 materials/<id>/src/p0, p1… 문서로 나눠 저장해요. */
+var SRC_PART = 60000;
 function saveMat(m){
   if (!m) return;
   m.updated = Date.now();
   later1('mat-' + m.id, function(){
-    if (STORE.kind === 'db') profileRef().collection('materials').doc(m.id).set(clone(m)).catch(function(){});
-    else localSave();
+    if (STORE.kind !== 'db') { localSave(); return; }
+    var ref = profileRef().collection('materials').doc(m.id), body = clone(m);
+    if (m.source != null && m.source.length > SRC_PART) {
+      if (!m.srcSaved) {
+        var n = Math.ceil(m.source.length / SRC_PART);
+        for (var i = 0; i < n; i++) ref.collection('src').doc('p' + i).set({t:m.source.slice(i * SRC_PART, (i + 1) * SRC_PART)}).catch(function(){});
+        m.srcParts = n; m.srcSaved = true;
+      }
+      body = clone(m); delete body.source; delete body.srcSaved; body.srcParts = m.srcParts;
+    }
+    ref.set(body).catch(function(){});
+  });
+}
+function loadSource(m){
+  var ref = profileRef().collection('materials').doc(m.id).collection('src');
+  var gets = [];
+  for (var i = 0; i < m.srcParts; i++) gets.push(ref.doc('p' + i).get());
+  return Promise.all(gets).then(function(ds){
+    if (ds.some(function(d){ return !d.exists; })) throw new Error('missing');
+    m.source = ds.map(function(d){ return String(d.data().t || ''); }).join(''); m.srcSaved = true;
   });
 }
 function wipeAll(){
   var ids = Object.keys(STORE.mats);
   if (STORE.kind === 'db') {
-    ids.forEach(function(id){ profileRef().collection('materials').doc(id).delete().catch(function(){}); });
+    ids.forEach(function(id){
+      var m = STORE.mats[id], ref = profileRef().collection('materials').doc(id);
+      for (var i = 0; i < ((m && m.srcParts) || 0); i++) ref.collection('src').doc('p' + i).delete().catch(function(){});
+      ref.delete().catch(function(){});
+    });
     profileRef().set(defaultProfile()).catch(function(){});
   }
   STORE.profile = defaultProfile(); STORE.mats = {};
@@ -1327,14 +1583,19 @@ function matProgress(m){
 }
 function createMat(a, source, fileName){
   var id = 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  var m = {id:id, title:a.title, fileName:fileName || '', source:source.slice(0, 60000), analysis:packAnalysis(a),
+  var m = {id:id, title:a.title, fileName:fileName || '', source:source, srcHash:textHash(source), pageStarts:S.pageStarts || null, analysis:packAnalysis(a),
     best:{}, exams:[], created:Date.now(), updated:Date.now()};
   STORE.mats[id] = m; saveMat(m); checkAch();
   return m;
 }
 function openMat(id){
   var m = STORE.mats[id]; if (!m) return;
-  S.matId = id; S.source = m.source; S.fileName = m.fileName;
+  if (m.source == null && m.srcParts) {          // 긴 자료는 원문을 따로 나눠 저장해요. 열 때 불러와요.
+    toast('자료를 불러오는 중이에요…');
+    loadSource(m).then(function(){ openMat(id); }).catch(function(){ toast('자료를 불러오지 못했어요. 잠시 후 다시 열어 주세요.'); });
+    return;
+  }
+  S.matId = id; S.source = m.source; S.fileName = m.fileName; S.pageStarts = m.pageStarts || null;
   S.analysis = sliceSections(clone(m.analysis), m.source);
   S.selected = {}; S.analysis.sections.forEach(function(s){ S.selected[s.id] = true; });
   S.mode = S.analysis.recommended_mode || 'flow';
@@ -1482,7 +1743,7 @@ function viewStudy(){
     scene('fighting', true),
     dbox('오늘은 새로운 걸 배울까요, 아니면 전에 하던 걸 이어서 할까요?').box,
     h('div', {class:'pick'},
-      h('button', {class:'pick-card', onclick:function(){ S.matId = null; S.source = ''; S.fileName = ''; S.analysis = null; resetTeach(); go('upload'); }},
+      h('button', {class:'pick-card', onclick:function(){ S.matId = null; S.source = ''; S.pageStarts = null; S.fileName = ''; S.analysis = null; resetTeach(); go('upload'); }},
         h('b', {}, '새 학습'), h('span', {}, '자료를 올리고 처음부터 가르치기')),
       h('button', {class:'pick-card', onclick:function(){ go('library'); }},
         h('b', {}, '내 학습'), h('span', {}, n ? '올린 자료 ' + n + '개 이어서 하기' : '아직 올린 자료가 없어요'))));
@@ -1502,7 +1763,7 @@ function viewLibrary(){
     h('div', {class:'sheet', 'data-title':'내 학습'},
       h('p', {class:'muted'}, '진행률은 학습 목표 중 핵심 설명 이상까지 가르친 목표의 비율이에요.'),
       body),
-    h('button', {class:'btn', onclick:function(){ S.matId = null; S.source = ''; S.analysis = null; resetTeach(); go('upload'); }}, '새 학습 시작'));
+    h('button', {class:'btn', onclick:function(){ S.matId = null; S.source = ''; S.pageStarts = null; S.analysis = null; resetTeach(); go('upload'); }}, '새 학습 시작'));
 }
 
 /* ---------- 업적 ---------- */
@@ -1551,7 +1812,7 @@ function viewUpload(){
     var n = ta.value.trim().length;
     count.textContent = n.toLocaleString() + '자' + (n > LIMIT.analyze ? ' (앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 분석해요)' : '');
   }
-  ta.addEventListener('input', function(){ S.source = ta.value; upd(); });
+  ta.addEventListener('input', function(){ S.source = ta.value; S.pageStarts = null; upd(); });
   upd();
   var fi = h('input', {type:'file', id:'file', class:'sr', accept:'.pdf,.txt,.md,application/pdf,text/plain'});
   fi.addEventListener('change', function(){ onFile(fi.files[0], ta, upd); fi.value = ''; });
@@ -1565,7 +1826,7 @@ function viewUpload(){
       h('p', {class:'muted'}, '자료를 올리면 목차, 학습 목표, 시험 문제를 만들어요. 이 내용은 후배에게 전달되지 않아요.'),
       h('div', {class:'row'},
         h('label', {for:'file', class:'btn ghost small', tabindex:'0', onkeydown:function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fi.click(); } }}, 'PDF·텍스트 파일 올리기'),
-        h('button', {class:'btn ghost small', onclick:function(){ ta.value = SAMPLE; S.source = SAMPLE; S.fileName = '예시 자료'; upd(); }}, '예시 자료 넣기')),
+        h('button', {class:'btn ghost small', onclick:function(){ ta.value = SAMPLE; S.source = SAMPLE; S.pageStarts = null; S.fileName = '예시 자료'; upd(); }}, '예시 자료 넣기')),
       fi, ta,
       h('div', {class:'row spread'}, count, btn),
       status),
@@ -1584,7 +1845,7 @@ function openReader(secId){
   var closeBtn = h('button', {class:'btn ghost small', onclick:close}, '닫기');
   m = h('div', {class:'modal', onclick:function(e){ if (e.target === m) close(); }},
     h('div', {class:'mpanel', role:'dialog', 'aria-modal':'true', 'aria-label':title},
-      h('div', {class:'row spread'}, h('h3', {style:'margin:0'}, title), closeBtn),
+      h('div', {class:'row spread'}, h('h3', {style:'margin:0'}, title, s && a.sliceOk && pageLabel(s.from, s.to) ? h('span', {class:'pg'}, pageLabel(s.from, s.to)) : null), closeBtn),
       s && !a.sliceOk ? h('p', {class:'muted small', style:'margin-top:8px'}, '구간을 정확히 나누지 못해 전체 자료를 보여 줘요.') : null,
       h('div', {class:'reading'}, body)));
   document.body.append(m);
@@ -1606,7 +1867,7 @@ function viewOutline(){
     var warn = '';
     if (!selectedIds().length) warn = '가르칠 범위를 하나 이상 골라 주세요.';
     else if (!nq) warn = '고른 범위에 시험 문제가 없어요. 범위를 하나 더 골라 주세요.';
-    else if (len > LIMIT.range) warn = '고른 범위가 길어요(' + len.toLocaleString() + '자). AI는 앞 ' + LIMIT.range.toLocaleString() + '자만 보고 판정하고 채점해요. 범위를 줄이면 더 정확해요.';
+    void len;
     warnEl.textContent = warn;
     warnEl.style.display = warn ? '' : 'none';
     startBtn.disabled = !selectedIds().length || !nq;
@@ -1618,7 +1879,8 @@ function viewOutline(){
     cb.addEventListener('change', function(){ S.selected[s.id] = cb.checked; refresh(); });
     var gs = a.goals.filter(function(g){ return g.section === s.id; });
     return h('div', {class:'sec'},
-      h('div', {class:'sec-head'}, cb, h('label', {for:'cb-' + s.id, class:'sec-title'}, (i + 1) + '. ' + s.title),
+      h('div', {class:'sec-head'}, cb, h('label', {for:'cb-' + s.id, class:'sec-title'}, (i + 1) + '. ' + s.title,
+        a.sliceOk && pageLabel(s.from, s.to) ? h('span', {class:'pg'}, pageLabel(s.from, s.to)) : null),
         h('button', {class:'btn ghost small', onclick:function(){ openReader(s.id); }}, '읽기')),
       gs.length ? h('ul', {class:'goals'}, gs.map(function(g){ return h('li', {}, g.text); })) : null);
   });
@@ -1796,7 +2058,7 @@ function viewReview(){
         c.student ? [h('dt', {}, '후배 답'), h('dd', {}, c.student)] : null,
         c.missing ? [h('dt', {}, '빠진 것'), h('dd', {}, c.missing)] : null,
         c.cause ? [h('dt', {}, '원인'), h('dd', {}, c.cause)] : null,
-        st ? [h('dt', {}, '다시 볼 곳'), h('dd', {}, h('button', {class:'btn ghost small', onclick:function(){ openReader(c.section); }}, st + ' 읽기'))] : null));
+        st ? [h('dt', {}, '다시 볼 곳'), h('dd', {}, h('button', {class:'btn ghost small', onclick:function(){ openReader(c.section); }}, st + ' 읽기' + (cardPage(c) ? ' (p.' + cardPage(c) + ')' : '')))] : null));
   });
   var qs = E.qs.map(function(q){
     var f = E.finals.filter(function(x){ return x.id === q.id; })[0] || {final:'', claims:[]};

@@ -8,6 +8,20 @@ window.claude = { use: function (name) {
     return Promise.resolve({ text: line, truncated: false, modelTierApplied: 'quick' });
   };
   f.json = function (p) {
+    (window.__prompts = window.__prompts || []).push({kind: p.slice(0, 60), len: p.length, text: p});
+    // 예시 자료가 아닌 긴 자료(쪽 단위 테스트): 받은 원문 묶음에서 구간 시작 문장을 뽑아 흉내 낸다
+    if (p.indexOf('자료 분석 계층') >= 0 && p.indexOf('무단 통치') < 0) {
+      var body = p.split('<자료>\n')[1].split('\n</자료>')[0];
+      var lines = body.split('\n').filter(function (l) { return l.trim().length > 20; });
+      var a = lines[0], b = lines[Math.floor(lines.length / 2)];
+      return Promise.resolve({
+        title: '긴 자료 테스트', recommended_mode: 'flow', recommend_reason: '테스트',
+        sections: [{ id: 's1', title: a.slice(0, 12), start: a.slice(0, 16) }, { id: 's2', title: b.slice(0, 12), start: b.slice(0, 16) }],
+        goals: [{ id: 'g1', section: 's1', text: a.slice(0, 20) + '을 설명할 수 있다' }, { id: 'g2', section: 's2', text: b.slice(0, 20) + '을 설명할 수 있다' }],
+        exam: [{ id: 'q1', section: 's1', goal: 'g1', kind: 'flow', question: a.slice(0, 20) + '?', answer: a.slice(0, 40), key_points: [a.slice(0, 10)], detail_points: [] },
+               { id: 'q2', section: 's2', goal: 'g2', kind: 'flow', question: b.slice(0, 20) + '?', answer: b.slice(0, 40), key_points: [b.slice(0, 10)], detail_points: [] }]
+      });
+    }
     if (p.indexOf('자료 분석 계층') >= 0) return Promise.resolve({
       title: '일제의 식민 통치 방식 변화', recommended_mode: 'flow',
       recommend_reason: '통치 방식이 왜 바뀌었는지 흐름이 중요해서 흐름 이해를 추천해요.',
