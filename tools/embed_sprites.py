@@ -18,6 +18,9 @@ for f in sorted((ROOT / "assets" / "title").glob("*.png")):
     if "-x" in f.stem:
         continue
     data["title-" + f.stem] = "data:image/png;base64," + base64.b64encode(f.read_bytes()).decode()
+# 배경 같은 webp 그림도 title-이름 으로 넣는다(예: title-bg = 앱 전체 배경).
+for f in sorted((ROOT / "assets" / "title").glob("*.webp")):
+    data["title-" + f.stem] = "data:image/webp;base64," + base64.b64encode(f.read_bytes()).decode()
 
 block = (
     "<!-- SPRITES:START -->\n"

@@ -47,7 +47,7 @@ async def main():
         await page.click("text=보내기")
         await page.wait_for_timeout(500)
         await page.screenshot(path=OUT / "3-teach.png", full_page=True)
-        await page.click('role=tab[name="하린의 공책"]')
+        await page.click('role=tab[name="지민의 공책"]')
         await page.wait_for_timeout(200)
         await page.screenshot(path=OUT / "4-note.png", full_page=True)
         await page.click('role=tab[name="런타임"]')

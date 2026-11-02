@@ -1,4 +1,4 @@
-"""하린 원본 그림(흰 배경)에서 배경을 지우고 가벼운 webp로 저장한다.
+"""지민 원본 그림(흰 배경)에서 배경을 지우고 가벼운 webp로 저장한다.
 사용: python3 tools/cutout.py 원본.png 저장이름 [--keep-bg] [--protect 변:시작-끝 ...]
   --protect left:0.45-0.8  왼쪽 변의 45~80% 구간에 닿은 흰 부분(예: 종이)은 배경으로 보지 않는다.
   변 이름: top, bottom, left, right
