@@ -165,6 +165,8 @@ input[type=checkbox]{accent-color:var(--pink)}
 .mis .mid{font-family:var(--px-b);color:var(--pink)}
 .mst{grid-column:2;font-family:var(--px);font-size:11px;justify-self:start;padding:1px 7px;border:2px solid var(--ink-soft);color:var(--ink-soft)}
 .mst.open{border-color:var(--warn);color:var(--warn)}
+.mst.ok{border-color:var(--ok);color:var(--ok)}
+.mst.bad{border-color:var(--bad);color:var(--bad)}
 
 /* 런타임 */
 .rt{border:2px solid var(--line);padding:10px 12px;font-size:14px;background:var(--win);margin-top:8px}
@@ -421,6 +423,12 @@ var LIMIT = {analyze:30000, range:14000};
 var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
 var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', wrap:'시험 준비 알림' };
 var TAGS = { '설명 누락':'var(--blue)', '오개념 미교정':'var(--red)', '잘못된 설명':'var(--amber)', '참고':'var(--ink-soft)' };
+// 시험이 끝난 뒤 오개념(캐릭터가 혼자 한 틀린 추론)을 어떻게 처리했는지 공개할 때 쓰는 문구
+var MISC_RESULT = {
+  corrected:{label:'바르게 고쳐 줬어요', ok:true},
+  wrongly_corrected:{label:'고쳐 줬지만 설명이 원문과 달랐어요', ok:false},
+  open:{label:'그냥 넘어가서 그대로 믿고 시험을 봤어요', ok:false}
+};
 var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움', ungraded:'채점 안 됨' };
 
 /* 지민 표정 그림: 아래 sprites 블록에 들어 있다(tools/embed_sprites.py가 채움) */
@@ -1062,6 +1070,7 @@ function runExam(retry){
     var m = curMat();
     if (m) { m.exams = (m.exams || []).concat([{score:g.score, mode:S.mode, ts:Date.now()}]).slice(-30); saveMat(m); }
     E.levelUp = addAff(E.affGain);
+    S.misc.forEach(function(m){ m.revealed = true; }); // 시험이 끝났으니 정답 공개
     go('review');
   }).catch(function(e){
     E.err = errMsg(e) || '중단됐어요.';
@@ -1597,10 +1606,12 @@ function viewNote(){
     h('div', {class:'note'}, lines),
     S.misc.length ? h('div', {class:'mis-box'},
       h('h3', {}, ch.short + '가 혼자 추론한 것'),
-      h('p', {class:'muted'}, '맞는지 틀린지는 시험이 끝나면 알려 줘요. 답하지 않고 넘어가면 이대로 믿고 시험을 봐요.'),
+      h('p', {class:'muted'}, S.misc.some(function(m){ return m.revealed; })
+        ? '시험이 끝난 추론은 정답을 공개했어요. 모두 원문과 어긋나는 틀린 추론이었어요.'
+        : '맞는지 틀린지는 시험이 끝나면 알려 줘요. 답하지 않고 넘어가면 이대로 믿고 시험을 봐요.'),
       S.misc.map(function(m){
         return h('div', {class:'mis'}, h('span', {class:'mid'}, m.id), h('span', {}, m.text),
-          h('span', {class:'mst' + (m.status === 'open' ? ' open' : '')}, m.status === 'open' ? '확인 필요' : '답변 반영됨'));
+          m.revealed ? miscBadge(m) : h('span', {class:'mst' + (m.status === 'open' ? ' open' : '')}, m.status === 'open' ? '확인 필요' : '답변 반영됨'));
       })) : null);
 }
 
@@ -1650,6 +1661,26 @@ function viewExam(){
     h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'));
 }
 
+function miscBadge(m){
+  var r = MISC_RESULT[m.status] || MISC_RESULT.open;
+  return h('span', {class:'mst ' + (r.ok ? 'ok' : 'bad')}, (r.ok ? '✓ ' : '✗ ') + r.label);
+}
+
+// 되짚기 화면의 '정답 공개' 창: 캐릭터가 혼자 한 틀린 추론과 학습자의 대응
+function viewMiscReveal(ch){
+  var list = S.misc.filter(function(m){ return m.revealed; });
+  if (!list.length) return null;
+  var fixed = list.filter(function(m){ return m.status === 'corrected'; }).length;
+  return h('div', {class:'sheet reveal', 'data-title':ch.short + '의 추론, 정답 공개', style:'margin-top:20px'},
+    h('p', {class:'muted'}, '이 추론들은 모두 원문과 어긋나는 틀린 생각이었어요. 설명에 빈틈이 있는 곳을 보고 일부러 만든 함정이에요.'),
+    h('p', {style:'margin:0 0 4px'}, h('b', {}, '함정 ' + list.length + '개 중 ' + fixed + '개를 바로잡았어요.')),
+    list.map(function(m){
+      return h('div', {class:'mis'}, h('span', {class:'mid'}, m.id),
+        h('span', {}, m.text, arr(m.based_on).length ? h('span', {class:'muted small'}, ' (' + m.based_on.join(', ') + ' 문장을 듣고 한 추론)') : null),
+        miscBadge(m));
+    }));
+}
+
 function viewReview(){
   var E = S.exam, G = E.grade, ch = CHARS[S.charId], a = S.analysis;
   var react = G.score >= 80 ? '선배 덕분에 거의 다 풀었어요! 머릿속에서 연결이 잘 돼요.'
@@ -1693,6 +1724,7 @@ function viewReview(){
       G.score >= 80 && SPRITES.cafe ? [
         h('img', {class:'reward-art', src:SPRITES.cafe, alt:'카페에서 딸기 파르페를 먹는 지민'}),
         h('p', {class:'muted small', style:'margin-top:6px'}, '80점 넘으면 받는 보상 일러스트예요. 지민이가 시험 끝나고 파르페 먹으러 갔대요.')] : null),
+    viewMiscReveal(ch),
     h('h2', {style:'margin:18px 0 0'}, '되짚기'),
     cards.length ? cards : h('p', {class:'muted'}, '되짚을 구멍이 없어요. 완벽하게 가르쳤어요!'),
     G.good.length ? h('div', {class:'sheet', 'data-title':'잘 가르친 점', style:'margin-top:20px'}, h('ul', {class:'good'}, G.good.map(function(g){ return h('li', {}, g); }))) : null,
