@@ -1,0 +1,73 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:Sn;src:url(Sniglet-ExtraBold.ttf)}
+html,body{margin:0;background:transparent}
+svg{display:block}
+text{font-family:Sn;font-size:200px;letter-spacing:-4px;paint-order:stroke fill;stroke-linejoin:round}
+</style></head><body>
+<svg id="logo" width="1400" height="560" viewBox="0 0 1400 560" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBD9DD"/>
+      <stop offset=".5" stop-color="#EFA3B2"/>
+      <stop offset="1" stop-color="#D6788F"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="top"><rect x="0" y="0" width="1400" height="255"/></clipPath>
+    <filter id="grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 .55  0 0 0 0 .42  0 0 0 0 .3  0 0 0 .09 0" result="g"/>
+      <feComposite in="g" in2="SourceGraphic" operator="in" result="gi"/>
+      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="gi"/></feMerge>
+    </filter>
+    <symbol id="star" viewBox="-50 -50 100 100">
+      <path d="M0-46 13-15 46-12 21 9 28 42 0 25-28 42-21 9-46-12-13-15Z" fill="#E6C065" stroke="#2E3A66" stroke-width="7" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="heart" viewBox="-50 -50 100 100">
+      <path d="M0 38C-30 16-44 2-44-16-44-32-32-42-19-42-9-42-3-36 0-30 3-36 9-42 19-42 32-42 44-32 44-16 44 2 30 16 0 38Z" fill="#E8A0AE" stroke="#2E3A66" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M-26-24C-22-32-12-32-9-27" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>
+    </symbol>
+  </defs>
+
+  <g transform="rotate(-6 700 290)" filter="url(#grain)">
+    <!-- cream outer halo -->
+    <g fill="none" stroke="#FFF6E6" stroke-width="64">
+      <text x="140" y="270">Teach</text><text x="430" y="470">Me</text>
+    </g>
+    <!-- navy drop shadow -->
+    <g fill="#2E3A66" stroke="#2E3A66" stroke-width="30" transform="translate(10 14)">
+      <text x="140" y="270">Teach</text><text x="430" y="470">Me</text>
+    </g>
+    <!-- main letters -->
+    <g fill="url(#fill)" stroke="#2E3A66" stroke-width="22">
+      <text x="140" y="270">Teach</text><text x="430" y="470">Me</text>
+    </g>
+    <!-- glossy shine on the upper half -->
+    <g fill="url(#shine)" clip-path="url(#top)" opacity=".55">
+      <text x="140" y="270">Teach</text>
+    </g>
+    <!-- exclamation: bar + heart dot -->
+    <g transform="translate(812 300)">
+      <rect x="-26" y="0" width="52" height="118" rx="26" fill="#FFF6E6" stroke="#FFF6E6" stroke-width="40"/>
+      <rect x="-26" y="0" width="52" height="118" rx="26" fill="#2E3A66" transform="translate(10 14)"/>
+      <rect x="-26" y="0" width="52" height="118" rx="26" fill="url(#fill)" stroke="#2E3A66" stroke-width="14"/>
+    </g>
+    <circle cx="812" cy="470" r="44" fill="#FFF6E6"/>
+    <use href="#heart" x="769" y="425" width="86" height="86"/>
+  </g>
+
+  <!-- decorations -->
+  <use href="#star" x="78" y="70" width="88" height="88"/>
+  <use href="#star" x="980" y="70" width="70" height="62"/>
+  <use href="#star" x="1065" y="160" width="40" height="40"/>
+  <use href="#heart" x="905" y="350" width="64" height="64" transform="rotate(12 937 382)"/>
+  <g fill="#FFF6E6" stroke="#2E3A66" stroke-width="5">
+    <path d="M1000 260l7 18 18 7-18 7-7 18-7-18-18-7 18-7z"/>
+    <path d="M250 400l5 13 13 5-13 5-5 13-5-13-13-5 13-5z"/>
+  </g>
+</svg>
+</body></html>
