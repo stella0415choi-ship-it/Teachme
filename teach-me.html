@@ -134,6 +134,7 @@ input[type=checkbox]{accent-color:var(--pink)}
 .composer textarea{margin:0;min-height:54px}
 .composer .btn{flex:none}
 .actions{margin-top:8px}
+.keyhint{font-family:var(--px);font-size:11px;color:var(--ink-soft);text-align:right;margin:4px 0 0}
 
 /* 목차 */
 .sec{border-top:2px dashed var(--rule);padding:10px 0}
@@ -164,6 +165,8 @@ input[type=checkbox]{accent-color:var(--pink)}
 .mis .mid{font-family:var(--px-b);color:var(--pink)}
 .mst{grid-column:2;font-family:var(--px);font-size:11px;justify-self:start;padding:1px 7px;border:2px solid var(--ink-soft);color:var(--ink-soft)}
 .mst.open{border-color:var(--warn);color:var(--warn)}
+.mst.ok{border-color:var(--ok);color:var(--ok)}
+.mst.bad{border-color:var(--bad);color:var(--bad)}
 
 /* 런타임 */
 .rt{border:2px solid var(--line);padding:10px 12px;font-size:14px;background:var(--win);margin-top:8px}
@@ -206,7 +209,8 @@ details.q summary{cursor:pointer;font-size:15px}
 .res.correct{color:var(--ok);border-color:var(--ok)}
 .res.partial{color:var(--warn);border-color:var(--warn)}
 .res.wrong{color:var(--bad);border-color:var(--bad)}
-.res.not_learned{color:var(--ink-soft);border-color:var(--ink-soft)}
+.res.not_learned,.res.ungraded{color:var(--ink-soft);border-color:var(--ink-soft)}
+.notice{font-size:14px;background:var(--yellow);color:#2F3366;border:2px solid var(--line);padding:8px 10px;margin:10px 0 0}
 .claim{font-size:14px;margin:6px 0 0;padding-left:10px;border-left:4px solid var(--ok)}
 .claim.bad{border-color:var(--bad);color:var(--ink-soft);text-decoration:line-through}
 .cite{display:inline-block;font-family:var(--px);font-size:11px;background:var(--yellow);color:#2F3366;padding:0 5px;margin-left:4px}
@@ -368,6 +372,7 @@ function toast(msg){
   setTimeout(function(){ t.remove(); }, 3200);
 }
 function arr(x){ return Array.isArray(x) ? x : []; }
+function coarse(){ return !!(window.matchMedia && matchMedia('(pointer: coarse)').matches); }
 function reduced(){ return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }
 
 /* ---------- AI runtime (Claude sample capability) ---------- */
@@ -401,7 +406,8 @@ var CHARS = {
     blurb:'기초가 탄탄한 후배. 새 개념을 앞 내용과 연결하거나 응용하는 깊은 질문을 해요.',
     persona:'성실하고 호기심 많은 후배. 선배에게 존댓말을 쓴다. 차분하고 똑똑하다.',
     level:'기본기가 있는 학생처럼 묻는다. 개념 사이의 관계, 앞 시기와의 비교, 원인과 결과, 그렇다면 이런 경우도 그런지 같은 응용 질문을 한다. 단순 용어 질문은 거의 하지 않는다.',
-    hello:'선배, 오늘 배운 거 알려주시는 거죠? 들으면서 앞 내용이랑 연결해서 궁금한 거 여쭤볼게요!'
+    hello:'선배, 오늘 배운 거 알려주시는 거죠? 들으면서 앞 내용이랑 연결해서 궁금한 거 여쭤볼게요!',
+    unknown:'그건 안 배워서 답을 못하겠어요...'
   }
 };
 var MODES = {
@@ -412,10 +418,18 @@ var MODES = {
     prompt:'memorize — 용어, 연도, 인물과 법 이름 같은 세부 사항까지 정확히 아는 것이 목표.',
     charStyle:'정확한 용어, 연도, 이름을 확인하는 질문을 자주 섞는다.' }
 };
+// AI에게 보내는 자료 길이 한도(글자 수). analyze: 자료 분석, range: 추적기와 채점이 보는 선택 범위
+var LIMIT = {analyze:30000, range:14000};
 var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
 var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', wrap:'시험 준비 알림' };
 var TAGS = { '설명 누락':'var(--blue)', '오개념 미교정':'var(--red)', '잘못된 설명':'var(--amber)', '참고':'var(--ink-soft)' };
-var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움' };
+// 시험이 끝난 뒤 오개념(캐릭터가 혼자 한 틀린 추론)을 어떻게 처리했는지 공개할 때 쓰는 문구
+var MISC_RESULT = {
+  corrected:{label:'바르게 고쳐 줬어요', ok:true},
+  wrongly_corrected:{label:'고쳐 줬지만 설명이 원문과 달랐어요', ok:false},
+  open:{label:'그냥 넘어가서 그대로 믿고 시험을 봤어요', ok:false}
+};
+var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움', ungraded:'채점 안 됨' };
 
 /* 지민 표정 그림: 아래 sprites 블록에 들어 있다(tools/embed_sprites.py가 채움) */
 var SPRITES = (function(){
@@ -440,10 +454,12 @@ function setFace(face){
   if (els.kao) els.kao.textContent = KAO[face] || KAO.neutral;
   var src = SPRITES[face] || SPRITES.neutral;
   if (!src || els.sprite.getAttribute('src') === src) return;
-  els.sprite.classList.add('fade');
+  // 0.16초 사이에 화면이 바뀌어도 에러가 나지 않게 지금 그림을 붙잡아 둬요.
+  var img = els.sprite;
+  img.classList.add('fade');
   setTimeout(function(){
-    els.sprite.src = src; els.sprite.alt = FACE_ALT[face] || '지민';
-    els.sprite.classList.remove('fade');
+    img.src = src; img.alt = FACE_ALT[face] || '지민';
+    img.classList.remove('fade');
   }, reduced() ? 0 : 160);
 }
 var FACE_BY_KIND = { ask:'think', request:'lean', misconception:'think', wrap:'happy' };
@@ -500,16 +516,59 @@ var SAMPLE = [
 '경제적으로는 일본의 쌀 부족을 해결하기 위해 산미 증식 계획(1920~1934)을 추진하였다. 쌀 생산량은 늘었지만 증산량보다 많은 쌀이 일본으로 빠져나가 한국인의 1인당 쌀 소비량은 오히려 줄었다. 수리 조합비와 비료 대금 등 증산 비용은 농민에게 떠넘겨져 많은 농민이 몰락하였다. 또한 1920년 회사령을 폐지하여 허가제를 신고제로 바꾸면서 일본 자본이 한국에 더 쉽게 들어오게 되었다.'
 ].join('\n');
 
+// 예시 자료는 시연 때 기다리지 않도록 분석 결과를 미리 만들어 뒀어요. (AI 호출 없이 바로 목차로)
+var SAMPLE_ANALYSIS = {
+  title:'일제의 식민 통치 방식 변화 (1910~1920년대)',
+  recommended_mode:'flow',
+  recommend_reason:'통치 방식이 왜 바뀌었는지, 겉으로 내세운 것과 실제가 어떻게 달랐는지가 핵심이라 연도보다 원인과 결과를 설명하는 연습이 더 도움이 돼요.',
+  sections:[
+    {id:'s1', title:'1910년대 무단 통치', start:'1. 1910년대 무단 통치'},
+    {id:'s2', title:'1910년대 경제 수탈: 토지 조사 사업과 회사령', start:'경제적으로 일제는 토지 조사 사업'},
+    {id:'s3', title:'1920년대 문화 통치의 내용과 본질', start:'2. 1920년대 문화 통치'},
+    {id:'s4', title:'1920년대 경제 정책: 산미 증식 계획', start:'경제적으로는 일본의 쌀 부족을'}
+  ],
+  goals:[
+    {id:'g1', section:'s1', text:'헌병 경찰제와 즉결 처분권 등 무단 통치의 특징을 설명할 수 있다'},
+    {id:'g2', section:'s2', text:'토지 조사 사업이 농민에게 끼친 영향을 설명할 수 있다'},
+    {id:'g3', section:'s2', text:'회사령의 내용과 목적을 설명할 수 있다'},
+    {id:'g4', section:'s3', text:'3·1 운동 이후 일제가 통치 방식을 바꾼 이유를 설명할 수 있다'},
+    {id:'g5', section:'s3', text:'문화 통치가 기만적이었던 이유를 구체적인 사례로 설명할 수 있다'},
+    {id:'g6', section:'s4', text:'산미 증식 계획의 결과를 설명할 수 있다'}
+  ],
+  exam:[
+    {id:'q1', section:'s1', goal:'g1', kind:'detail', question:'1910년대 일제가 실시한 헌병 경찰제란 무엇이고, 헌병 경찰은 어떤 권한을 가졌나요?',
+      answer:'헌병이 경찰 업무를 맡는 제도로, 헌병 경찰은 재판 없이 벌금이나 태형 등을 가할 수 있는 즉결 처분권을 가졌다.',
+      key_points:['헌병이 경찰 업무를 맡음','재판 없이 처벌할 수 있는 즉결 처분권'], detail_points:['조선 태형령(1912)은 한국인에게만 적용']},
+    {id:'q2', section:'s2', goal:'g2', kind:'flow', question:'토지 조사 사업으로 많은 농민의 처지가 어떻게 바뀌었고, 그 이유는 무엇인가요?',
+      answer:'기한부 신고제로 신고되지 않은 토지가 총독부 소유가 되고 농민이 관습적으로 인정받던 경작권이 부정되어, 많은 농민이 기한부 계약 소작농으로 전락했다.',
+      key_points:['신고되지 않은 토지는 총독부 소유','관습적 경작권이 부정됨','기한부 계약 소작농으로 전락'], detail_points:['1910~1918년','기한부 신고제']},
+    {id:'q3', section:'s2', goal:'g3', kind:'detail', question:'1910년 일제가 공포한 회사령은 어떤 법이고, 무엇을 노렸나요?',
+      answer:'회사를 세울 때 총독의 허가를 받게 한 법으로, 한국인의 기업 활동을 억누르려는 것이었다.',
+      key_points:['회사 설립에 총독의 허가가 필요','한국인의 기업 활동 억압'], detail_points:['1910년 공포']},
+    {id:'q4', section:'s3', goal:'g4', kind:'flow', question:'일제가 1920년대에 무단 통치에서 문화 통치로 방식을 바꾼 까닭은 무엇인가요?',
+      answer:'1919년 3·1 운동을 계기로 무력만으로는 식민 지배를 유지하기 어렵다는 것을 깨달았고, 국제 여론도 나빠졌기 때문이다.',
+      key_points:['3·1 운동이 계기','무력만으로는 지배를 유지하기 어렵다고 판단','국제 여론 악화'], detail_points:['1919년']},
+    {id:'q5', section:'s3', goal:'g5', kind:'flow', question:'문화 통치가 기만적인 통치라고 불리는 이유를 사례를 들어 설명해 보세요.',
+      answer:'겉으로는 문관 총독 임명 허용, 보통 경찰제 전환, 한글 신문 허가를 내세웠지만 실제로 문관 총독은 한 명도 없었고 경찰 수와 예산은 늘었으며 신문은 검열로 통제했다. 본질은 친일파를 키워 민족을 분열시키는 것이었다.',
+      key_points:['겉으로 내세운 정책과 실제가 달랐던 사례','친일파를 키워 민족을 분열'], detail_points:['치안 유지법(1925)','보통 경찰제로 바꾼 뒤 경찰 수와 예산 증가']},
+    {id:'q6', section:'s4', goal:'g6', kind:'flow', question:'산미 증식 계획으로 쌀 생산량은 늘었는데도 한국인의 생활이 어려워진 이유는 무엇인가요?',
+      answer:'증산량보다 많은 쌀이 일본으로 빠져나가 한국인의 1인당 쌀 소비량이 줄었고, 수리 조합비와 비료 대금 같은 증산 비용이 농민에게 떠넘겨져 많은 농민이 몰락했기 때문이다.',
+      key_points:['증산량보다 많은 쌀이 일본으로 유출','1인당 쌀 소비량 감소','증산 비용을 농민이 부담'], detail_points:['1920~1934년','수리 조합비, 비료 대금']}
+  ]
+};
+
 /* ---------- state ---------- */
 var S = {
   screen:'home', matId:null, source:'', fileName:'', analysis:null, selected:{},
   mode:'flow', charId:'harin', face:'fighting',
   ledger:[], dialog:[], misc:[], goals:{}, turn:0, wrap:false,
-  exam:null, draft:'', tab:'talk', busy:false, dev:false, logs:[]
+  exam:null, draft:'', tab:'talk', busy:false, dev:false, logs:[],
+  gen:0 // 가르치기를 새로 시작할 때마다 1씩 늘어요. 늦게 도착한 AI 대답이 새 대화에 끼어들지 않게 막아요.
 };
 var els = {};
 
 function resetTeach(){
+  S.gen++;
   S.ledger = []; S.dialog = []; S.misc = []; S.goals = {}; S.turn = 0; S.wrap = false; S.exam = null; S.draft = '';
 }
 function selectedIds(){ return Object.keys(S.selected).filter(function(k){ return S.selected[k]; }); }
@@ -519,8 +578,8 @@ function goalsSel(){
 }
 function examQs(){
   var ids = selectedIds();
-  var qs = S.analysis.exam.filter(function(q){ return ids.indexOf(q.section) >= 0; });
-  return qs.length ? qs : S.analysis.exam.slice();
+  // 고른 범위의 문제만 내요. 안 가르친 범위에서 출제하면 불공정하니까요.
+  return S.analysis.exam.filter(function(q){ return ids.indexOf(q.section) >= 0; });
 }
 function selectedSource(){
   var a = S.analysis;
@@ -581,7 +640,7 @@ var P = {
       '학습 목표 모드: ' + MODES[S.mode].prompt,
       '현재 턴: ' + S.turn,
       '',
-      '[원문 — 선택 범위]', selectedSource().slice(0, 12000),
+      '[원문 — 선택 범위]', selectedSource().slice(0, LIMIT.range),
       '',
       '[학습 목표]', gs.map(function(g){ return g.id + ': ' + g.text; }).join('\n'),
       '',
@@ -621,6 +680,7 @@ var P = {
       '',
       '반드시 지킬 것',
       '- 너는 이 과목 내용을 아래 [배운 것]에 있는 학습자의 문장으로만 안다. 거기 없는 교과 지식(인물, 연도, 용어, 원인, 결과)을 네가 먼저 꺼내지 마라. 일상 상식은 써도 된다.',
+      '- 학습자가 [배운 것]에서 쓰지 않은 인물, 연도, 용어, 사건 이름을 네가 먼저 말하지 마라. 더 알고 싶으면 그다음은 어떻게 됐는지처럼 내용 없이 물어라.',
       '- 학습자가 틀리게 설명해도 지적하지 마라. 너는 정답을 모른다.',
       '- 대사만 1~3문장으로 쓴다. 지문, 따옴표, 이름표 없이.',
       '- 학습자의 마지막 말에 짧게 반응한 다음 이번 턴 지시를 수행한다.',
@@ -694,8 +754,9 @@ var P = {
       '카드 항목: title(무엇이 문제인지 한 줄), student(후배 답 요약 한 문장), missing(원문 기준으로 빠지거나 틀린 내용 1~2문장), cause(학습자 문장과 연결한 원인 한 문장), section(다시 볼 구간 id).',
       '카드는 중요한 것만 최대 5개. good은 잘 가르친 점 1~2개, S번호를 들어 구체적으로.',
       '문장은 짧고 구체적으로 쓰고, 같은 결론 문장을 반복하지 않는다.',
+      'per_question은 모든 문제에 대해 빠짐없이 쓴다. 점수는 프로그램이 계산하므로 summary에 점수 숫자를 쓰지 않는다.',
       '',
-      '[원문]', selectedSource().slice(0, 14000),
+      '[원문]', selectedSource().slice(0, LIMIT.range),
       '',
       '[구간]', a.sections.map(function(s){ return s.id + ': ' + s.title; }).join('\n'),
       '',
@@ -710,7 +771,7 @@ var P = {
       '[후배 최종 답안]', JSON.stringify(finals.map(function(f){ return {id:f.id, answer:f.final, status:f.status}; })),
       '',
       'JSON만 출력:',
-      '{"score":0,"summary":"한 문장","per_question":[{"id":"q1","result":"correct"}],"cards":[{"tag":"설명 누락","title":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
+      '{"summary":"한 문장","per_question":[{"id":"q1","result":"correct"}],"cards":[{"tag":"설명 누락","title":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
     ].join('\n');
   }
 };
@@ -772,26 +833,57 @@ function normSolve(r, qs){
     };
   });
 }
-function mergeVerify(solved, r){
+// 근거 검증 결과를 합쳐요. 원칙: 확인이 안 된 주장은 통과시키지 않아요(fail-closed).
+// AI 검증기의 판단과 별개로, 코드가 직접 확인할 수 있는 것(근거 번호가 공책에 있는지)은 코드가 확인해요.
+function mergeVerify(solved, r, beliefs){
   var list = arr(r && r.results);
+  var valid = {};
+  S.ledger.forEach(function(l){ valid[l.id] = 1; });
+  arr(beliefs).forEach(function(b){ valid[b.id] = 1; });
   return solved.map(function(s){
-    var v = list.filter(function(x){ return String(x.id) === s.id; })[0] || {};
-    var vc = arr(v.claims);
+    var v = list.filter(function(x){ return String(x.id) === s.id; })[0];
+    var vc = v ? arr(v.claims) : [];
     var claims = s.claims.map(function(c, i){
-      var bad = (vc[i] && vc[i].verdict === 'unsupported') || !c.basis.length;
-      return {text:c.text, basis:c.basis, verdict:bad ? 'unsupported' : 'ok', reason:String((vc[i] && vc[i].reason) || '')};
+      var real = c.basis.filter(function(b){ return valid[b]; });
+      var bad = true, reason;
+      if (!c.basis.length) reason = '근거 번호가 없어요.';
+      else if (!real.length) reason = '공책에 없는 번호(' + c.basis.join(', ') + ')를 근거로 썼어요.';
+      else if (!vc[i]) reason = '검증 결과가 없어서 안전하게 지웠어요.';
+      else if (vc[i].verdict !== 'ok') reason = String(vc[i].reason || '인용한 문장으로 뒷받침되지 않아요.');
+      else { bad = false; reason = String(vc[i].reason || ''); }
+      return {text:c.text, basis:real.length ? real : c.basis, verdict:bad ? 'unsupported' : 'ok', reason:reason};
     });
-    var st = ['answered','partial','not_learned'].indexOf(v.status) >= 0 ? v.status : s.status;
-    return {id:s.id, answer:s.answer, claims:claims, final:String(v.final_answer || s.answer), status:st};
+    // 남은 주장 수로 답 상태를 코드가 다시 정해요.
+    var okClaims = claims.filter(function(c){ return c.verdict === 'ok'; });
+    var status, final;
+    if (!okClaims.length) {
+      status = 'not_learned'; final = CHARS[S.charId].unknown;
+    } else if (okClaims.length < claims.length) {
+      status = 'partial';
+      final = (v && v.final_answer && v.status !== 'not_learned') ? String(v.final_answer) : okClaims.map(function(c){ return c.text; }).join(' ');
+    } else {
+      status = (s.status === 'partial' || (v && v.status === 'partial')) ? 'partial' : 'answered';
+      final = (v && v.final_answer) ? String(v.final_answer) : s.answer;
+    }
+    return {id:s.id, answer:s.answer, claims:claims, final:final, status:status};
   });
 }
-function normGrade(r, qs){
+// 점수는 AI가 따로 적은 숫자 대신 문제별 결과로 직접 계산해요. (정답 1, 부분 정답 0.5)
+function normGrade(r, qs, finals){
   r = r || {};
-  var score = Math.max(0, Math.min(100, Math.round(Number(r.score) || 0)));
-  var pq = {};
-  arr(r.per_question).forEach(function(p){ if (RESULT[p.result]) pq[String(p.id)] = p.result; });
+  var given = {};
+  arr(r.per_question).forEach(function(p){ if (RESULT[p.result] && p.result !== 'ungraded') given[String(p.id)] = p.result; });
+  var pq = {}, pts = 0, counts = {};
+  qs.forEach(function(q){
+    var f = arr(finals).filter(function(x){ return x.id === q.id; })[0];
+    var res = (f && f.status === 'not_learned') ? 'not_learned' : (given[q.id] || 'ungraded');
+    pq[q.id] = res;
+    counts[res] = (counts[res] || 0) + 1;
+    pts += res === 'correct' ? 1 : (res === 'partial' ? 0.5 : 0);
+  });
+  var score = qs.length ? Math.round(pts / qs.length * 100) : 0;
   return {
-    score:score, summary:String(r.summary || ''), per:pq,
+    score:score, summary:String(r.summary || ''), per:pq, counts:counts,
     cards:arr(r.cards).slice(0, 6).map(function(c){
       return {tag:TAGS[c.tag] ? c.tag : '설명 누락', title:String(c.title || ''), student:String(c.student || ''), missing:String(c.missing || ''), cause:String(c.cause || ''), section:String(c.section || '')};
     }),
@@ -840,34 +932,54 @@ function onFile(file, ta, upd){
 function analyze(btn, status){
   var text = S.source.trim();
   if (text.length < 80) { status.textContent = '자료가 너무 짧아요. 한 문단 이상 넣어 주세요.'; return; }
-  btn.disabled = true;
-  status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
-  addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
-  AI.json(P.analyze(text.slice(0, 30000)), {modelTier:'default', cache:{gcTime:3600000}}).then(function(raw){
+  // AI가 실제로 읽는 만큼만 자료로 써요. 그래야 목차, 읽기, 채점 기준이 서로 맞아요.
+  var cut = text.length > LIMIT.analyze;
+  text = text.slice(0, LIMIT.analyze);
+  // 전에 올린 자료와 똑같으면 AI를 다시 부르지 않고 그 폴더를 열어요. (사용량 절약)
+  var same = Object.keys(STORE.mats).map(function(k){ return STORE.mats[k]; }).filter(function(m){ return m.source === text; })[0];
+  if (same) { toast('전에 올린 자료예요. 내 학습에 있는 폴더를 열게요.'); openMat(same.id); return; }
+  function finish(raw){
     var a = normAnalysis(raw, text);
     if (!a.sections.length || !a.exam.length) throw {code:'invalid_json'};
+    S.source = text;
     S.analysis = a; S.selected = {};
     S.matId = createMat(a, text, S.fileName).id;
     a.sections.forEach(function(s){ S.selected[s.id] = true; });
     S.mode = a.recommended_mode;
     resetTeach(); go('outline');
-  }).catch(function(e){
+    if (cut) toast('자료가 길어서 앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 사용해요.');
+  }
+  if (text === SAMPLE) {
+    addLog({layer:'자료 분석 계층', tier:'없음', sees:['원문 전체'], blocked:[], note:'예시 자료라서 미리 만들어 둔 분석 결과를 써요. AI 호출 없음.'});
+    finish(clone(SAMPLE_ANALYSIS));
+    return;
+  }
+  btn.disabled = true;
+  status.textContent = '자료를 읽고 목차와 시험 문제를 만드는 중이에요. 30초에서 1분쯤 걸려요.';
+  addLog({layer:'자료 분석 계층', tier:'default', sees:['원문 전체'], blocked:[], note:'목차, 학습 목표, 시험 문제를 만들고 보관해요.'});
+  AI.json(P.analyze(text), {modelTier:'default', cache:{gcTime:3600000}}).then(finish).catch(function(e){
     status.textContent = errMsg(e) || '중단됐어요.';
     btn.disabled = false;
   });
 }
 
 function startTeach(){
-  resetTeach();
-  S.dialog.push({role:'char', text:CHARS[S.charId].hello});
-  S.face = 'fighting';
-  bump('lessons');
-  S.tab = 'talk';
-  go('teach');
+  function begin(){
+    resetTeach();
+    S.dialog.push({role:'char', text:CHARS[S.charId].hello});
+    S.face = 'fighting';
+    bump('lessons');
+    S.tab = 'talk';
+    saveSession();
+    go('teach');
+  }
+  if (S.ledger.length) ask('처음부터 다시 가르칠까요?', '지금까지 가르친 공책과 대화가 지워져요.', '처음부터 하기', begin);
+  else begin();
 }
 
 function applyTracker(r){
   r = r || {};
+  var fixed = 0;
   arr(r.goals).forEach(function(g){
     var lv = Math.max(0, Math.min(3, parseInt(g.level, 10) || 0));
     if (g.id) S.goals[String(g.id)] = {level:lv, note:String(g.note || '')};
@@ -876,13 +988,13 @@ function applyTracker(r){
     var m = S.misc.filter(function(x){ return x.id === String(u.id); })[0];
     if (m && m.status === 'open' && (u.status === 'corrected' || u.status === 'wrongly_corrected')) {
       m.status = u.status;
-      if (u.status === 'corrected') bump('fixed');
+      if (u.status === 'corrected') fixed++;
     }
   });
   var d = r.directive || {};
   return {
     kind:KIND[d.kind] ? d.kind : 'ask', goal:String(d.goal || ''), focus:String(d.focus || ''),
-    misconception:String(d.misconception || ''), based_on:arr(d.based_on).map(String)
+    misconception:String(d.misconception || ''), based_on:arr(d.based_on).map(String), fixed:fixed
   };
 }
 
@@ -893,12 +1005,34 @@ function setLine(text, thinking){
   els.dtext.textContent = text;
 }
 
+// 캐릭터 대사 앞에 붙은 이름표("지민: ")나 따옴표를 떼요.
+function cleanLine(t){
+  var ch = CHARS[S.charId];
+  t = String(t || '').trim();
+  t = t.replace(new RegExp('^(?:' + ch.name + '|' + ch.short + ')\\s*[:：]\\s*'), '');
+  t = t.replace(/^["“”'‘’]+/, '').replace(/["“”'‘’]+$/, '').trim();
+  return t;
+}
+
+// 가르치기 화면의 버튼 상태만 다시 맞춰요. 화면이 바뀌어 버튼이 없으면 아무것도 안 해요.
+function updateTeachUi(){
+  if (S.screen !== 'teach' || !els.send) return;
+  els.send.disabled = S.busy;
+  els.exam.disabled = S.busy;
+  els.exam.className = 'btn small' + (S.wrap ? '' : ' ghost');
+  if (els.scene && !S.busy) els.scene.classList.remove('talk');
+  renderPanel();
+}
+
 function send(){
   if (S.busy) return;
   var msg = els.input.value.trim();
   if (!msg) return;
-  var ch = CHARS[S.charId];
-  S.busy = true; els.send.disabled = true; els.input.value = ''; S.draft = '';
+  var ch = CHARS[S.charId], gen = S.gen;
+  // 실패하면 보내기 전 상태로 되돌릴 수 있게 지금 상태를 기억해 둬요.
+  var snap = {ledger:S.ledger.length, dialog:S.dialog.length, turn:S.turn, wrap:S.wrap, face:S.face,
+    goals:JSON.stringify(S.goals), misc:S.misc.map(function(m){ return m.status; })};
+  S.busy = true; els.input.value = ''; S.draft = '';
   S.turn++;
   var ids = [];
   splitSentences(msg).forEach(function(t){
@@ -906,11 +1040,12 @@ function send(){
     S.ledger.push({id:id, text:t, turn:S.turn}); ids.push(id);
   });
   S.dialog.push({role:'user', text:msg, ids:ids});
-  renderPanel();
+  updateTeachUi();
   setLine('생각하는 중…', true);
   setFace('neutral');
   var d, mis = null;
   AI.json(P.tracker(), {modelTier:'quick', cache:false}).then(function(raw){
+    if (gen !== S.gen) throw {code:'stale'};
     d = applyTracker(raw);
     if (d.kind === 'misconception') {
       var canMis = d.misconception && S.turn > 1 && S.misc.length < 3 && !S.misc.some(function(m){ return m.status === 'open'; });
@@ -918,7 +1053,6 @@ function send(){
       else d.kind = 'ask';
     }
     S.wrap = d.kind === 'wrap';
-    recordGoals();
     updateGauge();
     addLog({layer:'이해 상태 추적기', tier:'quick', sees:['원문(선택 범위)','학습 목표','학습자 문장','대화'], blocked:[],
       note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요.', detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : (d.focus ? ' / ' + d.focus : ''))});
@@ -927,26 +1061,44 @@ function send(){
     setLine('', false);
     S.face = FACE_BY_KIND[d.kind] || 'think';
     setFace(S.face);
-    els.scene.classList.add('talk');
-    return AI.text(P.character(d, mis), {modelTier:'quick', cache:false, onText:function(u){ setLine(u.text, false); }});
+    if (els.scene) els.scene.classList.add('talk');
+    return AI.text(P.character(d, mis), {modelTier:'quick', cache:false, onText:function(u){ if (gen === S.gen) setLine(u.text, false); }});
   }).then(function(res){
-    var line = res.text.trim();
+    if (gen !== S.gen) return; // 그사이 가르치기를 새로 시작했으면 늦은 대답은 버려요.
+    var line = cleanLine(res && res.text);
+    if (!line) throw {code:'empty'};
     if (mis) S.misc.push(mis);
     S.dialog.push({role:'char', text:line, kind:d.kind, mis:mis ? mis.id : null});
     setLine(line, false);
-    els.exam.className = 'btn small' + (S.wrap ? '' : ' ghost');
+    // 대답까지 성공한 턴만 기록에 남겨요.
+    recordGoals();
+    if (d.fixed) bump('fixed', d.fixed);
   }).catch(function(e){
-    setLine(errMsg(e) || '중단됐어요. 다시 보내 주세요.', false);
-    els.dbox.classList.add('err');
+    if (gen !== S.gen) return;
+    // 보내기 전 상태로 되돌리고, 쓴 글은 입력창에 다시 넣어 줘요. (공책 문장 중복 방지)
+    S.ledger.length = snap.ledger; S.dialog.length = snap.dialog; S.turn = snap.turn; S.wrap = snap.wrap;
+    S.goals = JSON.parse(snap.goals);
+    S.misc.length = Math.min(S.misc.length, snap.misc.length);
+    S.misc.forEach(function(m, i){ m.status = snap.misc[i]; });
+    S.draft = msg;
+    if (els.input) els.input.value = msg;
+    S.face = snap.face; setFace(S.face);
+    updateGauge();
+    setLine((errMsg(e) || '중단됐어요.') + ' 쓴 내용은 입력창에 그대로 남겨 뒀어요. 다시 보내 주세요.', false);
+    if (els.dbox) els.dbox.classList.add('err');
   }).then(function(){
-    S.busy = false; els.send.disabled = false; els.scene.classList.remove('talk');
-    renderPanel();
+    // 성공하든 실패하든 반드시 여기까지 와서 '바쁨' 표시를 꺼요.
+    S.busy = false;
+    if (gen === S.gen) saveSession();
+    updateTeachUi();
   });
 }
 
 function runExam(retry){
+  if (S.busy) { toast(CHARS[S.charId].short + '가 대답하는 중이에요. 대답이 끝나면 시험을 볼 수 있어요.'); return; }
   if (!retry) {
     if (!S.ledger.length) { toast('먼저 한 문장이라도 설명해 주세요.'); return; }
+    if (!examQs().length) { toast('고른 범위에 시험 문제가 없어요. 목차에서 범위를 다시 골라 주세요.'); return; }
     S.exam = {qs:examQs(), beliefs:openBeliefs(), stage:0, err:''};
   }
   var E = S.exam; E.err = '';
@@ -959,12 +1111,12 @@ function runExam(retry){
   p = p.then(function(){
     if (E.stage > 1) return;
     addLog({layer:'근거 검증기', tier:'quick', sees:['학습자 문장','후배 답안과 근거 번호'], blocked:['원문','모범답안'], note:'근거 없는 주장은 지우고 안 배운 걸로 바꿔요.'});
-    return AI.json(P.verify(E.beliefs, E.solved), {modelTier:'quick', cache:false}).then(function(r){ E.finals = mergeVerify(E.solved, r); E.stage = 2; renderAll(); });
+    return AI.json(P.verify(E.beliefs, E.solved), {modelTier:'quick', cache:false}).then(function(r){ E.finals = mergeVerify(E.solved, r, E.beliefs); E.stage = 2; renderAll(); });
   });
   p = p.then(function(){
     if (E.stage > 2) return;
     addLog({layer:'채점·되짚기 계층', tier:'default', sees:['원문','모범답안','학습자 문장','후배 최종 답안'], blocked:[], note:'원인을 세 가지로 나눠 되짚기 카드를 만들어요.'});
-    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs); E.stage = 3; });
+    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs, E.finals); E.stage = 3; });
   });
   p.then(function(){
     var g = E.grade;
@@ -975,6 +1127,8 @@ function runExam(retry){
     var m = curMat();
     if (m) { m.exams = (m.exams || []).concat([{score:g.score, mode:S.mode, ts:Date.now()}]).slice(-30); saveMat(m); }
     E.levelUp = addAff(E.affGain);
+    S.misc.forEach(function(m){ m.revealed = true; }); // 시험이 끝났으니 정답 공개
+    saveSession();
     go('review');
   }).catch(function(e){
     E.err = errMsg(e) || '중단됐어요.';
@@ -1144,6 +1298,22 @@ function checkAch(){
   if (got.length) { saveProfile(); setTimeout(function(){ toast('업적 달성: ' + got.join(', ')); }, 900); }
 }
 
+/* ---------- 확인 창: "정말 지울까요?" 같은 질문을 화면 안에서 띄워요 ---------- */
+function ask(title, msg, okLabel, onOk){
+  var prev = document.activeElement, m;
+  function close(){ m.remove(); document.removeEventListener('keydown', esc); if (prev && prev.focus) prev.focus(); }
+  function esc(e){ if (e.key === 'Escape') close(); }
+  var cancel = h('button', {class:'btn ghost small', onclick:close}, '취소');
+  var ok = h('button', {class:'btn small', onclick:function(){ close(); onOk(); }}, okLabel);
+  m = h('div', {class:'modal', onclick:function(e){ if (e.target === m) close(); }},
+    h('div', {class:'mpanel', role:'alertdialog', 'aria-modal':'true', 'aria-label':title},
+      h('h3', {}, title), h('p', {class:'muted'}, msg),
+      h('div', {class:'row', style:'justify-content:flex-end'}, cancel, ok)));
+  document.body.append(m);
+  document.addEventListener('keydown', esc);
+  cancel.focus();
+}
+
 /* ---------- 내 학습 자료 ---------- */
 function curMat(){ return S.matId ? STORE.mats[S.matId] : null; }
 function packAnalysis(a){
@@ -1168,7 +1338,27 @@ function openMat(id){
   S.analysis = sliceSections(clone(m.analysis), m.source);
   S.selected = {}; S.analysis.sections.forEach(function(s){ S.selected[s.id] = true; });
   S.mode = S.analysis.recommended_mode || 'flow';
-  resetTeach(); go('outline');
+  resetTeach();
+  if (restoreSession(m)) toast('가르치던 내용이 있어요. 이어서 가르칠 수 있어요.');
+  go('outline');
+}
+// 가르치던 대화(공책, 대화, 오개념, 이해 수준)를 그 자료 문서에 함께 저장해요.
+// 새로고침하거나 홈에 다녀와도 내 학습에서 그 자료를 열면 이어서 가르칠 수 있어요.
+var SESSION_FIELDS = ['ledger','dialog','misc','goals','turn','wrap','selected','mode','face','draft'];
+function saveSession(){
+  var m = curMat(); if (!m) return;
+  if (!S.ledger.length) { if (m.session) { delete m.session; saveMat(m); } return; }
+  var keep = {};
+  SESSION_FIELDS.forEach(function(k){ keep[k] = clone(S[k]); });
+  keep.dialog = keep.dialog.slice(-60);
+  m.session = keep;
+  saveMat(m);
+}
+function restoreSession(m){
+  var ss = m && m.session;
+  if (!ss || !arr(ss.ledger).length) return false;
+  SESSION_FIELDS.forEach(function(k){ if (ss[k] !== undefined) S[k] = clone(ss[k]); });
+  return true;
 }
 function recordGoals(){
   var m = curMat(); if (!m) return;
@@ -1357,7 +1547,10 @@ function viewUpload(){
   var ta = h('textarea', {rows:9, placeholder:'교과서, 필기, 학습지 내용을 붙여넣어도 돼요.', 'aria-label':'학습 자료 내용'});
   ta.value = S.source;
   var count = h('span', {class:'muted'});
-  function upd(){ count.textContent = ta.value.trim().length.toLocaleString() + '자'; }
+  function upd(){
+    var n = ta.value.trim().length;
+    count.textContent = n.toLocaleString() + '자' + (n > LIMIT.analyze ? ' (앞 ' + LIMIT.analyze.toLocaleString() + '자까지만 분석해요)' : '');
+  }
   ta.addEventListener('input', function(){ S.source = ta.value; upd(); });
   upd();
   var fi = h('input', {type:'file', id:'file', class:'sr', accept:'.pdf,.txt,.md,application/pdf,text/plain'});
@@ -1402,10 +1595,22 @@ function openReader(secId){
 function viewOutline(){
   var a = S.analysis;
   var countEl = h('p', {class:'muted', style:'margin:10px 0 0'});
-  var startBtn = h('button', {class:'btn', onclick:startTeach}, '가르치기 시작');
+  var warnEl = h('p', {class:'notice', role:'status'});
+  // 가르치던 대화가 있으면 '이어서'를 먼저 보여 줘요.
+  var canResume = S.ledger.length > 0;
+  var startBtn = h('button', {class:'btn' + (canResume ? ' ghost' : ''), onclick:startTeach}, canResume ? '처음부터 가르치기' : '가르치기 시작');
+  var resumeBtn = canResume ? h('button', {class:'btn', onclick:function(){ S.tab = 'talk'; go('teach'); }}, '이어서 가르치기') : null;
   function refresh(){
-    countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + examQs().length + '개';
-    startBtn.disabled = !selectedIds().length;
+    var nq = examQs().length, len = selectedSource().length;
+    countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + nq + '개';
+    var warn = '';
+    if (!selectedIds().length) warn = '가르칠 범위를 하나 이상 골라 주세요.';
+    else if (!nq) warn = '고른 범위에 시험 문제가 없어요. 범위를 하나 더 골라 주세요.';
+    else if (len > LIMIT.range) warn = '고른 범위가 길어요(' + len.toLocaleString() + '자). AI는 앞 ' + LIMIT.range.toLocaleString() + '자만 보고 판정하고 채점해요. 범위를 줄이면 더 정확해요.';
+    warnEl.textContent = warn;
+    warnEl.style.display = warn ? '' : 'none';
+    startBtn.disabled = !selectedIds().length || !nq;
+    if (resumeBtn) resumeBtn.disabled = startBtn.disabled;
   }
   var secs = a.sections.map(function(s, i){
     var cb = h('input', {type:'checkbox', id:'cb-' + s.id});
@@ -1427,11 +1632,12 @@ function viewOutline(){
     h('div', {class:'sheet', 'data-title':'목차와 범위'},
       h('div', {class:'row spread'}, h('h2', {style:'margin:0'}, a.title), h('button', {class:'btn ghost small', onclick:function(){ openReader(null); }}, '공부 모드')),
       h('p', {class:'muted', style:'margin-top:6px'}, '가르칠 범위를 고르세요. 읽기를 누르면 그 구간 자료를 다시 볼 수 있어요.'),
-      secs, countEl),
+      secs, countEl, warnEl),
     h('div', {class:'sheet', 'data-title':'이번 목표는?'},
       modes,
       a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
-    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'), startBtn)
+    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'),
+      h('div', {class:'row'}, startBtn, resumeBtn))
   );
 }
 
@@ -1453,14 +1659,23 @@ function viewTeach(){
   els.panel = h('div', {role:'tabpanel'});
   els.input = h('textarea', {rows:2, placeholder:ch.short + '에게 설명해 보세요', 'aria-label':'설명 입력'});
   els.input.value = S.draft;
-  els.input.addEventListener('input', function(){ S.draft = els.input.value; });
-  els.input.addEventListener('keydown', function(e){ if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); } });
+  els.input.addEventListener('input', function(){ S.draft = els.input.value; saveSession(); });
+  // 컴퓨터: Enter로 보내기, Shift+Enter로 줄 바꿈. 폰: Enter는 줄 바꿈, 보내기 버튼으로 보내기.
+  // 한글 조합 중(isComposing)에 누른 Enter는 무시해야 마지막 글자가 두 번 보내지지 않아요.
+  var touch = coarse();
+  els.input.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+    if (e.metaKey || e.ctrlKey || (!touch && !e.shiftKey)) { e.preventDefault(); send(); }
+  });
   els.send = h('button', {class:'btn', onclick:send}, '보내기');
   els.send.disabled = S.busy;
   els.exam = h('button', {class:'btn small' + (S.wrap ? '' : ' ghost'), onclick:function(){ runExam(false); }}, '수업 끝내고 시험 보기');
+  els.exam.disabled = S.busy;
+  if (S.busy) els.scene.classList.add('talk');
   renderPanel();
   return h('section', {}, stage, els.dbox, tabs, els.panel,
     h('div', {class:'composer'}, els.input, els.send),
+    h('p', {class:'keyhint'}, touch ? '다 쓰면 보내기 버튼을 눌러요.' : 'Enter로 보내기 · Shift+Enter로 줄 바꿈'),
     h('div', {class:'row spread actions'}, h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '목차로'), els.exam));
 }
 
@@ -1490,10 +1705,12 @@ function viewNote(){
     h('div', {class:'note'}, lines),
     S.misc.length ? h('div', {class:'mis-box'},
       h('h3', {}, ch.short + '가 혼자 추론한 것'),
-      h('p', {class:'muted'}, '맞는지 틀린지는 시험이 끝나면 알려 줘요. 답하지 않고 넘어가면 이대로 믿고 시험을 봐요.'),
+      h('p', {class:'muted'}, S.misc.some(function(m){ return m.revealed; })
+        ? '시험이 끝난 추론은 정답을 공개했어요. 모두 원문과 어긋나는 틀린 추론이었어요.'
+        : '맞는지 틀린지는 시험이 끝나면 알려 줘요. 답하지 않고 넘어가면 이대로 믿고 시험을 봐요.'),
       S.misc.map(function(m){
         return h('div', {class:'mis'}, h('span', {class:'mid'}, m.id), h('span', {}, m.text),
-          h('span', {class:'mst' + (m.status === 'open' ? ' open' : '')}, m.status === 'open' ? '확인 필요' : '답변 반영됨'));
+          m.revealed ? miscBadge(m) : h('span', {class:'mst' + (m.status === 'open' ? ' open' : '')}, m.status === 'open' ? '확인 필요' : '답변 반영됨'));
       })) : null);
 }
 
@@ -1543,6 +1760,26 @@ function viewExam(){
     h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'));
 }
 
+function miscBadge(m){
+  var r = MISC_RESULT[m.status] || MISC_RESULT.open;
+  return h('span', {class:'mst ' + (r.ok ? 'ok' : 'bad')}, (r.ok ? '✓ ' : '✗ ') + r.label);
+}
+
+// 되짚기 화면의 '정답 공개' 창: 캐릭터가 혼자 한 틀린 추론과 학습자의 대응
+function viewMiscReveal(ch){
+  var list = S.misc.filter(function(m){ return m.revealed; });
+  if (!list.length) return null;
+  var fixed = list.filter(function(m){ return m.status === 'corrected'; }).length;
+  return h('div', {class:'sheet reveal', 'data-title':ch.short + '의 추론, 정답 공개', style:'margin-top:20px'},
+    h('p', {class:'muted'}, '이 추론들은 모두 원문과 어긋나는 틀린 생각이었어요. 설명에 빈틈이 있는 곳을 보고 일부러 만든 함정이에요.'),
+    h('p', {style:'margin:0 0 4px'}, h('b', {}, '함정 ' + list.length + '개 중 ' + fixed + '개를 바로잡았어요.')),
+    list.map(function(m){
+      return h('div', {class:'mis'}, h('span', {class:'mid'}, m.id),
+        h('span', {}, m.text, arr(m.based_on).length ? h('span', {class:'muted small'}, ' (' + m.based_on.join(', ') + ' 문장을 듣고 한 추론)') : null),
+        miscBadge(m));
+    }));
+}
+
 function viewReview(){
   var E = S.exam, G = E.grade, ch = CHARS[S.charId], a = S.analysis;
   var react = G.score >= 80 ? '선배 덕분에 거의 다 풀었어요! 머릿속에서 연결이 잘 돼요.'
@@ -1563,7 +1800,7 @@ function viewReview(){
   });
   var qs = E.qs.map(function(q){
     var f = E.finals.filter(function(x){ return x.id === q.id; })[0] || {final:'', claims:[]};
-    var res = G.per[q.id] || (f.status === 'not_learned' ? 'not_learned' : 'partial');
+    var res = G.per[q.id] || 'ungraded';
     return h('details', {class:'q'},
       h('summary', {}, q.question, h('span', {class:'res ' + res}, RESULT[res])),
       h('p', {class:'qa'}, h('b', {}, ch.short + ' 최종 답: '), f.final),
@@ -1579,12 +1816,14 @@ function viewReview(){
     dbox(react).box,
     h('div', {class:'sheet', 'data-title':'시험 결과'},
       h('div', {class:'score'}, h('b', {}, G.score + '점'), h('span', {class:'muted'}, MODES[S.mode].label + ' 기준')),
+      G.counts ? h('p', {class:'muted small', style:'margin:6px 0 0'}, Object.keys(RESULT).filter(function(k){ return G.counts[k]; }).map(function(k){ return RESULT[k] + ' ' + G.counts[k]; }).join(' · ') + ' (정답 1점, 부분 정답 0.5점으로 계산)') : null,
       G.summary ? h('p', {style:'margin-top:8px'}, G.summary) : null,
       h('p', {class:'muted small'}, S.mode === 'flow' ? '흐름 이해가 목표라서 연도나 세부 명칭만 빠진 건 감점하지 않았어요.' : '완벽 암기가 목표라서 세부 사항까지 채점했어요.'),
       h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain + (E.levelUp ? ' · Lv.' + levelOf(PROFILE().aff) + ' 달성!' : '')), h('span', {}, '코인 +' + E.coinGain + ' (보유 ' + PROFILE().coins + ')')),
       G.score >= 80 && SPRITES.cafe ? [
         h('img', {class:'reward-art', src:SPRITES.cafe, alt:'카페에서 딸기 파르페를 먹는 지민'}),
         h('p', {class:'muted small', style:'margin-top:6px'}, '80점 넘으면 받는 보상 일러스트예요. 지민이가 시험 끝나고 파르페 먹으러 갔대요.')] : null),
+    viewMiscReveal(ch),
     h('h2', {style:'margin:18px 0 0'}, '되짚기'),
     cards.length ? cards : h('p', {class:'muted'}, '되짚을 구멍이 없어요. 완벽하게 가르쳤어요!'),
     G.good.length ? h('div', {class:'sheet', 'data-title':'잘 가르친 점', style:'margin-top:20px'}, h('ul', {class:'good'}, G.good.map(function(g){ return h('li', {}, g); }))) : null,
