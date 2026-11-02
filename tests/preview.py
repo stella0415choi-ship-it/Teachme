@@ -30,7 +30,12 @@ async def main():
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
         await page.goto(page_path.as_uri())
-        await page.wait_for_timeout(400)
+        await page.wait_for_timeout(300)
+        await page.screenshot(path=OUT / "0-title-intro.png")
+        await page.wait_for_timeout(4500)
+        await page.screenshot(path=OUT / "0-title.png")
+        await page.click("text=눌러서 시작하기")
+        await page.wait_for_timeout(600)
         await page.screenshot(path=OUT / "1-upload.png", full_page=True)
         await page.click("text=예시 자료 넣기")
         await page.click("text=자료 분석하기")
