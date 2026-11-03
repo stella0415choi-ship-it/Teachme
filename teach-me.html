@@ -19,7 +19,7 @@
 /* ===== 디자인 토큰: 딸기우유 연분홍 + 남색, 2000년대 미연시·플래시 게임 느낌 ===== */
 :root{
   --bg:#FFE4E1; --dot:rgba(255,255,255,.6); --win:#FFFFFF; --ink:#2F3366; --ink-soft:#6B6F9A;
-  --line:#2F3366; --bar:#2F3366; --bar-ink:#FFFFFF; --pink:#FFD1DC; --pink-bright:#E58FA8; --navy:#2F3366; --pink-soft:#FFE4E1; --yellow:#BFE3FA; --lav:#FFF1EE; --rose:#E58FA8; --tab-on:#D6EEFC;
+  --line:#2F3366; --bar:#2F3366; --bar-ink:#FFFFFF; --pink:#FFD1DC; --pink-bright:#E58FA8; --navy:#2F3366; --pink-soft:#FFE4E1; --yellow:#FFF0A8; --lav:#FFF1EE; --rose:#E58FA8; --tab-on:#FFF9C4;
   --ok:#1E9A7A; --bad:#E0446E; --warn:#C27410; --blue:#3E66D6;
   /* 예전 이름(스크립트 안에서 쓰는 것) */
   --paper:var(--lav); --sheet:var(--win); --rule:#D9D4EA; --margin:var(--pink); --hl:var(--yellow); --hl-ink:#2F3366;
@@ -101,7 +101,7 @@ input[type=checkbox]{accent-color:var(--rose)}
 @media (prefers-reduced-motion:reduce){.scene.talk .sprite,.dbox .next{animation:none}.sprite{transition:none}}
 
 /* 대사 상자 */
-.dbox{position:relative;z-index:3;background:rgba(255,255,255,.85);color:#2F3366;border:1.5px solid #2F3366;border-radius:12px;box-shadow:0 3px 0 rgba(47,51,102,.14);padding:22px 40px 14px 16px;margin:-64px 14px 18px 8px;min-height:96px;font-family:var(--px);font-size:16px;line-height:1.75}
+.dbox{position:relative;z-index:3;background:rgba(255,255,255,.85);color:#2F3366;border:none;border-radius:12px;box-shadow:0 3px 0 rgba(47,51,102,.16),0 6px 16px rgba(47,51,102,.14);padding:22px 40px 14px 16px;margin:-64px 14px 18px 8px;min-height:96px;font-family:var(--px);font-size:16px;line-height:1.75}
 .dbox .plate{position:absolute;top:-17px;left:14px;background:var(--pink);color:#2F3366;font-family:var(--px-b);padding:5px 16px;font-size:14px;line-height:1.3;border:2px solid #2F3366;border-radius:999px;box-shadow:0 2px 0 rgba(47,51,102,.2)}
 .dbox .plate::before{content:"";position:absolute;inset:3px;border:1.5px dashed rgba(47,51,102,.55);border-radius:999px;pointer-events:none}
 .dbox.sm{font-size:12px;line-height:1.7;min-height:76px;padding:20px 34px 12px 14px}
@@ -253,7 +253,7 @@ body.fit #app,body.fit .wrap{min-height:0}
 .thought::before{content:"";position:absolute;right:-17px;bottom:calc(100% - 13px);width:7px;height:7px;background:#fff;border:2px solid #2F3366;border-radius:50%}
 /* 지민이가 떠올린 공책 문장: 오른쪽 위 노란 메모지 */
 .memos{position:absolute;z-index:3;left:10px;top:10px;width:46%;max-width:190px;display:flex;flex-direction:column}
-.memo{width:100%;background:#DCEFFC;color:#3A3A5A;padding:14px 10px 10px;position:relative;transform:rotate(var(--r,3deg));
+.memo{width:100%;background:#FFF5BF;color:#3A3A5A;padding:14px 10px 10px;position:relative;transform:rotate(var(--r,3deg));
   box-shadow:3px 4px 0 rgba(47,51,102,.22);font-size:11.5px;line-height:1.4;animation:memoIn .35s ease-out}
 .memo + .memo{margin-top:-6px;width:92%}
 .memo::before{content:"";position:absolute;left:50%;top:-7px;width:44px;height:14px;transform:translateX(-50%) rotate(-3deg);background:rgba(255,209,220,.9)}
@@ -287,7 +287,8 @@ body.fit .vn-stage{min-height:0}
 .vn-stage .gauge{right:12px;top:12px}
 .vn-ui{position:absolute;z-index:3;left:0;right:0;bottom:0;padding:0 12px 14px;display:flex;flex-direction:column;gap:10px}
 .vn-ui .dbox{margin:22px 6px 0 0}
-.vn-ui .choices{margin:0 6px 0 0}
+.vn-ui .choices{margin:0 6px 8px 0}
+.vn-ui .choices:empty{display:none}
 .vn-bottom{flex:none;padding:8px 12px 10px;background:rgba(255,246,250,.82);border-top:1.5px solid #2F3366}
 .vn-bottom .composer{position:static;background:none;padding:0;margin:0;gap:8px;align-items:stretch}
 .vn-bottom .composer textarea{min-height:42px;height:42px;padding:9px 12px;font-size:14px;line-height:1.5;border-width:1.5px;resize:none}
@@ -306,13 +307,13 @@ body.fit .vn-stage{min-height:0}
 .homebtn{font-family:var(--px-b);font-size:13px;background:#fff;color:#2F3366;border:2px solid #2F3366;padding:4px 9px;cursor:pointer;box-shadow:2px 2px 0 #2F3366}
 .homebtn:active{transform:translate(2px,2px);box-shadow:none}
 .dbox.tap{cursor:pointer}
-.dbox.tap:hover{box-shadow:0 4px 0 var(--rose)}
+.dbox.tap:hover{box-shadow:0 3px 0 var(--rose),0 6px 16px rgba(47,51,102,.14)}
 .dbox.wait .next{visibility:hidden}
-.choices{display:flex;flex-direction:column;gap:9px;margin:-4px 14px 6px 8px}
-.choice{font-family:var(--px);font-size:15px;text-align:left;background:#fff;color:#2F3366;border:2px solid #2F3366;border-radius:12px;padding:10px 14px;cursor:pointer;box-shadow:0 4px 0 rgba(47,51,102,.18)}
+.choices{display:flex;flex-direction:column;gap:5px;margin:-4px 14px 6px 8px}
+.choice{font-family:var(--px);font-size:13px;line-height:1.4;text-align:left;background:rgba(255,255,255,.85);color:#2F3366;border:none;border-radius:12px;padding:6px 14px;cursor:pointer;box-shadow:0 3px 0 rgba(47,51,102,.16),0 5px 12px rgba(47,51,102,.12)}
 .choice::before{content:"▶ ";color:var(--rose)}
 .choice:hover{background:var(--pink-soft)}
-.choice:active{transform:translateY(4px);box-shadow:0 0 0 rgba(47,51,102,.18)}
+.choice:active{transform:translateY(3px);box-shadow:0 0 0 rgba(47,51,102,.16)}
 .hint{font-family:var(--px);font-size:12px;color:#2F3366;text-align:center;margin:4px 0 14px}
 .menu{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 6px 12px 0}
 .menu .btn{flex-direction:column;gap:4px;min-height:74px;font-size:15px}
@@ -330,8 +331,8 @@ body.fit .vn-stage{min-height:0}
 .pick-card span{font-size:13px;line-height:1.45}
 .pick-card:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #2F3366}
 .folders{display:grid;gap:14px}
-.folder{position:relative;text-align:left;cursor:pointer;background:#E3F3FD;color:#2F3366;border:3px solid #2F3366;box-shadow:4px 4px 0 #2F3366;padding:16px 14px 12px;margin-top:12px;display:flex;flex-direction:column;gap:8px}
-.folder::before{content:"";position:absolute;left:-3px;top:-15px;width:40%;height:12px;background:#E3F3FD;border:3px solid #2F3366;border-bottom:none}
+.folder{position:relative;text-align:left;cursor:pointer;background:#FFF9DB;color:#2F3366;border:3px solid #2F3366;box-shadow:4px 4px 0 #2F3366;padding:16px 14px 12px;margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.folder::before{content:"";position:absolute;left:-3px;top:-15px;width:40%;height:12px;background:#FFF9DB;border:3px solid #2F3366;border-bottom:none}
 .folder:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #2F3366}
 .f-title{font-family:var(--px-b);font-size:16px;line-height:1.35}
 .f-bar{display:block;height:12px;background:#fff;border:2px solid #2F3366}
@@ -340,9 +341,9 @@ body.fit .vn-stage{min-height:0}
 /* 업적 */
 .achs{display:grid;gap:10px}
 .ach{display:flex;gap:12px;align-items:center;padding:10px 12px;border:2px dashed #A9A6C6;background:#F4F3F8;color:#8A88A6}
-.ach.on{border:3px solid #2F3366;background:#E3F3FD;color:#2F3366;box-shadow:3px 3px 0 var(--pink)}
+.ach.on{border:3px solid #2F3366;background:#FFF9DB;color:#2F3366;box-shadow:3px 3px 0 var(--pink)}
 .a-ic{flex:none;width:34px;height:34px;display:grid;place-items:center;font-size:18px;background:#fff;border:2px solid currentColor}
-.ach.on .a-ic{color:#5AAFE0;border-color:#2F3366}
+.ach.on .a-ic{color:#E0B830;border-color:#2F3366}
 .ach b{display:block;font-family:var(--px-b);font-weight:400;font-size:15px}
 .ach span{font-size:13px;line-height:1.4}
 /* 설정: 의상 */
