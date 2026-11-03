@@ -114,6 +114,7 @@ input[type=checkbox]{accent-color:var(--pink)}
 /* 대사 상자 */
 .dbox{position:relative;z-index:3;background:rgba(255,255,255,.96);color:#2F3366;border:3px solid #2F3366;box-shadow:5px 5px 0 var(--pink);padding:16px 40px 16px 16px;margin:-64px 14px 18px 8px;min-height:96px;font-family:var(--px);font-size:16px;line-height:1.75}
 .dbox .plate{position:absolute;top:-30px;left:-3px;background:var(--pink);color:#2F3366;font-family:var(--px-b);padding:4px 14px;font-size:15px;border:3px solid #2F3366;border-bottom:none}
+.dbox.sm{font-size:14px;line-height:1.65;min-height:84px;padding:14px 36px 14px 14px}
 .dbox .next{position:absolute;right:14px;bottom:10px;color:var(--pink);font-size:14px;animation:blink 1s steps(2,start) infinite}
 .dbox.thinking .txt{opacity:.7}
 .dbox.err .txt{color:#D2335F}
@@ -224,39 +225,48 @@ details.q summary{cursor:pointer;font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#2F3366;border:3px solid var(--pink);font-family:var(--px);padding:10px 14px;font-size:14px;max-width:90%;z-index:60}
 @media (min-width:700px){.wrap{padding-top:24px}}
 
-/* 시험 장면: 회색 모의고사 시험지, 속마음 말풍선, 공책 메모지 */
-.exam-scene .sprite{height:118%;bottom:-18%}
-/* 속마음 구름 말풍선(💭 모양): 울퉁불퉁한 구름 + 왼쪽 아래로 작아지는 동그라미 두 개 */
-.thought{position:absolute;z-index:3;left:6px;top:8px;width:68%;min-height:92px;display:flex;align-items:center;justify-content:center;
-  padding:22px 36px 24px;color:#2F3366;font-family:var(--px);font-size:13px;line-height:1.5;text-align:center;filter:drop-shadow(3px 3px 0 rgba(47,51,102,.25))}
+/* 시험 장면: 위에 모의고사 시험지, 아래 답을 쓰는 지민이(속마음 구름 + 공책 메모지), 맨 아래 답안 작성 진행 막대 */
+.paper{position:relative;margin:0 6px 16px 0;background:#F4F4F8;color:#2B2B40;border:3px solid #2F3366;box-shadow:6px 6px 0 #2F3366;padding:12px 16px 14px}
+.paper-top{display:flex;justify-content:space-between;gap:10px;font-family:var(--px);font-size:11px;color:#6B6B88}
+.paper-top span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paper-top span:last-child{flex:none;white-space:nowrap}
+.paper-title{text-align:center;font-family:var(--px-b);font-size:21px;color:#2F3366;margin:8px 0 10px;padding-bottom:10px;border-bottom:3px solid #2F3366}
+.pq{font-family:"Gowun Dodum",serif;font-size:16px;font-weight:700;line-height:1.55;margin:0 0 8px;color:#22223A;word-break:keep-all}
+.pa{font-family:"Gowun Dodum",serif;font-size:15px;line-height:1.7;color:#2F3366;white-space:pre-wrap;min-height:3.4em}
+.pa::after{content:"▍";color:#2F3366;animation:blink 1s steps(2,start) infinite}
+.pa.nl{color:#8A88A6}
+.pnext{border-top:2px solid #C9C9D8;margin-top:8px;padding-top:8px;font-size:13px;color:#A2A2B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stamp{position:absolute;right:14px;bottom:14px;transform:rotate(-12deg);border:3px solid #E0446E;color:#E0446E;font-family:var(--px-b);font-size:18px;padding:4px 10px;background:rgba(255,255,255,.7);animation:blink 1s steps(2,start) infinite}
+.scene.exam-scene{height:clamp(360px,58vh,480px)}
+.exam-scene .sprite{height:104%;bottom:-26%}
+/* 속마음 구름 말풍선(💭 모양): 울퉁불퉁한 구름 + 오른쪽 아래(지민이 쪽)로 작아지는 동그라미 두 개 */
+.thought{position:absolute;z-index:3;left:6px;top:20%;width:54%;min-height:88px;display:flex;align-items:center;justify-content:center;
+  padding:20px 26px 22px;color:#2F3366;font-family:var(--px);font-size:12.5px;line-height:1.5;text-align:center;word-break:keep-all;filter:drop-shadow(3px 3px 0 rgba(47,51,102,.22))}
 .thought .cloud{position:absolute;inset:0;width:100%;height:100%;z-index:-1;overflow:visible}
 .thought .cloud path{fill:#fff;stroke:#2F3366;stroke-width:3;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .thought .tx{position:relative}
-.thought::after{content:"";position:absolute;left:20%;bottom:-20px;width:15px;height:15px;background:#fff;border:3px solid #2F3366;border-radius:50%}
-.thought::before{content:"";position:absolute;left:12%;bottom:-34px;width:9px;height:9px;background:#fff;border:2.5px solid #2F3366;border-radius:50%}
-.memo-hint{font-family:var(--px);font-size:12px;color:#2F3366;margin:14px 0 6px;min-height:1em}
-.memos{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;margin-bottom:6px;min-height:20px}
-.memo{flex:0 0 auto;width:min(46%,170px);background:#FFF3A6;color:#3A3A5A;padding:14px 10px 10px;position:relative;transform:rotate(var(--r,-2deg));
-  box-shadow:3px 4px 0 rgba(47,51,102,.18);font-size:13px;line-height:1.45;animation:memoIn .35s ease-out}
-.memo::before{content:"";position:absolute;left:50%;top:-7px;width:44px;height:14px;transform:translateX(-50%) rotate(-3deg);background:rgba(242,123,174,.55)}
+.thought::after{content:"";position:absolute;right:16%;bottom:-18px;width:14px;height:14px;background:#fff;border:3px solid #2F3366;border-radius:50%}
+.thought::before{content:"";position:absolute;right:8%;bottom:-32px;width:8px;height:8px;background:#fff;border:2.5px solid #2F3366;border-radius:50%}
+/* 지민이가 떠올린 공책 문장: 오른쪽 위 노란 메모지 */
+.memos{position:absolute;z-index:3;right:8px;top:10px;width:42%;display:flex;flex-direction:column;align-items:flex-end}
+.memo{width:100%;background:#FFF0A0;color:#3A3A5A;padding:14px 10px 10px;position:relative;transform:rotate(var(--r,3deg));
+  box-shadow:3px 4px 0 rgba(47,51,102,.22);font-size:12.5px;line-height:1.45;animation:memoIn .35s ease-out}
+.memo + .memo{margin-top:-6px;width:92%}
+.memo::before{content:"";position:absolute;left:50%;top:-7px;width:44px;height:14px;transform:translateX(-50%) rotate(-3deg);background:rgba(242,123,174,.6)}
 .memo b{display:block;font-family:var(--px-b);font-weight:400;font-size:11px;color:#C2457E;margin-bottom:3px}
+.memo span{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
 .memo.belief{background:#FFD9E6}
 .memo.belief b{color:#B4234F}
 .memo.empty{background:#EEEDF3;color:#77779A}
-@keyframes memoIn{from{opacity:0;transform:translateY(-8px) rotate(var(--r,-2deg))}to{opacity:1}}
-.paper{position:relative;margin:6px 6px 8px 0;background:#E7E6E1;color:#2B2B33;border:2px solid #9C9A94;box-shadow:5px 5px 0 #2F3366;
-  background-image:repeating-linear-gradient(0deg,transparent 0 27px,rgba(0,0,0,.06) 27px 28px);padding:0 14px 16px}
-.paper-head{display:grid;grid-template-columns:1fr;gap:2px;text-align:center;border-bottom:3px double #55534E;margin:0 -14px 12px;padding:10px 12px 8px;background:#DCDBD5}
-.paper-head b{font-family:var(--px-b);font-weight:400;font-size:17px}
-.ph-l,.ph-r{font-size:11px;color:#55534E;font-family:var(--px)}
-.pq{font-family:"Gowun Dodum",serif;font-size:16px;font-weight:700;line-height:1.6;margin:4px 0 12px}
-.pa-box{position:relative;border:2px solid #55534E;background:rgba(255,255,255,.55);min-height:110px;padding:12px 12px 12px 44px}
-.pa-label{position:absolute;left:0;top:0;bottom:0;width:32px;display:grid;place-items:center;border-right:2px solid #55534E;font-family:var(--px-b);font-size:13px;color:#55534E;background:#DCDBD5}
-.pa{font-family:"Gowun Dodum",serif;font-size:16px;line-height:1.7;color:#24305F;white-space:pre-wrap;min-height:1.7em}
-.pa::after{content:"▍";color:#24305F;animation:blink 1s steps(2,start) infinite}
-.pa.nl{color:#8A88A6}
-.stamp{position:absolute;right:16px;bottom:18px;transform:rotate(-12deg);border:3px solid #E0446E;color:#E0446E;font-family:var(--px-b);font-size:18px;padding:4px 10px;background:rgba(255,255,255,.6);animation:blink 1s steps(2,start) infinite}
-.exam-status{font-family:var(--px);font-size:12px;color:#2F3366;text-align:center;margin:6px 0 0}
+@keyframes memoIn{from{opacity:0;transform:translateY(-8px) rotate(var(--r,3deg))}to{opacity:1}}
+/* 맨 아래 진행 막대: 답안 작성 01 / 05 */
+.exam-prog{display:flex;align-items:center;gap:10px;margin:14px 6px 0 0;background:var(--pink);border:3px solid #2F3366;box-shadow:4px 4px 0 #2F3366;padding:8px 12px;font-family:var(--px);font-size:12px;color:#2F3366}
+.exam-prog .lbl{white-space:nowrap}
+.exam-prog .segs{flex:1;display:flex;gap:4px}
+.exam-prog .segs i{flex:1;height:12px;background:#fff;border:2px solid #2F3366}
+.exam-prog .segs i.on{background:var(--yellow)}
+.exam-prog .pct{min-width:3em;text-align:right}
+.exam-status{font-family:var(--px);font-size:12px;color:#2F3366;text-align:center;margin:10px 0 0}
 @media (prefers-reduced-motion:reduce){.memo,.stamp,.pa::after{animation:none}}
 /* 쪽 번호 표시 */
 .pg{display:inline-block;margin-left:8px;font-family:var(--px);font-size:11px;color:#2F3366;background:var(--yellow);border:2px solid #2F3366;padding:0 5px;vertical-align:2px}
@@ -323,11 +333,11 @@ details.q summary{cursor:pointer;font-size:15px}
   background-size:48px 48px;animation:t-drift 14s linear infinite}
 .t-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 38%,rgba(255,232,242,.75),rgba(255,232,242,0) 62%)}
 .t-girl{position:absolute;left:-40px;top:62px;width:800px;height:auto;max-width:none;transform-origin:50% 100%;animation:t-breathe 4.2s ease-in-out infinite}
-.t-bar{position:absolute;left:0;right:0;top:0;height:52px;background:#F27BAE;border-bottom:4px solid #2F3366;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:2}
-.t-bar b{font-family:"Silkscreen",monospace;font-weight:700;font-size:18px;color:#2F3366;letter-spacing:1px}
+.t-bar{position:absolute;left:0;right:0;top:0;height:52px;background:#1E2A5C;display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:2}
+.t-bar b{font-family:"Silkscreen",monospace;font-weight:700;font-size:18px;color:#fff;letter-spacing:1px}
 .t-bar i{display:inline-block;width:22px;height:22px;margin-left:10px;animation:t-blink 2.4s steps(1) infinite}
 .t-bar i:nth-child(1){background:#FFE27A}
-.t-bar i:nth-child(2){background:#2F3366;animation-delay:.8s}
+.t-bar i:nth-child(2){background:#F06C9B;animation-delay:.8s}
 .t-bar i:nth-child(3){background:#fff;animation-delay:1.6s}
 .t-pxb{box-shadow:0 -4px 0 0 #1E2A5C,0 4px 0 0 #1E2A5C,-4px 0 0 0 #1E2A5C,4px 0 0 0 #1E2A5C,8px 8px 0 0 rgba(30,42,92,.3)}
 .t-sticker{position:absolute;background:#fff;padding:10px 14px}
@@ -337,8 +347,8 @@ details.q summary{cursor:pointer;font-size:15px}
 .t-s2{left:376px;top:516px;--r:4deg;animation:t-wiggle 2.2s ease-in-out .4s infinite}
 .t-s2 img{width:96px;height:auto}
 .t-logo{position:absolute;right:28px;top:70px;width:430px;height:auto;max-width:none;image-rendering:pixelated;animation:t-float 3.2s ease-in-out infinite}
-.t-sub{position:absolute;right:44px;top:368px;padding:10px 18px;background:#fff;color:#2F3366;font-size:24px;white-space:nowrap}
-.t-sub span{color:#E25A98}
+.t-sub{position:absolute;right:44px;top:368px;padding:10px 18px;background:#1E2A5C;color:#fff;font-size:24px;white-space:nowrap}
+.t-sub span{color:#FFE27A}
 .t-card{position:absolute;left:398px;top:636px;width:280px;padding:16px 18px 14px;background:#fff;transform:rotate(3deg);display:flex;flex-direction:column;gap:8px}
 .t-card .lbl{font-size:24px}
 .t-segs{display:flex;gap:5px}
@@ -346,17 +356,17 @@ details.q summary{cursor:pointer;font-size:15px}
 .t-segs i::after{content:"";position:absolute;inset:0;background:#F06C9B;transform:scaleX(0);transform-origin:left;animation:t-fill .35s ease-out forwards}
 .t-segs i.e::after{display:none}
 .t-pct{font-family:"Pixelify Sans",sans-serif;font-weight:700;font-size:22px;text-align:right}
-.t-dlg{position:absolute;left:54px;right:54px;top:900px;min-height:132px;padding:30px 24px 22px;background:rgba(255,255,255,.96);color:#2F3366}
-.t-dlg .who{position:absolute;left:20px;top:-22px;padding:6px 18px;background:#F27BAE;color:#2F3366;font-size:22px}
+.t-dlg{position:absolute;left:54px;right:54px;top:900px;min-height:132px;padding:30px 24px 22px;background:rgba(30,42,92,.95);color:#fff}
+.t-dlg .who{position:absolute;left:20px;top:-22px;padding:6px 18px;background:#F06C9B;color:#fff;font-size:22px}
 .t-dlg p{margin:0;font-size:23px;line-height:1.5;min-height:69px;word-break:keep-all}
-.t-dlg .more{position:absolute;right:22px;bottom:12px;color:#F27BAE;font-size:18px;animation:t-blink 1s steps(1) infinite}
+.t-dlg .more{position:absolute;right:22px;bottom:12px;color:#FFE27A;font-size:18px;animation:t-blink 1s steps(1) infinite}
 .t-start{position:absolute;left:50%;top:1120px;transform:translateX(-50%);font:inherit;font-size:52px;letter-spacing:2px;color:#1E2A5C;
   background:none;border:none;padding:8px 24px;cursor:pointer;white-space:nowrap;
   text-shadow:3px 0 0 #fff,-3px 0 0 #fff,0 3px 0 #fff,0 -3px 0 #fff,3px 3px 0 #fff,-3px -3px 0 #fff,3px -3px 0 #fff,-3px 3px 0 #fff}
 .t-start span{display:inline-block;animation:t-bob 1.1s ease-in-out infinite alternate}
 .t-start:focus-visible{outline:4px solid #1E2A5C;outline-offset:4px}
-.t-foot{position:absolute;left:0;right:0;bottom:0;height:40px;background:#F27BAE;border-top:4px solid #2F3366;display:flex;align-items:center;justify-content:center;
-  font-family:"Silkscreen",monospace;font-size:14px;color:#2F3366}
+.t-foot{position:absolute;left:0;right:0;bottom:0;height:40px;background:#1E2A5C;display:flex;align-items:center;justify-content:center;
+  font-family:"Silkscreen",monospace;font-size:14px;color:#F4BDD3}
 /* 처음 등장: 요소들이 차례로 튀어나온다 */
 .t-pop{animation-name:t-pop!important;animation-duration:.5s!important;animation-timing-function:cubic-bezier(.34,1.56,.64,1)!important;animation-iteration-count:1!important;animation-fill-mode:both!important}
 @keyframes t-pop{from{opacity:0;scale:.6}to{opacity:1;scale:1}}
@@ -1950,6 +1960,7 @@ function viewTeach(){
   var last = S.dialog.slice().reverse().filter(function(d){ return d.role === 'char'; })[0];
   els.scene = scene(S.face);
   var d = dbox(last ? last.text : '', {live:true});
+  d.box.classList.add('sm');
   els.dtext = d.txt; els.dbox = d.box;
   var stage = els.scene;
   var tabDefs = [['talk','대화'],['note',ch.short + '의 공책'],['runtime','런타임']];
@@ -2071,12 +2082,22 @@ function typeInto(el, text, speed, done){
 function examShowQuestion(i){
   var E = S.exam, q = E.qs[i];
   if (!els.paperQ) return;
-  els.paperNo.textContent = '문제 ' + (i + 1) + ' / ' + E.qs.length;
-  els.paperQ.textContent = (i + 1) + '. ' + q.question;
+  var nx = E.qs[i + 1];
+  els.paperQ.textContent = pad2(i + 1) + '. ' + q.question;
   els.paperA.textContent = '';
   els.paperA.classList.remove('nl');
+  els.pnext.textContent = nx ? pad2(i + 2) + '. ' + nx.question : '마지막 문제예요';
   els.memos.innerHTML = '';
-  els.memoHint.textContent = '';
+  examProg(i, false);
+}
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+/* 답안 작성 진행 막대: i번째 문제를 쓰는 중(done이면 다 씀) */
+function examProg(i, done, wrote){
+  var E = S.exam, n = E.qs.length, k = done ? n : wrote ? i + 1 : i;
+  if (!els.progLbl) return;
+  els.progLbl.textContent = done ? '답안 제출 완료' : '답안 작성 ' + pad2(i + 1) + ' / ' + pad2(n);
+  Array.prototype.forEach.call(els.progSegs.children, function(c, j){ c.classList.toggle('on', j < k); });
+  els.progPct.textContent = Math.round(k / Math.max(1, n) * 100) + '%';
 }
 function examPlay(){
   var E = S.exam;
@@ -2094,18 +2115,17 @@ function examPlay(){
     typeInto(els.bubbleTx, thought, E.skip ? 0 : 30, function(){
       var memos = examMemos(sol, E);
       if (memos.length) {
-        els.memoHint.textContent = '지민이가 떠올린 선배의 말';
-        memos.forEach(function(m, k){
-          els.memos.append(h('div', {class:'memo' + (m.belief ? ' belief' : ''), style:'--r:' + (k % 2 ? 2 : -2) + 'deg'},
+        memos.slice(0, 2).forEach(function(m, k){
+          els.memos.append(h('div', {class:'memo' + (m.belief ? ' belief' : ''), style:'--r:' + (k % 2 ? -2 : 3) + 'deg'},
             h('b', {}, m.belief ? '혼자 믿게 된 것' : '공책 ' + m.id), h('span', {}, m.text)));
         });
       } else {
-        els.memoHint.textContent = '';
         els.memos.append(h('div', {class:'memo empty'}, h('b', {}, '공책'), h('span', {}, '관련된 선배 말을 못 찾았어요')));
       }
       if (sol.status === 'not_learned') els.paperA.classList.add('nl');
       setTimeout(function(){
         typeInto(els.paperA, sol.answer, fast(), function(){
+          examProg(i, false, true);
           E.timers.push(setTimeout(function(){ step(i + 1); }, E.skip ? 150 : 1100));
         });
       }, E.skip ? 0 : 450);
@@ -2120,7 +2140,7 @@ function examAfterPlay(){
   if (E.stage >= 3 && E.grade) { examFinish(); return; }
   setFace('reading');
   els.bubbleTx.textContent = '다 풀긴 했는데… 몇 점일까… 무서워…';
-  els.paperNo.textContent = '답안 제출 완료';
+  examProg(E.qs.length - 1, true);
   els.status.textContent = E.stage < 2 ? '근거 검증기가 답안의 근거 번호를 확인하는 중…' : '채점하고 되짚기 카드를 만드는 중…';
   els.stamp.hidden = false;
 }
@@ -2151,38 +2171,39 @@ function examFinish(){
 }
 
 function viewExam(){
-  var E = S.exam, a = S.analysis;
+  var E = S.exam, a = S.analysis, ch = CHARS[S.charId];
   var sc = scene('writing', true, 'aff');
   sc.classList.add('exam-scene');
   els.kao.hidden = true;
+  if (els.gauge) { els.gauge.remove(); els.gauge = null; }
   els.bubbleTx = h('span', {class:'tx'}, '떨린다… 선배가 알려 주신 것만 떠올려야 해…');
   els.bubble = h('div', {class:'thought', 'aria-live':'polite'},
     h('span', {'aria-hidden':'true', html:'<svg class="cloud" viewBox="0 0 200 100" preserveAspectRatio="none"><path d="M40 86 A17 17 0 0 1 20 64 A19 19 0 0 1 32 32 A23 23 0 0 1 72 14 A26 26 0 0 1 120 10 A24 24 0 0 1 163 26 A20 20 0 0 1 183 58 A18 18 0 0 1 162 86 A22 22 0 0 1 122 93 A22 22 0 0 1 82 93 A20 20 0 0 1 40 86 Z"/></svg>'}),
     els.bubbleTx);
-  sc.append(els.bubble);
-  els.memoHint = h('p', {class:'memo-hint'});
-  els.memos = h('div', {class:'memos'});
-  els.paperNo = h('span', {}, '문제 1 / ' + E.qs.length);
-  els.paperQ = h('p', {class:'pq'}, '1. ' + (E.qs[0] ? E.qs[0].question : ''));
+  els.memos = h('div', {class:'memos', 'aria-label':ch.short + '이가 떠올린 선배의 말'});
+  sc.append(els.bubble, els.memos);
+  els.paperQ = h('p', {class:'pq'}, '01. ' + (E.qs[0] ? E.qs[0].question : ''));
   els.paperA = h('div', {class:'pa', 'aria-live':'polite'});
+  els.pnext = h('p', {class:'pnext'}, E.qs[1] ? '02. ' + E.qs[1].question : '마지막 문제예요');
   els.stamp = h('div', {class:'stamp', hidden:true}, '채점 중');
   els.status = h('p', {class:'exam-status', role:'status'});
   var skip = h('button', {class:'btn ghost small', onclick:function(){ E.skip = true; skip.disabled = true; }}, '빨리 보기 ▶▶');
   var paper = h('div', {class:'paper'},
-    h('div', {class:'paper-head'},
-      h('span', {class:'ph-l'}, 'TeachMe ' + E.round + '차고사'),
-      h('b', {}, (a && a.title) || '학습 평가'),
-      h('span', {class:'ph-r'}, MODES[S.mode].label + ' · ', els.paperNo)),
-    els.paperQ,
-    h('div', {class:'pa-box'}, h('span', {class:'pa-label'}, '답'), els.paperA),
-    els.stamp);
+    h('div', {class:'paper-top'}, h('span', {}, ((a && a.title) || '학습 평가') + ' · ' + MODES[S.mode].label), h('span', {}, '응시자 ' + ch.short)),
+    h('div', {class:'paper-title'}, 'TeachMe ' + E.round + '차고사'),
+    els.paperQ, els.paperA, els.pnext, els.stamp);
+  els.progLbl = h('span', {class:'lbl'});
+  els.progSegs = h('div', {class:'segs', 'aria-hidden':'true'}, E.qs.map(function(){ return h('i'); }));
+  els.progPct = h('span', {class:'pct'});
+  var prog = h('div', {class:'exam-prog'}, els.progLbl, els.progSegs, els.progPct);
   setTimeout(function(){
+    examProg(E.playIndex || 0, !!E.played);
     if (E.err) return;
     examStatus();
     if (E.solved && !E.played && !E.playing) examPlay();
     else if (E.played) examAfterPlay();
   }, 0);
-  return h('section', {}, sc, els.memoHint, els.memos, paper, els.status,
+  return h('section', {}, paper, sc, prog, els.status,
     E.err ? h('div', {}, h('p', {class:'err-text'}, E.err), h('button', {class:'btn small', onclick:function(){ runExam(true); }}, '이어서 다시 시도')) : null,
     h('div', {class:'row spread', style:'margin-top:10px'},
       h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'), skip));
