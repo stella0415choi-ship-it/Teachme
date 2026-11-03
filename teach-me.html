@@ -19,7 +19,7 @@
 /* ===== 디자인 토큰: 핑크 하프톤 + 네이비 레트로 게임 창 ===== */
 :root{
   --bg:#F5B8DD; --dot:rgba(255,255,255,.6); --win:#FFFFFF; --ink:#2F3366; --ink-soft:#6B6F9A;
-  --line:#2F3366; --bar:#2F3366; --bar-ink:#FFFFFF; --pink:#F27BAE; --pink-soft:#FCD9EB; --yellow:#F8DE74; --lav:#ECE8F6;
+  --line:#2F3366; --bar:#2F3366; --bar-ink:#FFFFFF; --pink:#F27BAE; --pink-bright:#F2569A; --navy:#2F3366; --pink-soft:#FCD9EB; --yellow:#F8DE74; --lav:#ECE8F6;
   --ok:#1E9A7A; --bad:#E0446E; --warn:#C27410; --blue:#3E66D6;
   /* 예전 이름(스크립트 안에서 쓰는 것) */
   --paper:var(--lav); --sheet:var(--win); --rule:#C9C6E0; --margin:var(--pink); --hl:var(--yellow); --hl-ink:#2F3366;
@@ -73,10 +73,10 @@ p{margin:0 0 10px}
 
 /* 버튼 */
 .btn{font-family:var(--px-b);font-size:15px;line-height:1.2;padding:11px 16px;border:3px solid var(--line);background:var(--pink);color:#2F3366;cursor:pointer;min-height:46px;
-  display:inline-flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:4px 4px 0 var(--line);border-radius:0}
-.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--line)}
+  display:inline-flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 0 var(--navy);border-radius:0;transition:all .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--navy)}
 .btn.ghost{background:var(--win);color:var(--ink)}
-.btn.small{padding:6px 11px;font-size:13px;min-height:36px;box-shadow:3px 3px 0 var(--line)}
+.btn.small{padding:6px 11px;font-size:13px;min-height:36px}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
 textarea{display:block;width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--win);border:3px solid var(--line);border-radius:0;padding:12px;resize:vertical;margin:10px 0}
 textarea:focus{outline:none;box-shadow:4px 4px 0 var(--pink)}
@@ -214,35 +214,47 @@ details.q summary{cursor:pointer;font-size:15px}
 @media (min-width:700px){.wrap{padding-top:24px}}
 
 /* 시험 장면: 위에 모의고사 시험지, 아래 답을 쓰는 지민이(속마음 구름 + 공책 메모지), 맨 아래 답안 작성 진행 막대 */
-.paper{position:relative;margin:0 6px 16px 0;background:#F4F4F8;color:#2B2B40;border:3px solid #2F3366;box-shadow:6px 6px 0 #2F3366;padding:12px 16px 14px}
-.paper-top{display:flex;justify-content:space-between;gap:10px;font-family:var(--px);font-size:11px;color:#6B6B88}
+.paper{position:relative;margin:0 6px 16px 0;background:#F4F4F8;color:#2B2B40;border:3px solid #2F3366;box-shadow:5px 5px 0 #2F3366;padding:9px 12px 9px}
+.paper-top{display:flex;justify-content:space-between;gap:10px;font-family:var(--px);font-size:10px;line-height:1.4;color:#5E5E78}
 .paper-top span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .paper-top span:last-child{flex:none;white-space:nowrap}
-.paper-title{text-align:center;font-family:var(--px-b);font-size:21px;color:#2F3366;margin:8px 0 10px;padding-bottom:10px;border-bottom:3px solid #2F3366}
-.pq{font-family:"Gowun Dodum",serif;font-size:16px;font-weight:700;line-height:1.55;margin:0 0 8px;color:#22223A;word-break:keep-all}
-.pa{font-family:"Gowun Dodum",serif;font-size:15px;line-height:1.7;color:#2F3366;white-space:pre-wrap;min-height:3.4em}
-.pa::after{content:"▍";color:#2F3366;animation:blink 1s steps(2,start) infinite}
+.paper-title{text-align:center;font-family:var(--px-b);font-size:16px;line-height:1.3;color:#2F3366;margin:5px 0 7px;padding-bottom:6px;border-bottom:3px solid #2F3366}
+.pq{font-family:"Gowun Dodum",serif;font-size:13.5px;font-weight:700;line-height:1.45;margin:0 0 5px;color:#22223A;word-break:keep-all}
+.pa{font-family:"Gowun Dodum",serif;font-size:13px;line-height:1.5;color:#2F3366;white-space:pre-wrap;min-height:3em}
+.pa::after{content:" ▼";color:var(--pink-bright);font-size:12px;animation:blinkCursor .8s step-end infinite}
+@keyframes blinkCursor{0%,100%{opacity:1}50%{opacity:0}}
 .pa.nl{color:#8A88A6}
-.pnext{border-top:2px solid #C9C9D8;margin-top:8px;padding-top:8px;font-size:13px;color:#A2A2B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pnext{border-top:2px solid #C9C9D8;margin-top:6px;padding-top:5px;font-size:11.5px;line-height:1.4;color:#6A6A82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stamp{position:absolute;right:14px;bottom:14px;transform:rotate(-12deg);border:3px solid #E0446E;color:#E0446E;font-family:var(--px-b);font-size:18px;padding:4px 10px;background:rgba(255,255,255,.7);animation:blink 1s steps(2,start) infinite}
-.scene.exam-scene{height:clamp(360px,58vh,480px)}
-.exam-scene .sprite{height:104%;bottom:-26%}
+.exam-screen{display:flex;flex-direction:column;flex:1;min-height:0}
+.exam-stage{position:relative;flex:1;min-height:340px;overflow:hidden}
+.exam-stage .paper{position:absolute;z-index:4;top:12px;left:12px;right:14px;margin:0}
+.exam-lower{position:absolute;left:0;right:0;bottom:0;height:56%}
+/* writing 그림은 양옆이 잘린 그림이라 가장자리를 흐리게 해서 네모 상자처럼 안 보이게 */
+.exam-lower .sprite{height:100%;bottom:0;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 14%,#000 86%,transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 14%,#000 86%,transparent 100%)}
+.exam-foot{padding:6px 12px 10px}
+.exam-foot .exam-prog{margin:0 6px 0 0}
+.exam-foot .exam-status{margin:6px 0 0}
+/* 세로가 짧은 폰: 지민이를 조금 작게, 메모지는 시험지 밑으로 */
+@media (max-height:740px){.exam-lower{height:50%}.exam-lower .memos{top:0}.exam-lower .thought{top:30%}}
+body.fit{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+body.fit #app,body.fit .wrap{min-height:0}
 /* 속마음 구름 말풍선(💭 모양): 울퉁불퉁한 구름 + 오른쪽 아래(지민이 쪽)로 작아지는 동그라미 두 개 */
-.thought{position:absolute;z-index:3;left:6px;top:20%;width:54%;min-height:88px;display:flex;align-items:center;justify-content:center;
-  padding:20px 26px 22px;color:#2F3366;font-family:var(--px);font-size:12.5px;line-height:1.5;text-align:center;word-break:keep-all;filter:drop-shadow(3px 3px 0 rgba(47,51,102,.22))}
+.thought{position:absolute;z-index:3;left:4px;top:34%;width:43%;min-height:80px;display:flex;align-items:center;justify-content:center;
+  padding:18px 26px 20px;color:#2F3366;font-family:var(--px);font-size:11px;line-height:1.5;text-align:center;word-break:keep-all;filter:drop-shadow(3px 3px 0 rgba(47,51,102,.22))}
 .thought .cloud{position:absolute;inset:0;width:100%;height:100%;z-index:-1;overflow:visible}
 .thought .cloud path{fill:#fff;stroke:#2F3366;stroke-width:3;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .thought .tx{position:relative}
-.thought::after{content:"";position:absolute;right:16%;bottom:-18px;width:14px;height:14px;background:#fff;border:3px solid #2F3366;border-radius:50%}
-.thought::before{content:"";position:absolute;right:8%;bottom:-32px;width:8px;height:8px;background:#fff;border:2.5px solid #2F3366;border-radius:50%}
+.thought::after{content:"";position:absolute;right:-10px;bottom:-6px;width:13px;height:13px;background:#fff;border:3px solid #2F3366;border-radius:50%}
+.thought::before{content:"";position:absolute;right:-22px;bottom:-20px;width:8px;height:8px;background:#fff;border:2.5px solid #2F3366;border-radius:50%}
 /* 지민이가 떠올린 공책 문장: 오른쪽 위 노란 메모지 */
-.memos{position:absolute;z-index:3;right:8px;top:10px;width:42%;display:flex;flex-direction:column;align-items:flex-end}
+.memos{position:absolute;z-index:3;right:0;top:-13%;width:33%;display:flex;flex-direction:column;align-items:flex-end}
 .memo{width:100%;background:#FFF0A0;color:#3A3A5A;padding:14px 10px 10px;position:relative;transform:rotate(var(--r,3deg));
-  box-shadow:3px 4px 0 rgba(47,51,102,.22);font-size:12.5px;line-height:1.45;animation:memoIn .35s ease-out}
+  box-shadow:3px 4px 0 rgba(47,51,102,.22);font-size:11.5px;line-height:1.4;animation:memoIn .35s ease-out}
 .memo + .memo{margin-top:-6px;width:92%}
 .memo::before{content:"";position:absolute;left:50%;top:-7px;width:44px;height:14px;transform:translateX(-50%) rotate(-3deg);background:rgba(242,123,174,.6)}
 .memo b{display:block;font-family:var(--px-b);font-weight:400;font-size:11px;color:#C2457E;margin-bottom:3px}
-.memo span{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.memo span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .memo.belief{background:#FFD9E6}
 .memo.belief b{color:#B4234F}
 .memo.empty{background:#EEEDF3;color:#77779A}
@@ -256,6 +268,9 @@ details.q summary{cursor:pointer;font-size:15px}
 .exam-prog .pct{min-width:3em;text-align:right}
 .exam-status{font-family:var(--px);font-size:12px;color:#2F3366;text-align:center;margin:10px 0 0}
 @media (prefers-reduced-motion:reduce){.memo,.stamp,.pa::after{animation:none}}
+/* 레트로 화면 가로줄 효과 */
+.scene::after,.vn-stage::after,.exam-stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:99;
+  background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,0) 50%,rgba(0,0,0,.03) 50%,rgba(0,0,0,.03));background-size:100% 4px}
 /* 쪽 번호 표시 */
 .pg{display:inline-block;margin-left:8px;font-family:var(--px);font-size:11px;color:#2F3366;background:var(--yellow);border:2px solid #2F3366;padding:0 5px;vertical-align:2px}
 /* ===== 미연시 화면(홈·가르치기): 상자 없이 교실 배경 위에 큰 캐릭터, 아래에 겹친 대사 상자 ===== */
@@ -1712,7 +1727,8 @@ function navbar(){
 function renderAll(){
   var app = document.getElementById('app');
   app.innerHTML = ''; els = {};
-  var vn = S.screen === 'home' || S.screen === 'teach';
+  var vn = S.screen === 'home' || S.screen === 'teach' || S.screen === 'exam';
+  document.body.classList.toggle('fit', S.screen === 'exam');
   var top = h('header', {class:'topbar'}, h('b', {}, 'TEACH_ME.EXE'),
     h('div', {class:'row', style:'gap:10px'},
       S.screen !== 'home' && !NAV_OF[S.screen] ? h('button', {class:'homebtn', onclick:function(){ go('home'); }}, '◀ 홈') : null,
@@ -1722,7 +1738,7 @@ function renderAll(){
   var view = {home:viewHome, study:viewStudy, library:viewLibrary, settings:viewSettings,
     upload:viewUpload, outline:viewOutline, teach:viewTeach, exam:viewExam, review:viewReview}[S.screen] || viewHome;
   var v = view();
-  if (vn) v.style.cssText = 'display:flex;flex-direction:column;flex:1';
+  if (vn) v.style.cssText = 'display:flex;flex-direction:column;flex:1;min-height:0';
   wrap.append(v);
   app.append(top, wrap);
   if (NAV_OF[S.screen]) app.append(navbar());
@@ -2207,16 +2223,12 @@ function examFinish(){
 
 function viewExam(){
   var E = S.exam, a = S.analysis, ch = CHARS[S.charId];
-  var sc = scene('writing', true, 'aff');
-  sc.classList.add('exam-scene');
-  els.kao.hidden = true;
-  if (els.gauge) { els.gauge.remove(); els.gauge = null; }
+  els.sprite = sprite('writing');
   els.bubbleTx = h('span', {class:'tx'}, '떨린다. 선배가 알려 주신 것만 떠올려야 해.');
   els.bubble = h('div', {class:'thought', 'aria-live':'polite'},
     h('span', {'aria-hidden':'true', html:'<svg class="cloud" viewBox="0 0 200 100" preserveAspectRatio="none"><path d="M40 86 A17 17 0 0 1 20 64 A19 19 0 0 1 32 32 A23 23 0 0 1 72 14 A26 26 0 0 1 120 10 A24 24 0 0 1 163 26 A20 20 0 0 1 183 58 A18 18 0 0 1 162 86 A22 22 0 0 1 122 93 A22 22 0 0 1 82 93 A20 20 0 0 1 40 86 Z"/></svg>'}),
     els.bubbleTx);
   els.memos = h('div', {class:'memos', 'aria-label':ch.short + '이가 떠올린 선배의 말'});
-  sc.append(els.bubble, els.memos);
   els.paperQ = h('p', {class:'pq'}, '01. ' + (E.qs[0] ? E.qs[0].question : ''));
   els.paperA = h('div', {class:'pa', 'aria-live':'polite'});
   els.pnext = h('p', {class:'pnext'}, E.qs[1] ? '02. ' + E.qs[1].question : '마지막 문제예요');
@@ -2238,10 +2250,12 @@ function viewExam(){
     if (E.solved && !E.played && !E.playing) examPlay();
     else if (E.played) examAfterPlay();
   }, 0);
-  return h('section', {}, paper, sc, prog, els.status,
-    E.err ? h('div', {}, h('p', {class:'err-text'}, E.err), h('button', {class:'btn small', onclick:function(){ runExam(true); }}, '이어서 다시 시도')) : null,
-    h('div', {class:'row spread', style:'margin-top:10px'},
-      h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'), skip));
+  var stage = h('div', {class:'exam-stage'}, h('div', {class:'exam-lower'}, els.sprite, els.bubble, els.memos), paper);
+  return h('section', {class:'exam-screen'}, stage,
+    h('div', {class:'exam-foot'}, prog, els.status,
+      E.err ? h('div', {}, h('p', {class:'err-text'}, E.err), h('button', {class:'btn small', onclick:function(){ runExam(true); }}, '이어서 다시 시도')) : null,
+      h('div', {class:'row spread', style:'margin-top:8px'},
+        h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'), skip)));
 }
 
 function miscBadge(m){
