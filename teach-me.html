@@ -226,10 +226,14 @@ details.q summary{cursor:pointer;font-size:15px}
 
 /* 시험 장면: 회색 모의고사 시험지, 속마음 말풍선, 공책 메모지 */
 .exam-scene .sprite{height:118%;bottom:-18%}
-.thought{position:absolute;z-index:3;left:10px;top:10px;max-width:62%;background:#fff;color:#2F3366;border:3px solid #2F3366;border-radius:18px;padding:8px 12px;
-  font-family:var(--px);font-size:13px;line-height:1.5;box-shadow:3px 3px 0 rgba(47,51,102,.25);min-height:2.4em}
-.thought::after{content:"";position:absolute;left:28px;bottom:-14px;width:12px;height:12px;background:#fff;border:3px solid #2F3366;border-radius:50%}
-.thought::before{content:"";position:absolute;left:44px;bottom:-24px;width:7px;height:7px;background:#fff;border:2px solid #2F3366;border-radius:50%}
+/* 속마음 구름 말풍선(💭 모양): 울퉁불퉁한 구름 + 왼쪽 아래로 작아지는 동그라미 두 개 */
+.thought{position:absolute;z-index:3;left:6px;top:8px;width:68%;min-height:92px;display:flex;align-items:center;justify-content:center;
+  padding:22px 36px 24px;color:#2F3366;font-family:var(--px);font-size:13px;line-height:1.5;text-align:center;filter:drop-shadow(3px 3px 0 rgba(47,51,102,.25))}
+.thought .cloud{position:absolute;inset:0;width:100%;height:100%;z-index:-1;overflow:visible}
+.thought .cloud path{fill:#fff;stroke:#2F3366;stroke-width:3;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.thought .tx{position:relative}
+.thought::after{content:"";position:absolute;left:20%;bottom:-20px;width:15px;height:15px;background:#fff;border:3px solid #2F3366;border-radius:50%}
+.thought::before{content:"";position:absolute;left:12%;bottom:-34px;width:9px;height:9px;background:#fff;border:2.5px solid #2F3366;border-radius:50%}
 .memo-hint{font-family:var(--px);font-size:12px;color:#2F3366;margin:14px 0 6px;min-height:1em}
 .memos{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;margin-bottom:6px;min-height:20px}
 .memo{flex:0 0 auto;width:min(46%,170px);background:#FFF3A6;color:#3A3A5A;padding:14px 10px 10px;position:relative;transform:rotate(var(--r,-2deg));
@@ -1363,7 +1367,9 @@ function runExam(retry){
   if (!retry) {
     if (!S.ledger.length) { toast('먼저 한 문장이라도 설명해 주세요.'); return; }
     if (!examQs().length) { toast('고른 범위에 시험 문제가 없어요. 목차에서 범위를 다시 골라 주세요.'); return; }
-    S.exam = {qs:examQs(), beliefs:openBeliefs(), stage:0, err:'', timers:[], playIndex:0};
+    // 몇 번째 시험인지: 자료(단원)마다 따로 센다
+    var cm = curMat();
+    S.exam = {qs:examQs(), beliefs:openBeliefs(), stage:0, err:'', timers:[], playIndex:0, round:((cm && cm.exams) ? cm.exams.length : 0) + 1};
   }
   var E = S.exam; E.err = ''; E.timers = E.timers || [];
   go('exam');
@@ -2084,7 +2090,7 @@ function examPlay(){
     examShowQuestion(i);
     setFace('writing');
     var thought = sol.thought || (sol.status === 'not_learned' ? '이 부분은 안 알려 주셨는데… 공책에 없어요.' : '선배가 해 준 말을 떠올려 보자…');
-    typeInto(els.bubble, '💭 ' + thought, E.skip ? 0 : 30, function(){
+    typeInto(els.bubbleTx, thought, E.skip ? 0 : 30, function(){
       var memos = examMemos(sol, E);
       if (memos.length) {
         els.memoHint.textContent = '지민이가 떠올린 선배의 말';
@@ -2112,7 +2118,7 @@ function examAfterPlay(){
   if (!els.paperQ) return;
   if (E.stage >= 3 && E.grade) { examFinish(); return; }
   setFace('reading');
-  els.bubble.textContent = '💭 다 풀었다…! 선배, 몇 점일까요?';
+  els.bubbleTx.textContent = '다 풀었다…! 선배, 몇 점일까요?';
   els.paperNo.textContent = '답안 제출 완료';
   els.status.textContent = E.stage < 2 ? '근거 검증기가 답안의 근거 번호를 확인하는 중…' : '채점하고 되짚기 카드를 만드는 중…';
   els.stamp.hidden = false;
@@ -2148,7 +2154,10 @@ function viewExam(){
   var sc = scene('writing', true, 'aff');
   sc.classList.add('exam-scene');
   els.kao.hidden = true;
-  els.bubble = h('div', {class:'thought', 'aria-live':'polite'}, '💭 시험지를 받았다… 선배가 알려 준 것만 떠올려야 해.');
+  els.bubbleTx = h('span', {class:'tx'}, '시험지를 받았다… 선배가 알려 준 것만 떠올려야 해.');
+  els.bubble = h('div', {class:'thought', 'aria-live':'polite'},
+    h('span', {'aria-hidden':'true', html:'<svg class="cloud" viewBox="0 0 200 100" preserveAspectRatio="none"><path d="M40 86 A17 17 0 0 1 20 64 A19 19 0 0 1 32 32 A23 23 0 0 1 72 14 A26 26 0 0 1 120 10 A24 24 0 0 1 163 26 A20 20 0 0 1 183 58 A18 18 0 0 1 162 86 A22 22 0 0 1 122 93 A22 22 0 0 1 82 93 A20 20 0 0 1 40 86 Z"/></svg>'}),
+    els.bubbleTx);
   sc.append(els.bubble);
   els.memoHint = h('p', {class:'memo-hint'});
   els.memos = h('div', {class:'memos'});
@@ -2160,7 +2169,7 @@ function viewExam(){
   var skip = h('button', {class:'btn ghost small', onclick:function(){ E.skip = true; skip.disabled = true; }}, '빨리 보기 ▶▶');
   var paper = h('div', {class:'paper'},
     h('div', {class:'paper-head'},
-      h('span', {class:'ph-l'}, '2026학년도 지민이 모의고사'),
+      h('span', {class:'ph-l'}, 'TeachMe ' + E.round + '차고사'),
       h('b', {}, (a && a.title) || '학습 평가'),
       h('span', {class:'ph-r'}, MODES[S.mode].label + ' · ', els.paperNo)),
     els.paperQ,
