@@ -29,19 +29,7 @@
   --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
   color-scheme:light; box-sizing:border-box;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#1D2048; --dot:rgba(242,123,174,.16); --win:#272B5E; --ink:#F3EEFA; --ink-soft:#B9B6D6;
-    --line:#0D0F2C; --bar:#3B4086; --pink-soft:#4A3570; --lav:#31356A; --rule:#454A86;
-    --ok:#5FD7B5; --bad:#FF7FA0; --warn:#F2B04D; --blue:#8FAEFF; --hl-ink:#2F3366; color-scheme:dark;
-  }
-  :root:not([data-theme="light"]) body.has-bg::before{filter:brightness(.35) saturate(.8)}
-}
-:root[data-theme="dark"]{
-  --bg:#1D2048; --dot:rgba(242,123,174,.16); --win:#272B5E; --ink:#F3EEFA; --ink-soft:#B9B6D6;
-  --line:#0D0F2C; --bar:#3B4086; --pink-soft:#4A3570; --lav:#31356A; --rule:#454A86;
-  --ok:#5FD7B5; --bad:#FF7FA0; --warn:#F2B04D; --blue:#8FAEFF; --hl-ink:#2F3366; color-scheme:dark;
-}
+/* 밝은 화면만 써요. 폰이 다크 모드여도 배경을 어둡게 만들지 않아요. */
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0}
 body{background-color:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%;min-height:100vh;display:flex;flex-direction:column}
