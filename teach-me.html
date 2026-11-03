@@ -51,18 +51,22 @@ p{margin:0 0 10px}
 /* 위·아래 네이비 바 */
 .topbar,.footbar{background:radial-gradient(rgba(255,255,255,.55) 1.6px,transparent 2.2px) 0 0/11px 11px,radial-gradient(rgba(255,255,255,.35) 1.6px,transparent 2.2px) 5.5px 5.5px/11px 11px,var(--pink);color:#2F3366;border-bottom:3px solid #2F3366;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
 .topbar b{font-family:var(--px-b);font-weight:400;font-size:17px;letter-spacing:.5px}
+.topbar{padding-top:calc(5px + env(safe-area-inset-top,0px));padding-bottom:5px;min-height:42px}
+.topbar .logo{height:30px;width:auto;image-rendering:pixelated;display:block}
+.topbar .stk{display:block;background:#fff;padding:2px 5px;transform:rotate(4deg);box-shadow:2px 2px 0 rgba(47,51,102,.35)}
+.topbar .stk img{display:block;height:20px;width:auto;image-rendering:pixelated}
 .footbar{border-bottom:none;border-top:3px solid #2F3366;justify-content:center;font-size:12px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
 .wbtns{display:flex;gap:7px}
 .wbtns i{width:18px;height:18px;display:block;border:2px solid #2F3366}
 .wbtns i:nth-child(1){background:var(--yellow)} .wbtns i:nth-child(2){background:#fff} .wbtns i:nth-child(3){background:#2F3366}
-.wrap{width:100%;max-width:560px;margin:0 auto;padding:16px 16px 36px;flex:1}
+.wrap{width:100%;max-width:560px;margin:0 auto;padding:8px 16px 36px;flex:1}
 
 /* 진행 단계 */
-.steps{display:flex;gap:5px;margin:0 0 14px;padding:0;list-style:none}
-.steps li{flex:1;min-width:0;font-family:var(--px);font-size:11px;text-align:center;padding:4px 0;background:var(--win);border:1.5px solid var(--line);color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.steps li.done{background:var(--yellow);color:#2F3366}
-.steps li.on{background:var(--pink);color:#2F3366;font-family:var(--px-b);box-shadow:0 2px 0 var(--line)}
-
+.steps{display:flex;gap:0;margin:0 0 10px;padding:0;list-style:none;filter:drop-shadow(0 2px 0 rgba(47,51,102,.25))}
+.steps li{flex:1;min-width:0;font-family:var(--px);font-size:10.5px;line-height:1;text-align:center;padding:5px 4px 5px 12px;margin-left:-6px;background:#fff;color:#2F3366;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%,8px 50%)}
+.steps li:first-child{margin-left:0;padding-left:8px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%)}
+.steps li.on{background:var(--yellow);font-family:var(--px-b)}
 .banner{background:var(--yellow);color:#2F3366;border:3px solid var(--line);padding:10px 12px;font-size:14px;margin:0 0 14px}
 
 /* 창(window): data-title이 있으면 위에 네이비 제목 막대 */
@@ -141,6 +145,10 @@ input[type=checkbox]{accent-color:var(--rose)}
 .opt.on{background:var(--pink-soft);box-shadow:4px 4px 0 var(--pink)}
 .opt-t{font-family:var(--px-b);font-size:16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .opt-d{font-size:13px;color:var(--ink-soft);line-height:1.45}
+.opt-wrap{position:relative}
+.opt-wrap .opt{width:100%;height:100%}
+.info{position:absolute;right:8px;top:8px;width:22px;height:22px;border-radius:50%;border:1.5px solid #2F3366;background:#fff;color:#2F3366;font-size:12px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+.info[aria-expanded="true"]{background:var(--yellow)}
 .rec{font-family:var(--px);font-size:11px;background:var(--yellow);color:#2F3366;border:2px solid #2F3366;padding:0 6px}
 .reason{font-size:14px;background:var(--lav);border-left:5px solid var(--pink);padding:8px 10px}
 
@@ -276,7 +284,7 @@ body.fit #app,body.fit .wrap{min-height:0}
 .pg{display:inline-block;margin-left:8px;font-family:var(--px);font-size:11px;color:#2F3366;background:var(--yellow);border:2px solid #2F3366;padding:0 5px;vertical-align:2px}
 /* ===== 미연시 화면(홈·가르치기): 상자 없이 교실 배경 위에 큰 캐릭터, 아래에 겹친 대사 상자 ===== */
 .wrap.vn{padding:0;display:flex;flex-direction:column}
-.wrap.vn > .steps{margin:10px 12px 0}
+.wrap.vn > .steps{margin:6px 12px 0}
 .wrap.vn > .banner{margin:10px 12px 0}
 .vn-stage{position:relative;flex:1;min-height:420px;overflow:hidden}
 body.fit .vn-stage{min-height:0}
@@ -285,9 +293,9 @@ body.fit .vn-stage{min-height:0}
 .vn-stage.talk .sprite{animation:bob .5s steps(2) infinite alternate}
 .vn-stage .kao{left:12px;top:12px}
 .vn-stage .gauge{right:12px;top:12px}
-.vn-ui{position:absolute;z-index:3;left:0;right:0;bottom:0;padding:0 12px 14px;display:flex;flex-direction:column;gap:10px}
+.vn-ui{position:absolute;z-index:3;left:0;right:0;bottom:0;padding:0 12px 24px;display:flex;flex-direction:column;gap:10px}
 .vn-ui .dbox{margin:22px 6px 0 0}
-.vn-ui .choices{margin:0 6px 8px 0}
+.vn-ui .choices{margin:0 6px 6px 0}
 .vn-ui .choices:empty{display:none}
 .vn-bottom{flex:none;padding:8px 12px 10px;background:rgba(255,246,250,.82);border-top:1.5px solid #2F3366}
 .vn-bottom .composer{position:static;background:none;padding:0;margin:0;gap:8px;align-items:stretch}
@@ -296,6 +304,42 @@ body.fit .vn-stage{min-height:0}
 .vn-bottom .keyhint{margin:4px 0 6px;font-size:10px}
 .vn-tools{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
 .logpanel .chat{max-height:none}
+/* ===== 가르치기: 채팅창 ===== */
+.tc{display:flex;flex-direction:column;flex:1;min-height:0}
+.tc-prof{position:relative;flex:none;margin:8px 12px 0;display:grid;grid-template-columns:1fr 2fr;grid-template-rows:minmax(0,1fr);height:128px;background:rgba(255,255,255,.88);border-radius:12px;overflow:hidden;
+  box-shadow:0 3px 0 rgba(47,51,102,.16),0 6px 16px rgba(47,51,102,.12)}
+.tc-prof.open{height:auto;max-height:48vh;grid-template-rows:auto}
+.tc-prof.open .tc-face{min-height:128px}
+.tc-face{position:relative;padding:0;border:none;cursor:pointer;overflow:hidden;background:#FFE4E1 var(--room-img,none) center/cover no-repeat;border-right:1.5px dashed rgba(47,51,102,.3)}
+.tc-img{position:absolute;left:50%;top:0;height:300px;width:auto;max-width:none;transform:translateX(-50%);transition:opacity .16s steps(2)}
+.tc-img.fade{opacity:0}
+.tc-tip{position:absolute;left:6px;bottom:6px;font-family:var(--px);font-size:10px;background:rgba(255,255,255,.9);color:#2F3366;padding:1px 6px;border-radius:999px}
+.tc-goals{position:relative;display:flex;flex-direction:column;min-width:0;padding:8px 10px 6px}
+.tc-gh{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:4px}
+.tc-gh b{font-family:var(--px-b);font-weight:400;font-size:12px;color:#2F3366;white-space:nowrap}
+.tc-gh .btn.small{font-size:11px;padding:4px 10px;min-height:26px}
+.tc-gwrap{flex:1;min-height:0;overflow:hidden}
+.tc-prof.open .tc-gwrap{overflow-y:auto}
+.tc-gl{list-style:none;margin:0;padding:0 0 18px;font-size:12px;line-height:1.4;color:#2F3366}
+.tc-gl li{display:flex;gap:6px;padding:2px 0}
+.tc-gl .lv{flex:none;font-size:9px;letter-spacing:1px;color:var(--rose);padding-top:2px}
+.tc-more{position:absolute;right:8px;bottom:4px;width:24px;height:20px;border:none;border-radius:6px;background:var(--pink);color:#2F3366;font-size:12px;cursor:pointer;line-height:1}
+.tc-chat{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 10px;display:flex;flex-direction:column;gap:6px}
+.tc-chat .msg{max-width:82%;font-size:13.5px;line-height:1.5;padding:8px 12px;border:none;border-radius:14px;animation:pop .18s ease-out;
+  box-shadow:0 2px 0 rgba(47,51,102,.14),0 4px 10px rgba(47,51,102,.1)}
+.tc-chat .msg.ch{background:rgba(255,255,255,.93);border-top-left-radius:4px}
+.tc-chat .msg.me{background:#FFD1DC;border-top-right-radius:4px;margin-top:4px}
+.tc-chat .msg.thinking{color:var(--ink-soft)}
+.tc-chat .msg.err{background:#FFE9EE;color:#B4234F}
+.tc-name{font-family:var(--px-b);font-size:11px;color:#2F3366;margin:6px 0 0 4px}
+@keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tc-bar{flex:none;display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,246,250,.9);border-top:1.5px solid #2F3366}
+.tc-bar textarea{margin:0;min-height:42px;height:42px;max-height:120px;padding:9px 14px;border:1.5px solid #2F3366;border-radius:21px;font-size:14px;line-height:1.5;resize:none;background:#fff}
+.send-ic{flex:none;width:42px;height:42px;border-radius:50%;border:none;background:#F49AB8;cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:0 3px 0 rgba(47,51,102,.3)}
+.send-ic svg{width:20px;height:20px;fill:#fff;margin-left:2px}
+.send-ic:active{transform:translateY(3px);box-shadow:none}
+.send-ic:disabled{opacity:.45;cursor:not-allowed;transform:none}
+@media (prefers-reduced-motion:reduce){.tc-chat .msg{animation:none}}
 /* 아래 바: 홈 / 공부 / 다이어리 / 설정 */
 .navbar{position:sticky;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);background:var(--pink);border-top:3px solid #2F3366;padding-bottom:env(safe-area-inset-bottom,0px)}
 .navbar button{font-family:var(--px-b);font-size:13px;color:#2F3366;background:none;border:none;border-right:2px solid rgba(47,51,102,.3);padding:7px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
@@ -309,7 +353,7 @@ body.fit .vn-stage{min-height:0}
 .dbox.tap{cursor:pointer}
 .dbox.tap:hover{box-shadow:0 3px 0 var(--rose),0 6px 16px rgba(47,51,102,.14)}
 .dbox.wait .next{visibility:hidden}
-.choices{display:flex;flex-direction:column;gap:5px;margin:-4px 14px 6px 8px}
+.choices{display:flex;flex-direction:column;gap:6.5px;margin:-4px 14px 6px 8px}
 .choice{font-family:var(--px);font-size:13px;line-height:1.4;text-align:left;background:rgba(255,255,255,.85);color:#2F3366;border:none;border-radius:12px;padding:6px 14px;cursor:pointer;box-shadow:0 3px 0 rgba(47,51,102,.16),0 5px 12px rgba(47,51,102,.12)}
 .choice::before{content:"▶ ";color:var(--rose)}
 .choice:hover{background:var(--pink-soft)}
@@ -572,6 +616,7 @@ function gauge(kind){
 }
 function updateGauge(){
   if (els.gauge && els.gauge.parentNode) { var g = gauge(els.gaugeKind); els.gauge.replaceWith(g); els.gauge = g; }
+  renderGoalBox();
 }
 function scene(face, small, kind){
   els.sprite = sprite(face);
@@ -941,8 +986,7 @@ var P = {
       '- 너는 이 과목 내용을 아래 [배운 것]에 있는 학습자의 문장으로만 안다. 거기 없는 교과 지식(인물, 연도, 용어, 원인, 결과)을 네가 먼저 꺼내지 마라. 일상 상식은 써도 된다.',
       '- 학습자가 [배운 것]에서 쓰지 않은 인물, 연도, 용어, 사건 이름을 네가 먼저 말하지 마라. 더 알고 싶으면 그다음은 어떻게 됐는지처럼 내용 없이 물어라.',
       '- 학습자가 틀리게 설명해도 지적하지 마라. 너는 정답을 모른다.',
-      '- 대사만 1~3문장으로 쓴다. 지문, 따옴표, 이름표 없이.',
-      '- 학습자의 마지막 말에 짧게 반응한 다음 이번 턴 지시를 수행한다.',
+      '- 대사는 두 줄로 나눠 쓴다. 첫 줄: 학습자의 마지막 말을 듣고 이해했다는 반응 1~2문장. 줄을 바꾼 둘째 줄: 이번 턴 지시(질문이나 요청) 1문장. 지문, 따옴표, 이름표 없이.',
       '',
       '[배운 것]', fmtLedger(),
       '',
@@ -1311,11 +1355,47 @@ function applyTracker(r){
   };
 }
 
-function setLine(text, thinking){
-  if (!els.dtext) return;
-  els.dbox.classList.toggle('thinking', !!thinking);
-  els.dbox.classList.remove('err');
-  els.dtext.textContent = text;
+/* 가르치기 채팅: 지금 말하는 중인 지민이 말풍선(els.live)을 채워요 */
+function setLine(text, thinking, err){
+  if (!els.chat) return;
+  if (!els.live) {
+    var last = els.chat.lastElementChild;
+    if (!last || !last.classList.contains('ch')) els.chat.append(h('div', {class:'tc-name'}, CHARS[S.charId].short));
+    els.live = h('div', {class:'msg ch live', 'aria-live':'polite'});
+    els.chat.append(els.live);
+  }
+  els.live.classList.toggle('thinking', !!thinking || !text);
+  els.live.classList.toggle('err', !!err);
+  els.live.textContent = text || '…';
+  scrollChat();
+}
+function scrollChat(){ if (els.chat) els.chat.scrollTop = els.chat.scrollHeight; }
+function renderChat(){
+  if (!els.chat) return;
+  els.chat.innerHTML = ''; els.live = null;
+  var ch = CHARS[S.charId];
+  S.dialog.forEach(function(d, i){
+    if (d.role === 'user') {
+      els.chat.append(h('div', {class:'msg me'}, d.text,
+        d.ids && d.ids.length ? h('span', {class:'ids'}, '공책에 ' + (d.ids.length > 1 ? d.ids[0] + '~' + d.ids[d.ids.length - 1] : d.ids[0]) + '로 적힘') : null));
+      return;
+    }
+    var prev = S.dialog[i - 1];
+    if (!prev || prev.role !== 'char') els.chat.append(h('div', {class:'tc-name'}, ch.short));
+    els.chat.append(h('div', {class:'msg ch'}, d.text));
+  });
+  scrollChat();
+}
+/* 지민이 대답을 '이해했다는 말'과 '질문'으로 끊어요. 줄바꿈이 있으면 그걸로, 없으면 첫 물음표 문장 앞에서. */
+function splitReply(t){
+  var lines = t.split(/\n+/).map(function(x){ return x.trim(); }).filter(Boolean);
+  if (lines.length >= 2) return [lines.slice(0, -1).join(' '), lines[lines.length - 1]];
+  var ss = splitSentences(t);
+  for (var k = 1; k < ss.length; k++) {
+    var head = ss.slice(0, k).join(' ');
+    if (/\?\s*$/.test(ss[k]) && head.replace(/[.\s]/g, '').length >= 6) return [head, ss.slice(k).join(' ')];
+  }
+  return [t];
 }
 
 // 캐릭터 대사 앞에 붙은 이름표("지민: ")나 따옴표를 떼요.
@@ -1335,6 +1415,7 @@ function updateTeachUi(){
   els.exam.className = 'btn small' + (S.wrap ? '' : ' ghost');
   if (els.scene && !S.busy) els.scene.classList.remove('talk');
   renderPanel();
+  renderGoalBox();
 }
 
 function send(){
@@ -1354,7 +1435,8 @@ function send(){
   });
   S.dialog.push({role:'user', text:msg, ids:ids});
   updateTeachUi();
-  setLine('생각하는 중…', true);
+  renderChat();
+  setLine('', true);
   setFace('neutral');
   var d, mis = null;
   AI.json(P.tracker(), {modelTier:'quick', cache:false}).then(function(raw){
@@ -1381,8 +1463,12 @@ function send(){
     var line = cleanLine(res && res.text);
     if (!line) throw {code:'empty'};
     if (mis) S.misc.push(mis);
-    S.dialog.push({role:'char', text:line, kind:d.kind, mis:mis ? mis.id : null});
-    setLine(line, false);
+    var parts = splitReply(line);
+    parts.forEach(function(t, k){
+      var lastPart = k === parts.length - 1;
+      S.dialog.push({role:'char', text:t, kind:lastPart ? d.kind : 'react', mis:lastPart && mis ? mis.id : null});
+    });
+    renderChat();
     // 대답까지 성공한 턴만 기록에 남겨요.
     recordGoals();
     if (d.fixed) bump('fixed', d.fixed);
@@ -1397,8 +1483,8 @@ function send(){
     if (els.input) els.input.value = msg;
     S.face = snap.face; setFace(S.face);
     updateGauge();
-    setLine((errMsg(e) || '중단됐어요.') + ' 쓴 내용은 입력창에 그대로 남겨 뒀어요. 다시 보내 주세요.', false);
-    if (els.dbox) els.dbox.classList.add('err');
+    renderChat();
+    setLine((errMsg(e) || '중단됐어요.') + ' 쓴 내용은 입력창에 그대로 남겨 뒀어요. 다시 보내 주세요.', false, true);
   }).then(function(){
     // 성공하든 실패하든 반드시 여기까지 와서 '바쁨' 표시를 꺼요.
     S.busy = false;
@@ -1709,9 +1795,10 @@ function recordGoals(){
 }
 
 /* ---------- views ---------- */
-var STEPS = [['upload','자료'],['outline','목차'],['teach','가르치기'],['exam','시험'],['review','되짚기']];
+var STEPS = [['upload','자료'],['goal','목표'],['teach','가르치기'],['exam','시험'],['review','되짚기']];
+var STEP_OF = {upload:'upload', outline:'upload', goal:'goal', teach:'teach', exam:'exam', review:'review'};
 function header(){
-  var idx = STEPS.map(function(s){ return s[0]; }).indexOf(S.screen);
+  var idx = STEPS.map(function(s){ return s[0]; }).indexOf(STEP_OF[S.screen]);
   if (idx < 0) return null;
   return h('ol', {class:'steps', 'aria-label':'진행 단계'}, STEPS.map(function(s, i){
     return h('li', {class:i === idx ? 'on' : (i < idx ? 'done' : ''), 'aria-current':i === idx ? 'step' : null}, s[1]);
@@ -1719,7 +1806,7 @@ function header(){
 }
 
 var NAV = [['home','⌂','홈'],['study','✎','공부'],['diary','▤','다이어리'],['settings','⚙','설정']];
-var NAV_OF = {home:'home', study:'study', library:'study', upload:'study', outline:'study', review:'study', settings:'settings'};
+var NAV_OF = {home:'home', study:'study', library:'study', upload:'study', outline:'study', goal:'study', review:'study', settings:'settings'};
 function navbar(){
   var cur = NAV_OF[S.screen];
   return h('nav', {class:'navbar', 'aria-label':'메뉴'}, NAV.map(function(n){
@@ -1734,14 +1821,15 @@ function renderAll(){
   app.innerHTML = ''; els = {};
   var vn = S.screen === 'home' || S.screen === 'teach' || S.screen === 'exam';
   document.body.classList.toggle('fit', S.screen === 'exam' || S.screen === 'teach');
-  var top = h('header', {class:'topbar'}, h('b', {}, 'TEACH_ME.EXE'),
+  var top = h('header', {class:'topbar'},
+    SPRITES['title-logo'] ? h('img', {class:'logo', src:SPRITES['title-logo'], alt:'Teach me!'}) : h('b', {}, 'Teach♡me'),
     h('div', {class:'row', style:'gap:10px'},
       S.screen !== 'home' && !NAV_OF[S.screen] ? h('button', {class:'homebtn', onclick:function(){ go('home'); }}, '◀ 홈') : null,
-      h('div', {class:'wbtns', 'aria-hidden':'true'}, h('i'), h('i'), h('i'))));
+      SPRITES['title-kaomoji-smile'] ? h('span', {class:'stk', 'aria-hidden':'true'}, h('img', {src:SPRITES['title-kaomoji-smile'], alt:''})) : null));
   var wrap = h('main', {class:'wrap' + (vn ? ' vn' : '')}, header());
   if (aiState === 'none') wrap.append(h('div', {class:'banner', role:'status'}, '이 화면에서는 AI를 부를 수 없어요. claude.ai 웹이나 앱에서 이 페이지를 열면 지민이가 대답해요.'));
   var view = {home:viewHome, study:viewStudy, library:viewLibrary, settings:viewSettings,
-    upload:viewUpload, outline:viewOutline, teach:viewTeach, exam:viewExam, review:viewReview}[S.screen] || viewHome;
+    upload:viewUpload, outline:viewOutline, goal:viewGoal, teach:viewTeach, exam:viewExam, review:viewReview}[S.screen] || viewHome;
   var v = view();
   if (vn) v.style.cssText = 'display:flex;flex-direction:column;flex:1;min-height:0';
   wrap.append(v);
@@ -1754,7 +1842,10 @@ function renderAll(){
 var HOME = {phase:'idle', idx:-1, turns:0, recent:[], text:HOME_LINE, face:null, reply:null};
 function homeFace(face){
   var o = OUTFITS.filter(function(x){ return x.id === PROFILE().outfit; })[0];
-  return (o && o.face) ? o.face : (face || 'neutral');
+  if (o && o.face) return o.face;
+  // 홈 잡담에서는 neutral과 reading만 써요. 4턴마다 공부하러 갈지 묻는 장면만 fighting.
+  if (HOME.phase === 'ask') return 'fighting';
+  return face === 'reading' ? 'reading' : 'neutral';
 }
 function pickChat(){
   var pool = CHATS.map(function(_, i){ return i; }).filter(function(i){ return HOME.recent.indexOf(i) < 0; });
@@ -1780,7 +1871,7 @@ function homeChoose(k){
   }
   var c = CHATS[HOME.idx].c[k];
   // 시비 거는 답에는 뾰로통한 얼굴(neutral)로 받아친다
-  HOME.phase = 'reply'; HOME.text = c[2]; HOME.face = c[3] === 'tease' ? 'neutral' : (c[1] >= 3 ? 'happy' : 'fighting');
+  HOME.phase = 'reply'; HOME.text = c[2]; HOME.face = c[3] === 'tease' ? 'reading' : 'neutral';
   HOME.turns++;
   bump('chats');
   addAff(c[1]);
@@ -1946,10 +2037,7 @@ function viewOutline(){
   var a = S.analysis;
   var countEl = h('p', {class:'muted', style:'margin:10px 0 0'});
   var warnEl = h('p', {class:'notice', role:'status'});
-  // 가르치던 대화가 있으면 '이어서'를 먼저 보여 줘요.
-  var canResume = S.ledger.length > 0;
-  var startBtn = h('button', {class:'btn' + (canResume ? ' ghost' : ''), onclick:startTeach}, canResume ? '처음부터 가르치기' : '가르치기 시작');
-  var resumeBtn = canResume ? h('button', {class:'btn', onclick:function(){ S.tab = 'talk'; go('teach'); }}, '이어서 가르치기') : null;
+  var goNext = h('button', {class:'btn', onclick:function(){ go('goal'); }}, '다음: 목표 고르기');
   function refresh(){
     var nq = examQs().length, len = selectedSource().length;
     countEl.textContent = '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + nq + '개';
@@ -1959,8 +2047,7 @@ function viewOutline(){
     void len;
     warnEl.textContent = warn;
     warnEl.style.display = warn ? '' : 'none';
-    startBtn.disabled = !selectedIds().length || !nq;
-    if (resumeBtn) resumeBtn.disabled = startBtn.disabled;
+    goNext.disabled = !selectedIds().length || !nq;
   }
   var secs = a.sections.map(function(s, i){
     var cb = h('input', {type:'checkbox', id:'cb-' + s.id});
@@ -1973,60 +2060,104 @@ function viewOutline(){
         h('button', {class:'btn ghost small', onclick:function(){ openReader(s.id); }}, '읽기')),
       gs.length ? h('ul', {class:'goals'}, gs.map(function(g){ return h('li', {}, g.text); })) : null);
   });
-  var modes = h('div', {class:'opts', role:'radiogroup', 'aria-label':'학습 목표'}, ['flow','memorize'].map(function(m){
-    return h('button', {class:'opt' + (S.mode === m ? ' on' : ''), role:'radio', 'aria-checked':String(S.mode === m), onclick:function(){ S.mode = m; renderAll(); }},
-      h('span', {class:'opt-t'}, MODES[m].label, a.recommended_mode === m ? h('span', {class:'rec'}, 'AI 추천') : null),
-      h('span', {class:'opt-d'}, MODES[m].desc));
-  }));
   refresh();
   return h('section', {},
     h('div', {class:'sheet', 'data-title':'목차와 범위'},
       h('div', {class:'row spread'}, h('h2', {style:'margin:0'}, a.title), h('button', {class:'btn ghost small', onclick:function(){ openReader(null); }}, '공부 모드')),
       h('p', {class:'muted', style:'margin-top:6px'}, '가르칠 범위를 고르세요. 읽기를 누르면 그 구간 자료를 다시 볼 수 있어요.'),
       secs, countEl, warnEl),
+    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'), goNext)
+  );
+}
+
+/* 이번 목표는?: 흐름 이해 / 완벽 암기. 자세한 설명은 ⓘ를 눌러야 보여요. */
+function viewGoal(){
+  var a = S.analysis;
+  var canResume = S.ledger.length > 0;
+  var startBtn = h('button', {class:'btn' + (canResume ? ' ghost' : ''), onclick:startTeach}, canResume ? '처음부터 가르치기' : '가르치기 시작');
+  var resumeBtn = canResume ? h('button', {class:'btn', onclick:function(){ S.tab = 'talk'; go('teach'); }}, '이어서 가르치기') : null;
+  var off = !selectedIds().length || !examQs().length;
+  startBtn.disabled = off; if (resumeBtn) resumeBtn.disabled = off;
+  var modes = h('div', {class:'opts', role:'radiogroup', 'aria-label':'학습 목표'}, ['flow','memorize'].map(function(m){
+    var desc = h('span', {class:'opt-d', hidden:true, id:'od-' + m}, MODES[m].desc);
+    var info = h('button', {class:'info', 'aria-label':MODES[m].label + ' 설명 보기', 'aria-expanded':'false', 'aria-controls':'od-' + m, onclick:function(e){
+      e.stopPropagation();
+      desc.hidden = !desc.hidden; info.setAttribute('aria-expanded', String(!desc.hidden));
+    }}, 'i');
+    return h('div', {class:'opt-wrap'},
+      h('button', {class:'opt' + (S.mode === m ? ' on' : ''), role:'radio', 'aria-checked':String(S.mode === m), onclick:function(){ S.mode = m; renderAll(); }},
+        h('span', {class:'opt-t'}, MODES[m].label, a.recommended_mode === m ? h('span', {class:'rec'}, 'AI 추천') : null),
+        desc),
+      info);
+  }));
+  return h('section', {},
     h('div', {class:'sheet', 'data-title':'이번 목표는?'},
+      h('p', {class:'muted', style:'margin:0'}, '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + examQs().length + '개'),
       modes,
       a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
-    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'),
+    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '◀ 범위 다시 고르기'),
       h('div', {class:'row'}, startBtn, resumeBtn))
   );
 }
 
+
+/* 가르치기: 채팅창 구조. 위에 지민이(1) : 학습 목표(2) 상자, 가운데 대화, 아래 입력창 */
+var SEND_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.4 20.4 21 12 3.4 3.6 3.4 10.1 15 12 3.4 13.9z"/></svg>';
+function renderGoalBox(){
+  if (!els.goalList) return;
+  els.goalList.innerHTML = '';
+  goalsSel().forEach(function(g){
+    var lv = (S.goals[g.id] || {}).level || 0;
+    els.goalList.append(h('li', {},
+      h('span', {class:'lv', role:'img', 'aria-label':LEVELS[lv]}, '●●●'.slice(0, lv) + '○○○'.slice(0, 3 - lv)),
+      h('span', {}, g.text)));
+  });
+  // 목표가 상자에 다 안 들어가면 ▾ 버튼을 보여 줘요.
+  requestAnimationFrame(function(){
+    if (!els.goalBox) return;
+    var over = els.goalBox.classList.contains('open') || els.goalWrap.scrollHeight > els.goalWrap.clientHeight + 2;
+    els.goalMore.hidden = !over;
+  });
+}
 function viewTeach(){
   var ch = CHARS[S.charId];
-  var last = S.dialog.slice().reverse().filter(function(d){ return d.role === 'char'; })[0];
   els.sprite = sprite(S.face);
-  els.kao = h('div', {class:'kao', 'aria-hidden':'true'}, KAO[S.face] || KAO.neutral);
-  els.gaugeKind = null; els.gauge = gauge(null);
-  var d = dbox(last ? last.text : '', {live:true});
-  d.box.classList.add('sm');
-  els.dtext = d.txt; els.dbox = d.box;
-  els.scene = h('div', {class:'vn-stage teach'}, els.sprite, els.kao, els.gauge, h('div', {class:'vn-ui'}, d.box));
+  els.sprite.className = 'tc-img';
+  els.kao = null; els.gauge = null;
+  var face = h('button', {class:'tc-face', 'aria-label':ch.short + '의 공책 보기', onclick:function(){ openPanel('note'); }}, els.sprite, h('span', {class:'tc-tip'}, '공책'));
+  els.exam = h('button', {class:'btn small' + (S.wrap ? '' : ' ghost'), onclick:function(){ runExam(false); }}, '수업 끝내고 시험 보기');
+  els.exam.disabled = S.busy;
+  els.goalList = h('ul', {class:'tc-gl'});
+  els.goalWrap = h('div', {class:'tc-gwrap'}, els.goalList);
+  els.goalMore = h('button', {class:'tc-more', 'aria-label':'학습 목표 펼치기', 'aria-expanded':'false', hidden:true, onclick:function(){
+    var open = !els.goalBox.classList.contains('open');
+    els.goalBox.classList.toggle('open', open);
+    els.goalMore.textContent = open ? '▴' : '▾';
+    els.goalMore.setAttribute('aria-expanded', String(open));
+    els.goalMore.setAttribute('aria-label', open ? '학습 목표 접기' : '학습 목표 펼치기');
+  }}, '▾');
+  els.goalBox = h('div', {class:'tc-prof'}, face,
+    h('div', {class:'tc-goals'},
+      h('div', {class:'tc-gh'}, h('b', {}, '학습 목표'), els.exam),
+      els.goalWrap, els.goalMore));
+  els.scene = els.goalBox;
+  els.chat = h('div', {class:'tc-chat', role:'log', 'aria-label':'대화'});
   els.input = h('textarea', {rows:1, placeholder:ch.short + '에게 설명해 보세요', 'aria-label':'설명 입력'});
   els.input.value = S.draft;
-  els.input.addEventListener('input', function(){ S.draft = els.input.value; saveSession(); });
+  function grow(){ els.input.style.height = 'auto'; els.input.style.height = Math.min(els.input.scrollHeight + 3, 120) + 'px'; }
+  els.input.addEventListener('input', function(){ S.draft = els.input.value; grow(); saveSession(); });
   // 컴퓨터: Enter로 보내기, Shift+Enter로 줄 바꿈. 폰: Enter는 줄 바꿈, 보내기 버튼으로 보내기.
   // 한글 조합 중(isComposing)에 누른 Enter는 무시해야 마지막 글자가 두 번 보내지지 않아요.
   var touch = coarse();
   els.input.addEventListener('keydown', function(e){
     if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
-    if (e.metaKey || e.ctrlKey || (!touch && !e.shiftKey)) { e.preventDefault(); send(); }
+    if (e.metaKey || e.ctrlKey || (!touch && !e.shiftKey)) { e.preventDefault(); send(); setTimeout(grow, 0); }
   });
-  els.send = h('button', {class:'btn', onclick:send}, '보내기');
+  els.send = h('button', {class:'send-ic', 'aria-label':'보내기', html:SEND_ICON, onclick:function(){ send(); setTimeout(grow, 0); }});
   els.send.disabled = S.busy;
-  els.exam = h('button', {class:'btn small' + (S.wrap ? '' : ' ghost'), onclick:function(){ runExam(false); }}, '수업 끝내고 시험 보기');
-  els.exam.disabled = S.busy;
-  if (S.busy) els.scene.classList.add('talk');
-  return h('section', {}, els.scene,
-    h('div', {class:'vn-bottom'},
-      h('div', {class:'composer'}, els.input, els.send),
-      h('p', {class:'keyhint'}, touch ? '다 쓰면 보내기 버튼을 눌러요.' : 'Enter로 보내기 · Shift+Enter로 줄 바꿈'),
-      h('div', {class:'vn-tools'},
-        h('button', {class:'btn ghost small', onclick:function(){ openPanel('talk'); }}, '대화 기록'),
-        h('button', {class:'btn ghost small', onclick:function(){ openPanel('note'); }}, ch.short + '의 공책'),
-        h('button', {class:'btn ghost small', onclick:function(){ openPanel('runtime'); }}, '런타임'),
-        h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '목차로'),
-        els.exam)));
+  setTimeout(function(){ renderChat(); renderGoalBox(); if (S.busy) setLine('', true); if (S.draft) grow(); }, 0);
+  return h('section', {class:'tc'}, els.goalBox, els.chat,
+    h('div', {class:'tc-bar'}, els.input, els.send));
 }
 /* 이전 대화, 공책, 런타임은 버튼을 누르면 창으로 열어요(미연시의 대사 기록처럼) */
 var PANEL_TITLE = {talk:'대화 기록', note:'공책', runtime:'런타임'};
@@ -2039,7 +2170,9 @@ function openPanel(tab){
   els.panel = panel;
   var closeBtn = h('button', {class:'btn ghost small', onclick:close}, '닫기');
   var title = tab === 'note' ? ch.short + '의 공책' : PANEL_TITLE[tab];
-  var box = h('div', {class:'mpanel'}, h('div', {class:'row spread', style:'margin-bottom:8px'}, h('h2', {style:'margin:0'}, title), closeBtn), panel);
+  var other = tab === 'note' ? h('button', {class:'btn ghost small', onclick:function(){ close(); openPanel('runtime'); }}, '런타임')
+    : tab === 'runtime' ? h('button', {class:'btn ghost small', onclick:function(){ close(); openPanel('note'); }}, '공책') : null;
+  var box = h('div', {class:'mpanel'}, h('div', {class:'row spread', style:'margin-bottom:8px'}, h('h2', {style:'margin:0'}, title), h('div', {class:'row', style:'gap:6px'}, other, closeBtn)), panel);
   m = h('div', {class:'modal', role:'dialog', 'aria-modal':'true', 'aria-label':title});
   m.append(box);
   m.addEventListener('click', function(e){ if (e.target === m) close(); });
