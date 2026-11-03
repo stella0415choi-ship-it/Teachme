@@ -70,7 +70,12 @@ async def main():
         await page.wait_for_timeout(200)
         await page.screenshot(path=OUT / "5-runtime.png", full_page=True)
         await page.click("text=수업 끝내고 시험 보기")
-        await page.wait_for_timeout(800)
+        await page.wait_for_timeout(2200)
+        await page.screenshot(path=OUT / "5b-exam-q1.png", full_page=True)
+        await page.wait_for_timeout(3800)
+        await page.screenshot(path=OUT / "5c-exam-q2.png", full_page=True)
+        await page.wait_for_selector(".score", timeout=30000)
+        await page.wait_for_timeout(400)
         await page.screenshot(path=OUT / "6-review.png", full_page=True)
         # 내 학습, 업적, 설정
         await page.click("text=◀ 홈")
