@@ -41,11 +41,11 @@ window.claude = { use: function (name) {
       directive: { kind: 'misconception', goal: 'g2', focus: '', misconception: '헌병 경찰제를 보통 경찰제로 바꿨으면 경찰이 줄어든 거죠?', based_on: ['S2'] }
     });
     if (p.indexOf('지금 시험을 본다') >= 0) return Promise.resolve({ answers: [
-      { id: 'q1', thought: '선배가 헌병이 경찰 일을 했다고 하셨지…', answer: '헌병이 경찰 일을 했어요.', claims: [{ text: '헌병이 경찰 업무를 맡았다', basis: ['S1'] }], status: 'answered' },
-      { id: 'q2', thought: '보통 경찰제로 바뀌었으니까… 경찰이 줄었겠지?', answer: '경찰이 줄었어요.', claims: [{ text: '경찰이 줄었다', basis: ['B1'] }, { text: '신문을 검열했다', basis: [] }], status: 'partial' }] });
+      { id: 'q1', thought: '선배가 헌병이 경찰 일을 했다고 하셨지…', answer: '헌병이 경찰 일을 했다.', claims: [{ text: '헌병이 경찰 업무를 맡았다', basis: ['S1'] }], status: 'answered' },
+      { id: 'q2', thought: '보통 경찰제로 바뀌었으니까… 경찰이 줄었겠지?', answer: '경찰이 줄었다.', claims: [{ text: '경찰이 줄었다', basis: ['B1'] }, { text: '신문을 검열했다', basis: [] }], status: 'partial' }] });
     if (p.indexOf('근거 검증기') >= 0) return Promise.resolve({ results: [
-      { id: 'q1', claims: [{ verdict: 'ok' }], final_answer: '헌병이 경찰 일을 했어요.', status: 'answered' },
-      { id: 'q2', claims: [{ verdict: 'ok' }, { verdict: 'unsupported', reason: '근거 번호 없음' }], final_answer: '경찰이 줄었어요.', status: 'partial' }] });
+      { id: 'q1', claims: [{ verdict: 'ok' }], final_answer: '헌병이 경찰 일을 했다.', status: 'answered' },
+      { id: 'q2', claims: [{ verdict: 'ok' }, { verdict: 'unsupported', reason: '근거 번호 없음' }], final_answer: '경찰이 줄었다.', status: 'partial' }] });
     return Promise.resolve({
       score: 55, summary: '무단 통치는 잘 가르쳤지만 문화 통치의 기만성이 전달되지 않았어요.',
       per_question: [{ id: 'q1', result: 'correct' }, { id: 'q2', result: 'wrong' }],

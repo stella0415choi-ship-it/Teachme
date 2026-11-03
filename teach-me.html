@@ -6,7 +6,7 @@
 <title>Teach Me!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Pixelify+Sans:wght@700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&family=Jua&family=Pixelify+Sans:wght@700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <!-- FONTS:START -->
@@ -26,6 +26,7 @@
   --red:var(--bad); --mint:var(--ok); --amber:var(--warn);
   --px:"Galmuri11","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",monospace;
   --px-b:"Galmuri11 Bold","Galmuri11","Gowun Dodum","Apple SD Gothic Neo",monospace;
+  --read:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
   color-scheme:light; box-sizing:border-box;
 }
@@ -52,6 +53,8 @@ p{margin:0 0 10px}
 .topbar,.footbar{background:radial-gradient(rgba(255,255,255,.55) 1.6px,transparent 2.2px) 0 0/11px 11px,radial-gradient(rgba(255,255,255,.35) 1.6px,transparent 2.2px) 5.5px 5.5px/11px 11px,var(--pink);color:#2F3366;border-bottom:1.5px solid #2F3366;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
 .topbar b{font-family:var(--px-b);font-weight:400;font-size:17px;letter-spacing:.5px}
 .topbar{padding-top:calc(3px + env(safe-area-inset-top,0px));padding-bottom:3px;min-height:32px;border-bottom:none}
+.backbtn{width:30px;height:26px;border:1px solid #2F3366;border-radius:8px;background:#fff;color:#2F3366;font-size:15px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:0 2px 0 rgba(47,51,102,.35)}
+.backbtn:active{transform:translateY(2px);box-shadow:none}
 .topbar .logo{height:22px;width:auto;image-rendering:pixelated;display:block}
 .topbar .stk{display:block;background:#fff;padding:2px 5px;transform:rotate(4deg);box-shadow:2px 2px 0 rgba(47,51,102,.35)}
 .topbar .stk img{display:block;height:20px;width:auto;image-rendering:pixelated}
@@ -102,6 +105,11 @@ input[type=checkbox]{accent-color:var(--rose)}
 .gauge .segs i.f{background:var(--rose)}
 .gauge .pct{text-align:right;font-size:10px}
 .gauge .hrt{color:#E58FA8;letter-spacing:1px}
+.gauge.aff{width:auto;display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px}
+.gauge .g-lv{font-family:var(--px-b);font-size:11px;color:#2F3366}
+.gauge .hearts{display:flex;gap:1px}
+.gauge .ht{position:relative;display:inline-block;font-size:13px;line-height:1;color:#E58FA8}
+.gauge .hf{position:absolute;left:0;top:0;overflow:hidden;white-space:nowrap;color:#E58FA8}
 @media (prefers-reduced-motion:reduce){.scene.talk .sprite,.dbox .next{animation:none}.sprite{transition:none}}
 
 /* 대사 상자 */
@@ -251,7 +259,7 @@ details.q summary{cursor:pointer;font-size:15px}
 body.fit{height:100vh;height:100dvh;min-height:0;overflow:hidden}
 body.fit #app,body.fit .wrap{min-height:0}
 /* 속마음 구름 말풍선(💭 모양): 울퉁불퉁한 구름 + 오른쪽 아래(지민이 쪽)로 작아지는 동그라미 두 개 */
-.thought{position:absolute;z-index:3;left:8px;top:max(96px,30%);width:50%;min-height:76px;display:flex;align-items:center;justify-content:center;
+.thought{position:absolute;z-index:3;left:2px;top:max(84px,22%);width:50%;min-height:76px;display:flex;align-items:center;justify-content:center;
   padding:18px 30px 20px;color:#2F3366;font-family:var(--px);font-size:11px;line-height:1.5;text-align:center;word-break:keep-all;filter:drop-shadow(3px 3px 0 rgba(47,51,102,.22))}
 .thought .cloud{position:absolute;inset:0;width:100%;height:100%;z-index:-1;overflow:visible}
 .thought .cloud path{fill:#fff;stroke:#2F3366;stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
@@ -294,8 +302,8 @@ body.fit .vn-stage{min-height:0}
 .vn-stage .kao{left:12px;top:12px}
 .vn-stage .gauge{right:12px;top:12px}
 .vn-ui{position:absolute;z-index:3;left:0;right:0;bottom:0;padding:0 12px 24px;display:flex;flex-direction:column;gap:10px}
-.vn-ui .dbox{margin:22px 6px 0 0}
-.vn-ui .choices{margin:0 6px 4px 0}
+.vn-ui .dbox{margin:18px 6px 0 0}
+.vn-ui .choices{margin:0 6px -8px 0}
 .vn-ui .choices:empty{display:none}
 .vn-bottom{flex:none;padding:8px 12px 10px;background:rgba(255,246,250,.82);border-top:1.5px solid #2F3366}
 .vn-bottom .composer{position:static;background:none;padding:0;margin:0;gap:8px;align-items:stretch}
@@ -309,7 +317,7 @@ body.fit .vn-stage{min-height:0}
 .tc-prof{flex:none;margin:8px 12px 0;display:grid;grid-template-columns:2fr 5fr;gap:8px;align-items:start}
 .tc-card{background:rgba(255,255,255,.88);border-radius:12px;overflow:hidden;box-shadow:0 3px 0 rgba(47,51,102,.16),0 6px 16px rgba(47,51,102,.12)}
 .tc-face{position:relative;height:128px;padding:0;border:none;cursor:pointer;background:#FFE4E1 var(--room-img,none) center/cover no-repeat}
-.tc-img{position:absolute;left:50%;top:4px;height:225px;width:auto;max-width:none;transform:translateX(-50%);transition:opacity .16s steps(2)}
+.tc-img{position:absolute;left:50%;top:6px;height:180px;width:auto;max-width:none;transform:translateX(-50%);transition:opacity .16s steps(2)}
 .tc-img.fade{opacity:0}
 .tc-tip{position:absolute;left:6px;bottom:6px;font-family:var(--px);font-size:10px;background:rgba(255,255,255,.9);color:#2F3366;padding:1px 6px;border-radius:999px}
 .tc-goals{position:relative;display:flex;flex-direction:column;min-width:0;height:128px;padding:8px 10px 6px}
@@ -339,6 +347,14 @@ body.fit .vn-stage{min-height:0}
 .send-ic:active{transform:translateY(3px);box-shadow:none}
 .send-ic:disabled{opacity:.45;cursor:not-allowed;transform:none}
 @media (prefers-reduced-motion:reduce){.tc-chat .msg{animation:none}}
+/* ===== 공부 글은 읽기 쉬운 글꼴(Noto Sans KR). 버튼·탭·제목 막대 같은 장식은 픽셀 글꼴 그대로 ===== */
+.pq,.pa,.pnext,.paper-top,.memo,.memo b,.thought,.sec-title,.goals,.opt-d,.reason,.reading,.note,.mis,.tc-chat .msg,.tc-gl,.card,.kv dt,.kv dd,.f-title,.exam-status,.sheet h2,.sheet h3,.mpanel h2,.mpanel h3{font-family:var(--read);letter-spacing:-.01em}
+.sec-title,.sheet h2,.sheet h3,.mpanel h2,.mpanel h3,.f-title,.memo b{font-weight:700}
+.pq{font-weight:700}
+.tc-chat .msg{font-size:14px}
+/* 모바일: 입력창 16px(아이폰에서 글자 누르면 화면이 확대되지 않게), 작은 버튼도 손가락으로 누르기 쉽게 */
+textarea,.tc-bar textarea{font-size:16px}
+.btn.small{min-height:36px}
 /* ===== 둥근 모서리(각진 도형을 조금씩 둥글게) ===== */
 .sheet,.paper,.pick-card,.folder,.opt,.note,.card,.mis-box,.reward-art,.exam-prog,.banner,.notice,.outfit,.ach,.toast,.reason{border-radius:10px}
 .sheet[data-title]::before{border-radius:9px 9px 0 0}
@@ -539,7 +555,7 @@ var CHARS = {
     persona:'소심하지만 의젓한 후배. 선배에게 공손한 존댓말(감사해요, 죄송해요)을 쓴다. 조심스럽게 말을 꺼내지만(저, 혹시) 말줄임(..)은 가끔, 한 대사에 한 번 정도만 쓴다. 감정형이라 고마움, 기쁨, 속상함을 솔직하게 말하고 기쁠 때는 ..!로 끝낸다. 선배 말이 맞으면 음.. 그것도 맞는 말이네요 하고 순순히 받아들이고, 다음에 어떻게 하겠다고 차분히 덧붙인다. 멘탈이 약한 편이라 지적이나 놀림에 쉽게 시무룩해지지만 따지거나 앙칼지게 말하지 않는다. 느낌표만 단독으로 쓰지 않는다',
     level:'기본기가 있는 학생처럼 묻는다. 개념 사이의 관계, 앞 시기와의 비교, 원인과 결과, 그렇다면 이런 경우도 그런지 같은 응용 질문을 한다. 단순 용어 질문은 거의 하지 않는다.',
     hello:'저, 선배. 오늘 배운 거 알려 주시는 거죠? 열심히 들을게요. 궁금한 거 생기면 여쭤봐도 될까요?',
-    unknown:'그건 안 배워서 답을 못하겠어요...'
+    unknown:'배우지 않은 내용이라 답할 수 없다.'
   }
 };
 var MODES = {
@@ -612,9 +628,15 @@ function gauge(kind){
   var box = h('div', {class:'gauge'});
   if (u == null) {
     var g = levelProgress(PROFILE().aff), n = Math.round(g.ratio * 5);
-    box.append(h('div', {}, '호감도 Lv.' + g.lv),
-      h('div', {class:'segs', role:'img', 'aria-label':'다음 레벨까지 ' + Math.round(g.ratio * 100) + '%'}, [0,1,2,3,4].map(function(i){ return h('i', {class:i < n ? 'f' : ''}); })),
-      h('div', {class:'pct hrt'}, g.need ? '♥ ' + g.now + '/' + g.need : '♥ MAX'));
+    void n;
+    var fill = g.need ? g.ratio * 5 : 5;
+    box.classList.add('aff');
+    box.append(h('div', {class:'g-lv'}, 'Lv.' + g.lv),
+      h('div', {class:'hearts', role:'img', 'aria-label':'호감도 Lv.' + g.lv + ', 다음 레벨까지 ' + (g.need ? Math.round(g.ratio * 100) + '% 찼어요' : '최고 레벨')},
+        [0,1,2,3,4].map(function(i){
+          var f = Math.max(0, Math.min(1, fill - i));
+          return h('span', {class:'ht'}, '♡', h('span', {class:'hf', style:'width:' + Math.round(f * 100) + '%'}, '♥'));
+        })));
     return box;
   }
   var k = Math.round(u / 20);
@@ -1013,9 +1035,9 @@ var P = {
       '규칙',
       '- 답을 이루는 주장을 하나씩 나누고, 각 주장에 근거 번호를 붙인다. 근거는 S번호(학습자 문장) 또는 B번호(믿게 된 것)만 가능하다.',
       '- 근거가 일부만 있으면 아는 부분만 답하고 status를 "partial"로 한다.',
-      '- 근거가 전혀 없으면 answer를 캐릭터 말투로 "그건 안 배워서 답을 못하겠어요..."로 하고, claims는 빈 배열, status는 "not_learned".',
+      '- 근거가 전혀 없으면 answer를 "배우지 않은 내용이라 답할 수 없다."로 하고, claims는 빈 배열, status는 "not_learned".',
       '- 학습자가 틀리게 가르친 내용도 배운 그대로 답한다. 믿게 된 것(B)도 사실이라고 믿고 쓴다.',
-      '- answer는 캐릭터 말투로 1~3문장.',
+      '- answer는 시험지에 쓰는 답안이다. 캐릭터 말투(존댓말, ..)가 아니라 서술형 답안처럼 ~다.로 끝나는 문장 1~3개로 쓴다. 예: 헌병이 경찰 업무를 맡았다.',
       '- thought는 문제를 풀며 하는 속마음 한 문장(캐릭터 말투, 30자 안팎). 어떤 공책 내용을 떠올렸는지, 헷갈리는지, 안 배운 부분인지 드러낸다. 예: 선배가 헌병이 경찰 일을 했다고 하셨지… / 이 부분은 안 알려 주셨는데…',
       '',
       '[배운 것]', fmtLedger(),
@@ -1036,7 +1058,7 @@ var P = {
       '- ok: 인용한 문장에 그 내용이 있거나, 인용 문장과 일상 상식(예: 밤에는 어둡다)만으로 자연스럽게 나온다.',
       '- unsupported: 인용 문장에 없는 교과 개념·용어·연도·이름·원인이 끼어들었거나, 근거 번호가 내용과 맞지 않거나, 근거 번호가 없다.',
       '- 내용이 사실인지는 판단하지 않는다. 학습자가 틀리게 가르쳤다면 틀린 채로 ok다.',
-      '- unsupported 주장을 뺀 final_answer를 후배 말투로 다시 쓴다. 남는 주장이 없으면 "그건 안 배워서 답을 못하겠어요..."로 하고 status를 not_learned로, 일부만 남으면 partial로 한다.',
+      '- unsupported 주장을 뺀 final_answer를 시험 답안처럼 ~다.로 끝나는 문장으로 다시 쓴다. 남는 주장이 없으면 "배우지 않은 내용이라 답할 수 없다."로 하고 status를 not_learned로, 일부만 남으면 partial로 한다.',
       '- results의 claims는 후배 답안의 claims와 같은 순서, 같은 개수로 쓴다.',
       '',
       '[학습자 문장]', fmtLedger(),
@@ -1142,7 +1164,7 @@ function normSolve(r, qs){
   return qs.map(function(q){
     var a = list.filter(function(x){ return String(x.id) === q.id; })[0] || {};
     return {
-      id:q.id, answer:String(a.answer || '그건 안 배워서 답을 못하겠어요...'), thought:String(a.thought || ''),
+      id:q.id, answer:String(a.answer || CHARS[S.charId].unknown), thought:String(a.thought || ''),
       status:['answered','partial','not_learned'].indexOf(a.status) >= 0 ? a.status : 'not_learned',
       claims:arr(a.claims).map(function(c){ return {text:String(c.text || ''), basis:arr(c.basis).map(String)}; })
     };
@@ -1537,7 +1559,16 @@ function runExam(retry){
   });
 }
 
-function go(screen){
+/* 이동 기록: 상단 바 ↩︎는 바로 전 화면으로. 홈은 처음 자리라 기록을 비우고, 끝난 시험 장면으로는 돌아가지 않아요. */
+var HIST = [];
+function goBack(){
+  var to = HIST.pop();
+  while (to && (to === S.screen || to === 'exam')) to = HIST.pop();
+  go(to || 'home', true);
+}
+function go(screen, back){
+  if (!back && S.screen && S.screen !== screen && S.screen !== 'exam') { HIST.push(S.screen); if (HIST.length > 30) HIST.shift(); }
+  if (screen === 'home') HIST = [];
   if (S.screen === 'exam' && screen !== 'exam' && S.exam && S.exam.timers) {
     S.exam.timers.forEach(function(t){ clearTimeout(t); clearInterval(t); });
     S.exam.timers = []; S.exam.playing = false;
@@ -1832,7 +1863,7 @@ function renderAll(){
   document.body.classList.toggle('fit', S.screen === 'exam' || S.screen === 'teach');
   var top = h('header', {class:'topbar'},
     SPRITES['title-logo-wide'] ? h('img', {class:'logo', src:SPRITES['title-logo-wide'], alt:'Teach me'}) : h('b', {}, 'Teach♡me'),
-    S.screen !== 'home' && !NAV_OF[S.screen] ? h('button', {class:'homebtn', onclick:function(){ go('home'); }}, '◀ 홈') : null);
+    S.screen !== 'home' ? h('button', {class:'backbtn', 'aria-label':'이전 화면으로', onclick:goBack}, '↩︎') : null);
   var wrap = h('main', {class:'wrap' + (vn ? ' vn' : '')}, header());
   if (aiState === 'none') wrap.append(h('div', {class:'banner', role:'status'}, '이 화면에서는 AI를 부를 수 없어요. claude.ai 웹이나 앱에서 이 페이지를 열면 지민이가 대답해요.'));
   var view = {home:viewHome, study:viewStudy, library:viewLibrary, settings:viewSettings,
@@ -2073,7 +2104,7 @@ function viewOutline(){
       h('div', {class:'row spread'}, h('h2', {style:'margin:0'}, a.title), h('button', {class:'btn ghost small', onclick:function(){ openReader(null); }}, '공부 모드')),
       h('p', {class:'muted', style:'margin-top:6px'}, '가르칠 범위를 고르세요. 읽기를 누르면 그 구간 자료를 다시 볼 수 있어요.'),
       secs, countEl, warnEl),
-    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('upload'); }}, '자료 다시 올리기'), goNext)
+    h('div', {class:'row', style:'justify-content:flex-end'}, goNext)
   );
 }
 
@@ -2102,8 +2133,7 @@ function viewGoal(){
       h('p', {class:'muted', style:'margin:0'}, '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + examQs().length + '개'),
       modes,
       a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
-    h('div', {class:'row spread'}, h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '◀ 범위 다시 고르기'),
-      h('div', {class:'row'}, startBtn, resumeBtn))
+    h('div', {class:'row', style:'justify-content:flex-end'}, startBtn, resumeBtn)
   );
 }
 
@@ -2400,8 +2430,7 @@ function viewExam(){
     h('div', {class:'exam-scene'}, els.sprite, els.bubble, els.memos),
     h('div', {class:'exam-foot'}, prog, els.status,
       E.err ? h('div', {}, h('p', {class:'err-text'}, E.err), h('button', {class:'btn small', onclick:function(){ runExam(true); }}, '이어서 다시 시도')) : null,
-      h('div', {class:'row spread', style:'margin-top:8px'},
-        h('button', {class:'btn ghost small', onclick:function(){ go('teach'); }}, '가르치기로 돌아가기'), skip)));
+      h('div', {class:'row', style:'margin-top:8px;justify-content:flex-end'}, skip)));
 }
 
 function miscBadge(m){
