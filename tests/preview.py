@@ -60,7 +60,7 @@ async def main():
         await page.click("text=다음: 목표 고르기")
         await page.wait_for_timeout(300)
         await page.click(".info >> nth=0")
-        await page.screenshot(path=OUT / "2b-goal.png")
+        await page.screenshot(path=OUT / "2b-goal.png", full_page=True)
         await page.click("text=가르치기 시작")
         await page.wait_for_timeout(300)
         await page.fill("textarea", "무단 통치 때는 헌병이 경찰 일을 했어. 문화 통치 때는 헌병 경찰제를 보통 경찰제로 바꿨어.")
