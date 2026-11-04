@@ -6,7 +6,7 @@
 <title>Teach Me!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&family=Jua&family=Pixelify+Sans:wght@700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Jua&family=Pixelify+Sans:wght@700&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
 <!-- FONTS:START -->
@@ -24,10 +24,10 @@
   /* 예전 이름(스크립트 안에서 쓰는 것) */
   --paper:var(--lav); --sheet:var(--win); --rule:#D9D4EA; --margin:var(--pink); --hl:var(--yellow); --hl-ink:#2F3366;
   --red:var(--bad); --mint:var(--ok); --amber:var(--warn);
-  --px:"Galmuri11","Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",monospace;
-  --px-b:"Galmuri11 Bold","Galmuri11","Gowun Dodum","Apple SD Gothic Neo",monospace;
+  --px:"Galmuri11","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",monospace;
+  --px-b:"Galmuri11 Bold","Galmuri11","Noto Sans KR","Apple SD Gothic Neo",monospace;
   --read:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
-  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   color-scheme:light; box-sizing:border-box;
 }
 /* 밝은 화면만 써요. 폰이 다크 모드여도 배경을 어둡게 만들지 않아요. */
@@ -162,7 +162,8 @@ input[type=checkbox]{accent-color:var(--rose)}
 .opt-wrap{position:relative}
 .opts.lvls{grid-template-columns:1fr;gap:8px}
 .opts.lvls .opt{padding:10px 14px;text-align:left}
-.opts.lvls .opt-t{color:var(--lc);font-size:15px}
+.opts.lvls .opt-t{color:var(--lc);font-size:15px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.opts.lvls .who{font-family:var(--read);font-weight:700;font-size:11.5px;color:#4A4A63}
 .opts.lvls .opt-d{display:block;margin-top:3px;font-size:12.5px}
 .opts.lvls .opt.on{box-shadow:0 0 0 2px var(--lc) inset,0 3px 0 rgba(47,51,102,.25)}
 .opts.three{grid-template-columns:1fr;gap:8px}
@@ -287,8 +288,8 @@ details.q summary{cursor:pointer;font-size:15px}
 .paper-top span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .paper-top span:last-child{flex:none;white-space:nowrap}
 .paper-title{text-align:center;font-family:var(--px-b);font-size:16px;line-height:1.3;color:#2F3366;margin:5px 0 7px;padding-bottom:6px;border-bottom:1.5px solid #2F3366}
-.pq{font-family:"Gowun Dodum",serif;font-size:13.5px;font-weight:700;line-height:1.45;margin:0 0 5px;color:#22223A;word-break:keep-all}
-.pa{font-family:"Gowun Dodum",serif;font-size:13px;line-height:1.5;color:#2F3366;white-space:pre-wrap;min-height:3em}
+.pq{font-family:var(--read);font-size:13.5px;font-weight:700;line-height:1.45;margin:0 0 5px;color:#22223A;word-break:keep-all}
+.pa{font-family:var(--read);font-size:13px;line-height:1.5;color:#2F3366;white-space:pre-wrap;min-height:3em}
 .pa::after{content:" ▼";color:var(--pink-bright);font-size:12px;animation:blinkCursor .8s step-end infinite}
 @keyframes blinkCursor{0%,100%{opacity:1}50%{opacity:0}}
 .pa.nl{color:#8A88A6}
@@ -621,14 +622,17 @@ var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유
 var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', nudge:'바른 용어로 알아듣기·되묻기', lead:'연관 개념으로 이끌기', summary:'요약해서 확인', listen:'받아 적기', wrap:'시험 준비 알림' };
 /* 난이도(목표 화면에서 고름). kinds = 이 난이도에서 추적기가 쓸 수 있는 지시 */
 var STYLES = {
-  easy:{label:'쉬움', color:'#2E9E5B', kinds:['request','ask','lead','nudge','wrap'], fallback:'ask',
+  easy:{label:'쉬움', color:'#2E9E5B', who:'공부가 덜 됐을 때',
+    short:'내용을 조금 아는 후배. 먼저 설명을 요청하고, 연관 개념을 짚어 주고, 틀린 용어도 알아서 고쳐 들어요.', kinds:['request','ask','lead','nudge','wrap'], fallback:'ask',
     desc:'처음 배우는 게 아니라 원문 내용을 어느 정도 아는 후배예요. 먼저 어디를 설명해 달라고 요청하고, 하나를 들으면 아, 그럼 이건 ~인 거죠? 하고 연관 개념으로 이끌어요. 살짝 다르게 설명해도 아, ~말씀하시는 건가요? 하고 바른 용어로 알아들어요. 공부가 덜 됐을 때 부족한 부분을 채우기 좋아요.',
     level:'이 단원을 어느 정도 미리 공부해 둔 상태라 개념 사이 연결을 잘 짚는다. 하지만 시험은 공책 내용만으로 푼다.'},
-  normal:{label:'보통', color:'#C99A06', kinds:['listen','summary','ask','lead','wrap'], fallback:'listen',
+  normal:{label:'보통', color:'#C99A06', who:'설명 연습을 하고 싶을 때',
+    short:'주로 받아 적고 가끔 요약하거나 질문해요. 오개념은 없어요.', kinds:['listen','summary','ask','lead','wrap'], fallback:'listen',
     desc:'설명을 주로 받아 적고, 가끔 ~했다는 거군요 하고 요약해 줘요. 가끔 질문하거나 답을 유도해요. 오개념은 만들지 않아요.',
     level:'기초는 있지만 이 단원은 처음 배운다. 주로 받아 적고, 궁금한 게 생기면 가끔 묻는다.'},
-  hard:{label:'어려움', color:'#D64545', kinds:['listen','summary','misconception','wrap'], fallback:'listen',
-    desc:'아무것도 모르는 백지 상태예요. 받아 적기만 하고 가끔 요약해요. 가끔 알아챌 수 있는 오개념을 말해서 선배가 바로잡는지 봐요. 내용을 외우고 있지 않으면 설명하기 어려워요. 완전 백지 테스트용이에요.',
+  hard:{label:'어려움', color:'#D64545', who:'혼자 힘으로 다 설명할 수 있는지 볼 때',
+    short:'아무것도 모르는 후배. 받아 적기만 하고, 가끔 틀린 추론을 말해요. 선배가 다 이끌어야 해요.', kinds:['listen','summary','misconception','wrap'], fallback:'listen',
+    desc:'아무것도 모르는 상태예요. 받아 적기만 하고 가끔 요약해요. 가끔 알아챌 수 있는 오개념을 말해서 선배가 바로잡는지 봐요. 내용을 외우고 있지 않으면 설명하기 어려워요. 처음부터 혼자 설명할 수 있는지 점검하는 용도예요.',
     level:'이 과목을 전혀 모른다. 배경지식이 없어서 질문거리도 잘 떠올리지 못하고, 대부분 받아 적기만 한다.'}
 };
 var OLD_STYLE = {smart:'easy', trap:'hard', blank:'hard'};
@@ -2291,7 +2295,7 @@ function viewGoal(){
   var styles = h('div', {class:'opts lvls', role:'radiogroup', 'aria-label':'난이도'}, Object.keys(STYLES).map(function(k){
     var st = STYLES[k];
     return h('button', {class:'opt' + (curSt === k ? ' on' : ''), role:'radio', 'aria-checked':String(curSt === k), style:'--lc:' + st.color, onclick:function(){ S.style = k; saveSession(); renderAll(); }},
-      h('span', {class:'opt-t'}, st.label), h('span', {class:'opt-d'}, st.desc));
+      h('span', {class:'opt-t'}, st.label, h('small', {class:'who'}, st.who)), h('span', {class:'opt-d'}, st.short));
   }));
   var modes = h('div', {class:'opts', role:'radiogroup', 'aria-label':'학습 목표'}, ['flow','memorize'].map(function(m){
     var desc = h('span', {class:'opt-d', hidden:true, id:'od-' + m}, MODES[m].desc);
