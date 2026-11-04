@@ -232,6 +232,8 @@ details.q{border-top:1px dashed var(--rule);padding:10px 0}
 /* 채점된 시험지(빨간 펜) */
 .gpage{margin-top:12px}
 .paper.graded{margin:0 4px 0 0}
+.passage{font-family:var(--read);font-size:12.5px;line-height:1.6;color:#33334A;background:#fff;border:1px solid #C9C9D8;border-radius:6px;padding:7px 10px;margin:4px 0 6px;white-space:pre-wrap}
+.subj{font-family:var(--read);font-size:12px;color:var(--ink-soft);margin:4px 0 0}
 .gq{display:flex;gap:6px;align-items:flex-start}
 .gq .pq{flex:1;margin:0}
 .qno{position:relative;flex:none;font-family:var(--read);font-weight:700;font-size:13.5px;line-height:1.45;color:#22223A}
@@ -621,6 +623,46 @@ var MODES = {
 var LIMIT = {analyze:200000, range:14000, batch:28000, pages:300};
 var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
 var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', nudge:'바른 용어로 알아듣기·되묻기', lead:'연관 개념으로 이끌기', summary:'요약해서 확인', listen:'받아 적기', wrap:'시험 준비 알림' };
+/* 과목 프로필: 자료 분석 때 AI가 과목을 판단하고, 문제·채점 기준을 과목 성격에 맞춰 세운다.
+   key = 핵심(두 목표 모두 채점), detail = 세부(완벽 암기에서만), strict = 완벽 암기에서 세부를 얼마나 엄격히 볼지 */
+var SUBJECTS = {
+  korean:{label:'국어', passage:true,
+    key:'작품·글의 주제, 화자나 인물의 정서·태도, 시어·소재가 뜻하는 바, 표현 방식의 효과, 글의 구조와 전개',
+    detail:'표현법 이름(역설, 대구 등), 갈래 특징, 핵심 개념어',
+    strict:'느슨함. 원문을 그대로 외울 필요 없고 객관식 선택지를 판단할 수 있는 수준이면 충분하다. 세부 항목은 1~2점만.'},
+  history:{label:'역사',
+    key:'사건의 원인과 배경, 결과와 영향, 정책·사건의 성격, 앞뒤 시기 비교',
+    detail:'연도, 제도·법·단체 이름, 인물',
+    strict:'엄격함. 완벽 암기라면 연도와 용어까지 정확해야 한다. 세부 항목 2~3점.'},
+  social:{label:'사회',
+    key:'개념의 뜻, 개념을 사례에 적용하기, 관점·입장 비교, 현상의 원인과 영향',
+    detail:'용어의 정확성, 사상가·이론 이름, 지명·수치',
+    strict:'보통. 용어는 뜻이 통하면 대체로 인정하되 핵심 용어는 정확해야 한다. 세부 항목 2점 안팎.',
+    note:'통합사회처럼 지리·윤리·경제·정치·법·사회문화가 섞인 과목이면, 이 자료가 실제로 다루는 영역을 판단해 그 영역의 핵심에 맞춰 기준을 세운다(예: 윤리면 사상가의 주장과 근거, 경제면 개념과 인과, 지리면 지역 특성과 원인).'},
+  science:{label:'과학',
+    key:'원리와 개념, 과정의 순서, 조건과 결과의 관계',
+    detail:'용어, 공식, 단위, 물질·기관 이름',
+    strict:'보통. 용어는 뜻이 통하면 대체로 인정하되 핵심 용어는 정확해야 한다. 세부 항목 2점 안팎.'},
+  etc:{label:'기타',
+    key:'자료의 핵심 개념과 그 관계',
+    detail:'용어, 숫자, 이름',
+    strict:'보통. 세부 항목 2점 안팎.'}
+};
+function subjOf(a){ a = a || S.analysis || {}; return SUBJECTS[(a.subject || {}).type] || SUBJECTS.etc; }
+function subjText(a){
+  a = a || S.analysis || {};
+  var sj = subjOf(a), area = (a.subject || {}).area;
+  return sj.label + (area ? '(' + area + ')' : '') + ' — 핵심: ' + sj.key + ' / 세부: ' + sj.detail + ' / 완벽 암기 엄격도: ' + sj.strict + (sj.note ? ' / ' + sj.note : '');
+}
+/* 채점 원칙(분석·채점 계층 공통). 평가하는 것은 선배의 설명이지 지민이의 글솜씨가 아니다. */
+var GRADE_RULES = [
+  '- 이 시험은 학습자(선배)가 후배에게 얼마나 핵심을 제대로 설명했는지 확인하는 도구다. 후배의 문장 실력, 문장 논리, 인과 서술 순서는 채점하지 않는다. 같은 뜻이면 표현이 달라도 인정한다.',
+  '- 문제가 묻는 것만 채점한다. 이유를 물었으면 이유만, 의미를 물었으면 의미만 본다. 묻지 않은 결과·결론·배경을 안 썼다고 감점하지 않는다.',
+  '- 문제나 함께 제시된 지문에 이미 나온 대상·상황은 답에서 다시 쓰지 않아도 된다. 무엇을 가리키는지 분명하면 생략해도 감점하지 않는다.',
+  '- 핵심 요소가 다 맞으면 문장이 짧아도 만점이다. 과하게 세세한 요소를 요구하지 않는다.',
+  '- 틀린 내용을 쓴 항목은 0점, 빈칸이면 0점이다.'
+].join('\n');
+
 /* 난이도(목표 화면에서 고름). kinds = 이 난이도에서 추적기가 쓸 수 있는 지시 */
 var STYLES = {
   easy:{label:'쉬움', color:'#2E9E5B', who:'공부가 덜 됐을 때',
@@ -747,6 +789,7 @@ var SAMPLE = [
 // 예시 자료는 시연 때 기다리지 않도록 분석 결과를 미리 만들어 뒀어요. (AI 호출 없이 바로 목차로)
 var SAMPLE_ANALYSIS = {
   title:'일제의 식민 통치 방식 변화 (1910~1920년대)',
+  subject:{type:'history', area:'한국사-일제 강점기'},
   recommended_mode:'flow',
   recommend_reason:'통치 방식이 왜 바뀌었는지, 겉으로 내세운 것과 실제가 어떻게 달랐는지가 핵심이라 연도보다 원인과 결과를 설명하는 연습이 더 도움이 돼요.',
   sections:[
@@ -787,16 +830,18 @@ var SAMPLE_ANALYSIS = {
 
 // 예시 자료 문제별 채점 기준(합계 10점)과 합격선(흐름 이해 / 완벽 암기)
 var SAMPLE_RUBRIC = {
-  q1:[[['헌병이 경찰 업무를 맡는 제도임을 씀',4],['헌병 경찰이 재판 없이 처벌하는 즉결 처분권을 가졌음을 씀',4],['태형 등 처벌 예시나 한국인에게만 적용된 점을 씀',2]],6,8],
-  q2:[[['신고되지 않은 토지가 총독부 소유가 됐음을 씀',3],['농민의 관습적 경작권이 인정되지 않았음을 씀',3],['많은 농민이 기한부 계약 소작농으로 전락했음을 씀',3],['기한부 신고제라는 용어를 정확히 씀',1]],6,8],
-  q3:[[['회사를 세울 때 총독의 허가를 받게 한 법임을 씀',5],['한국인의 기업 활동을 억누르려는 목적을 씀',4],['1910년 공포를 정확히 씀',1]],6,8],
-  q4:[[['3·1 운동이 계기였음을 씀',4],['무력만으로는 지배를 유지하기 어렵다고 판단했음을 씀',3],['국제 여론이 나빠졌음을 씀',2],['1919년을 정확히 씀',1]],5,8],
-  q5:[[['겉으로 내세운 정책과 실제가 달랐던 사례를 하나 이상 구체적으로 씀',4],['두 번째 사례를 씀(예: 보통 경찰제 전환 뒤 경찰 수·예산 증가, 신문 검열)',2],['본질이 친일파를 키워 민족을 분열시키는 것이었음을 씀',3],['치안 유지법 등 탄압 수단을 정확히 씀',1]],5,8],
-  q6:[[['증산량보다 많은 쌀이 일본으로 빠져나갔음을 씀',4],['한국인의 1인당 쌀 소비량이 줄었음을 씀',3],['증산 비용을 농민이 떠안았음을 씀',2],['수리 조합비·비료 대금 등 비용 이름을 정확히 씀',1]],5,8]
+  q1:[[['헌병이 경찰 업무를 맡는 제도임을 씀',4],['헌병 경찰이 재판 없이 처벌하는 즉결 처분권을 가졌음을 씀',4],['태형 등 처벌 예시나 한국인에게만 적용된 점을 씀',2,'d']],6,8],
+  q2:[[['신고되지 않은 토지가 총독부 소유가 됐음을 씀',3],['농민의 관습적 경작권이 인정되지 않았음을 씀',3],['많은 농민이 기한부 계약 소작농으로 전락했음을 씀',3],['기한부 신고제라는 용어를 정확히 씀',1,'d']],6,8],
+  q3:[[['회사를 세울 때 총독의 허가를 받게 한 법임을 씀',5],['한국인의 기업 활동을 억누르려는 목적을 씀',4],['1910년 공포를 정확히 씀',1,'d']],6,8],
+  q4:[[['3·1 운동이 계기였음을 씀',4],['무력만으로는 지배를 유지하기 어렵다고 판단했음을 씀',3],['국제 여론이 나빠졌음을 씀',2],['1919년을 정확히 씀',1,'d']],5,8],
+  q5:[[['겉으로 내세운 정책과 실제가 달랐던 사례를 하나 이상 구체적으로 씀',4],['두 번째 사례를 씀(예: 보통 경찰제 전환 뒤 경찰 수·예산 증가, 신문 검열)',2],['본질이 친일파를 키워 민족을 분열시키는 것이었음을 씀',3],['치안 유지법 등 탄압 수단을 정확히 씀',1,'d']],5,8],
+  q6:[[['증산량보다 많은 쌀이 일본으로 빠져나갔음을 씀',4],['한국인의 1인당 쌀 소비량이 줄었음을 씀',3],['증산 비용을 농민이 떠안았음을 씀',2],['수리 조합비·비료 대금 등 비용 이름을 정확히 씀',1,'d']],5,8]
 };
 SAMPLE_ANALYSIS.exam.forEach(function(q){
   var r = SAMPLE_RUBRIC[q.id]; if (!r) return;
-  q.rubric = r[0].map(function(x){ return {c:x[0], pts:x[1]}; }); q.pass_flow = r[1]; q.pass_memorize = r[2];
+  q.rubric_memorize = r[0].map(function(x){ return {c:x[0], pts:x[1]}; });
+  q.rubric_flow = normRubric(r[0].filter(function(x){ return !x[2]; }).map(function(x){ return {c:x[0], pts:x[1]}; }));
+  q.pass_flow = r[1]; q.pass_memorize = r[2];
 });
 
 /* ---------- state ---------- */
@@ -1015,6 +1060,7 @@ function mergeAnalyses(parts){
   parts.forEach(function(r, pi){
     r = r || {};
     if (!merged.title && r.title) merged.title = r.title;
+    if (!merged.subject && r.subject) merged.subject = r.subject;
     if (!merged.recommend_reason && r.recommend_reason) merged.recommend_reason = r.recommend_reason;
     vote[r.recommended_mode === 'memorize' ? 'memorize' : 'flow']++;
     var sid = {}, gid = {};
@@ -1037,14 +1083,19 @@ var P = {
       '규칙',
       '- sections: 자료 흐름대로 2~5개. start에는 그 구간이 시작되는 원문 문장의 앞 12~20글자를 원문 그대로 복사한다.',
       '- goals: 구간마다 1~2개. "~을 설명할 수 있다" 형태.',
-      '- exam: 구간마다 1~2문항, 전체 4~6문항. 1~3문장으로 답할 수 있는 서술형. 인과·관계·비교를 묻는 문제는 kind "flow", 용어·연도·이름의 정확성이 핵심이면 kind "detail".',
-      '  answer는 모범답안. key_points는 흐름 이해에 꼭 필요한 요소 2~3개. detail_points는 세부 암기 요소(연도, 법 이름 등), 없으면 빈 배열.',
-      '  rubric은 이 문제의 세부 채점 기준 3~5개, 점수(pts) 합계는 정확히 10. 각 기준은 답안에 무엇이 있어야 점수를 주는지 구체적으로(예: 3·1 운동이 계기였음을 씀 4점). 핵심 내용에 점수를 크게, 연도·용어 같은 세부에 작게. 만점은 거의 완벽한 설명이어야 받을 수 있게.',
-      '  pass_flow, pass_memorize는 10점 만점 중 합격선. 흐름 이해 합격선은 핵심 인과만 맞으면 넘도록 낮게(보통 5~6), 완벽 암기는 세부까지 맞아야 넘도록 높게(보통 8). 문제 성격에 따라 정한다.',
+      '- subject: 먼저 자료의 과목을 판단한다. type은 korean(국어·문학·비문학), history(한국사·세계사), social(통합사회·일반사회·지리·윤리·경제 등), science(통합과학·물리·화학·생명·지구), etc 중 하나. area에는 이 자료가 실제로 다루는 영역을 짧게(예: 현대시, 윤리-동양 사상, 경제-시장 실패). 과목별 기준:',
+      Object.keys(SUBJECTS).filter(function(k){ return k !== 'etc'; }).map(function(k){ var sj = SUBJECTS[k]; return '  ' + k + ' ' + sj.label + ': 핵심=' + sj.key + ' / 세부=' + sj.detail + ' / 엄격도=' + sj.strict + (sj.note ? ' / ' + sj.note : ''); }).join('\n'),
+      '- exam: 구간마다 1~2문항, 전체 4~6문항. 1~3문장으로 답할 수 있는 서술형. 과목의 핵심을 묻는다. 인과·관계·의미를 묻는 문제는 kind "flow", 용어·연도·이름의 정확성이 핵심이면 kind "detail".',
+      '  국어(korean)는 실제 내신처럼 문제마다 passage에 원문에서 필요한 부분(시구·문단 1~4줄)을 그대로 발췌해 넣는다. 다른 과목은 passage를 빈 문자열로.',
+      '  answer는 모범답안. key_points는 핵심 요소 2~3개. detail_points는 세부 요소, 없으면 빈 배열.',
+      '  rubric_flow(흐름 이해용)와 rubric_memorize(완벽 암기용)를 따로 만든다. 각각 항목 2~4개, pts 합계 정확히 10. 항목은 답안에 어떤 내용이 있으면 점수를 주는지 문제가 묻는 범위 안에서만 쓴다.',
+      '  rubric_flow는 핵심 항목만(세부 항목 없음). rubric_memorize는 핵심에 7~9점, 세부에 과목 엄격도만큼(국어 1~2점, 사회·과학 2점 안팎, 역사 2~3점).',
+      '  채점 기준을 세울 때 지킬 원칙:', GRADE_RULES,
+      '  pass_flow, pass_memorize는 10점 만점 중 합격선. 흐름 이해는 핵심을 대강 맞히면 넘도록 낮게(보통 5~6), 완벽 암기는 보통 7~8. 과목과 문제 성격에 따라 정한다.',
       '- recommended_mode: 세부 암기가 더 중요한 자료면 "memorize", 인과와 흐름 이해가 더 중요하면 "flow". recommend_reason은 학생에게 말하듯 한 문장.',
       '',
       'JSON만 출력:',
-      '{"title":"","recommended_mode":"flow","recommend_reason":"","sections":[{"id":"s1","title":"","start":""}],"goals":[{"id":"g1","section":"s1","text":""}],"exam":[{"id":"q1","section":"s1","goal":"g1","kind":"flow","question":"","answer":"","key_points":[],"detail_points":[],"rubric":[{"c":"","pts":4}],"pass_flow":6,"pass_memorize":8}]}',
+      '{"title":"","subject":{"type":"history","area":""},"recommended_mode":"flow","recommend_reason":"","sections":[{"id":"s1","title":"","start":""}],"goals":[{"id":"g1","section":"s1","text":""}],"exam":[{"id":"q1","section":"s1","goal":"g1","kind":"flow","question":"","answer":"","key_points":[],"detail_points":[],"passage":"","rubric_flow":[{"c":"","pts":5}],"rubric_memorize":[{"c":"","pts":4}],"pass_flow":6,"pass_memorize":8}]}',
       '',
       '<자료>', text, '</자료>'
     ].join('\n');
@@ -1140,7 +1191,8 @@ var P = {
       '',
       '[믿게 된 것]', fmtBeliefs(beliefs),
       '',
-      '[시험 문제]', qs.map(function(q){ return q.id + ': ' + q.question; }).join('\n'),
+      '[시험 문제]', qs.map(function(q){ return q.id + ': ' + q.question + (q.passage ? '\n  [제시 지문] ' + q.passage : ''); }).join('\n'),
+      qs.some(function(q){ return q.passage; }) ? '- 제시 지문은 시험지에 인쇄된 것이라 읽을 수 있다. 하지만 지문의 의미·해석·효과는 [배운 것]에 근거가 있어야 쓸 수 있다. 지문 내용을 그대로 옮겨 적는 주장에는 근거 번호 P를 붙인다.' : '',
       '',
       'JSON만 출력:',
       '{"answers":[{"id":"q1","thought":"","answer":"","claims":[{"text":"","basis":["S1"]}],"status":"answered"}]}'
@@ -1161,6 +1213,9 @@ var P = {
       '',
       '[믿게 된 것]', fmtBeliefs(beliefs),
       '',
+      '[시험지에 인쇄된 지문]', (S.exam && S.exam.qs ? S.exam.qs.filter(function(q){ return q.passage; }).map(function(q){ return q.id + ': ' + q.passage; }).join('\n') : '') || '없음',
+      '- 근거 P는 시험지 지문을 그대로 옮긴 주장에만 ok다. 지문의 의미·해석을 P만으로 주장했으면 unsupported.',
+      '',
       '[후배 답안]', JSON.stringify(solved.map(function(s){ return {id:s.id, answer:s.answer, claims:s.claims}; })),
       '',
       'JSON만 출력:',
@@ -1174,12 +1229,15 @@ var P = {
       '너는 학습 플랫폼 Teach Me!의 채점·되짚기 계층이다. 원문과 모범답안을 기준으로 후배의 최종 답안을 채점하고, 후배를 가르친 학습자에게 되짚기 피드백을 준다.',
       '',
       '학습 목표 모드: ' + MODES[S.mode].prompt,
-      '- 문제마다 주어진 rubric(채점 기준, 합계 10점)으로만 채점한다. 기준마다 got(0~그 기준의 pts, 0.5 단위)과 짧은 note를 준다. 학습 목표 모드와 상관없이 기준은 똑같이 적용한다(모드는 합격선만 바뀐다).',
-      '- 답안이 빈칸이면 모든 기준이 0점이다. 틀린 내용을 쓴 기준도 0점.',
-      '- reason은 시험지에 빨간 펜으로 적는 채점 이유 1~2문장. 무엇이 맞아서 점수를 줬고 무엇이 빠지거나 틀려 깎였는지 구체적으로.',
+      '과목: ' + subjText(a),
+      '- 문제마다 주어진 rubric(이번 학습 목표용 채점 기준, 합계 10점)으로만 채점한다. 기준마다 got(0~그 기준의 pts, 0.5 단위)과 짧은 note를 준다.',
+      GRADE_RULES,
+      '- 학습자 문장(공책)에 그 내용이 있는데 후배가 답안에서 빠뜨렸거나 서툴게 쓴 것은 감점하지 않는다. 선배는 설명했기 때문이다. 그 항목은 공책 기준으로 점수를 주고 note에 공책에 있어 인정이라고 쓴다.',
+      '- 지문을 그대로 옮겨 적은 것만으로는 점수를 주지 않는다.',
+      '- reason은 시험지에 빨간 펜으로 적는 채점 이유 1~2문장. 선배 설명 기준으로, 무엇이 설명돼서 점수를 줬고 무엇이 설명되지 않거나 틀려 깎였는지 쉬운 말로.',
       '',
       '카드 tag는 원인 기준으로 고른다.',
-      '- "설명 누락": 학습자 문장에 그 내용이 없거나 부족해서 후배가 모르거나 빠뜨렸다.',
+      '- "설명 누락": 학습자 문장에 그 내용이 없거나 부족해서 후배가 몰랐다. (공책에 있는데 후배가 빠뜨린 건 카드로 만들지 않는다.)',
       '- "오개념 미교정": 후배가 믿게 된 것(B)이 원인이 되어 틀렸다.',
       '- "잘못된 설명": 학습자 문장 자체가 원문과 다르다. cause에 해당 S번호를 적는다.',
       '- "참고": flow 모드에서 세부 사항만 빠진 경우(감점 없음).',
@@ -1194,7 +1252,7 @@ var P = {
       '',
       '[구간]', a.sections.map(function(s){ return s.id + ': ' + s.title; }).join('\n'),
       '',
-      '[시험 문제, 모범답안, 채점 기준]', JSON.stringify(qs.map(function(q){ return {id:q.id, section:q.section, kind:q.kind, question:q.question, answer:q.answer, key_points:q.key_points, detail_points:q.detail_points, rubric:rubricOf(q)}; })),
+      '[시험 문제, 모범답안, 채점 기준]', JSON.stringify(qs.map(function(q){ return {id:q.id, section:q.section, kind:q.kind, question:q.question, passage:q.passage || undefined, answer:q.answer, rubric:rubricOf(q)}; })),
       '',
       '[학습자 문장]', fmtLedger(),
       '',
@@ -1234,11 +1292,14 @@ function normAnalysis(r, text){
       id:String(q.id || ('q' + (i + 1))), section:seen[sec] ? sec : first, goal:String(q.goal || ''),
       kind:q.kind === 'detail' ? 'detail' : 'flow', question:String(q.question || ''), answer:String(q.answer || ''),
       key_points:arr(q.key_points).map(String), detail_points:arr(q.detail_points).map(String),
-      rubric:normRubric(q.rubric), pass_flow:q.pass_flow, pass_memorize:q.pass_memorize
+      passage:String(q.passage || ''), rubric:normRubric(q.rubric),
+      rubric_flow:normRubric(q.rubric_flow), rubric_memorize:normRubric(q.rubric_memorize),
+      pass_flow:q.pass_flow, pass_memorize:q.pass_memorize
     };
   }).filter(function(q){ return q.question; }).slice(0, 12);
   return sliceSections({
     title:String(r.title || S.fileName || '학습 자료'),
+    subject:{type:SUBJECTS[(r.subject || {}).type] ? r.subject.type : 'etc', area:String((r.subject || {}).area || '')},
     recommended_mode:r.recommended_mode === 'memorize' ? 'memorize' : 'flow',
     recommend_reason:String(r.recommend_reason || ''),
     sections:sections, goals:goals, exam:exam
@@ -1257,10 +1318,14 @@ function normRubric(r){
   return items;
 }
 function sampleQ(q){ return SAMPLE_ANALYSIS.exam.filter(function(x){ return x.question === q.question; })[0]; }
-function rubricOf(q){
-  if (q.rubric && q.rubric.length) return q.rubric;
-  var sq = sampleQ(q); if (sq && sq.rubric) return sq.rubric; // 예전에 저장한 예시 자료
-  var key = arr(q.key_points), det = arr(q.detail_points), items = [];
+function rubricOf(q, mode){
+  mode = mode || S.mode;
+  var byMode = mode === 'memorize' ? q.rubric_memorize : q.rubric_flow;
+  if (byMode && byMode.length) return byMode;
+  var sq = sampleQ(q);
+  if (sq && sq !== q) return rubricOf(sq, mode); // 예전에 저장한 예시 자료
+  if (q.rubric && q.rubric.length) return q.rubric; // 목표별 기준이 없는 예전 자료
+  var key = arr(q.key_points), det = mode === 'memorize' ? arr(q.detail_points) : [], items = [];
   var kp = det.length ? 8 : 10, dp = 10 - kp;
   key.forEach(function(k, i){ items.push({c:k, pts:Math.floor(kp / key.length) + (i < kp % key.length ? 1 : 0)}); });
   det.forEach(function(k, i){ items.push({c:k, pts:Math.floor(dp / det.length) + (i < dp % det.length ? 1 : 0)}); });
@@ -1310,6 +1375,7 @@ function mergeVerify(solved, r, beliefs){
   var valid = {};
   S.ledger.forEach(function(l){ valid[l.id] = 1; });
   arr(beliefs).forEach(function(b){ valid[b.id] = 1; });
+  valid.P = 1; // 시험지에 인쇄된 지문(국어)
   return solved.map(function(s){
     var v = list.filter(function(x){ return String(x.id) === s.id; })[0];
     var vc = v ? arr(v.claims) : [];
@@ -1947,7 +2013,7 @@ function ask(title, msg, okLabel, onOk){
 /* ---------- 내 학습 자료 ---------- */
 function curMat(){ return S.matId ? STORE.mats[S.matId] : null; }
 function packAnalysis(a){
-  return {title:a.title, recommended_mode:a.recommended_mode, recommend_reason:a.recommend_reason,
+  return {title:a.title, subject:a.subject, recommended_mode:a.recommended_mode, recommend_reason:a.recommend_reason,
     sections:a.sections.map(function(s){ return {id:s.id, title:s.title, start:s.start}; }), goals:a.goals, exam:a.exam};
 }
 function matProgress(m){
@@ -2270,6 +2336,7 @@ function viewOutline(){
   return h('section', {},
     h('div', {class:'sheet', 'data-title':'목차와 범위'},
       h('div', {class:'row spread'}, h('h2', {style:'margin:0'}, a.title), h('button', {class:'btn ghost small', onclick:function(){ openReader(null); }}, '공부 모드')),
+      h('p', {class:'subj'}, '과목: ' + subjOf(a).label + (a.subject && a.subject.area ? ' · ' + a.subject.area : '')),
       h('p', {class:'muted', style:'margin-top:6px'}, '가르칠 범위를 고르세요. 읽기를 누르면 그 구간 자료를 다시 볼 수 있어요.'),
       secs, countEl, warnEl),
     h('div', {class:'row', style:'justify-content:flex-end'}, goNext)
@@ -2494,6 +2561,7 @@ function examShowQuestion(i){
   if (!els.paperQ) return;
   var nx = E.qs[i + 1];
   els.paperQ.textContent = pad2(i + 1) + '. ' + q.question;
+  if (els.paperP) { els.paperP.textContent = q.passage || ''; els.paperP.hidden = !q.passage; }
   els.paperA.textContent = '';
   els.paperA.classList.remove('nl');
   els.pnext.textContent = nx ? pad2(i + 2) + '. ' + nx.question : '마지막 문제예요';
@@ -2591,6 +2659,7 @@ function viewExam(){
     els.bubbleTx);
   els.memos = h('div', {class:'memos', 'aria-label':ch.short + '이가 떠올린 선배의 말'});
   els.paperQ = h('p', {class:'pq'}, '01. ' + (E.qs[0] ? E.qs[0].question : ''));
+  els.paperP = h('div', {class:'passage', hidden:!(E.qs[0] && E.qs[0].passage)}, (E.qs[0] && E.qs[0].passage) || '');
   els.paperA = h('div', {class:'pa', 'aria-live':'polite'});
   els.pnext = h('p', {class:'pnext'}, E.qs[1] ? '02. ' + E.qs[1].question : '마지막 문제예요');
   els.stamp = h('div', {class:'stamp', hidden:true}, '채점 중');
@@ -2599,7 +2668,7 @@ function viewExam(){
   var paper = h('div', {class:'paper'},
     h('div', {class:'paper-top'}, h('span', {}, ((a && a.title) || '학습 평가') + ' · ' + MODES[S.mode].label), h('span', {}, '응시자 ' + ch.short)),
     h('div', {class:'paper-title'}, 'TeachMe ' + E.round + '차고사'),
-    els.paperQ, els.paperA, els.pnext, els.stamp);
+    els.paperQ, els.paperP, els.paperA, els.pnext, els.stamp);
   els.progLbl = h('span', {class:'lbl'});
   els.progSegs = h('div', {class:'segs', 'aria-hidden':'true'}, E.qs.map(function(){ return h('i'); }));
   els.progPct = h('span', {class:'pct'});
@@ -2656,6 +2725,7 @@ function gradedPage(i){
       h('span', {class:'qno'}, pad2(i + 1) + '.', h('span', {class:'red-mark m-' + res, 'aria-label':RESULT[res]}, MARK[res])),
       h('p', {class:'pq'}, q.question),
       h('span', {class:'red-score'}, (d.pts % 1 ? d.pts.toFixed(1) : d.pts) + ' / 10')),
+    q.passage ? h('div', {class:'passage'}, q.passage) : null,
     h('p', {class:'pa done ga' + (ans ? '' : ' nl')}, ans || '(빈칸)'),
     h('details', {class:'more why'}, h('summary', {}, '채점 이유와 기준 보기 · ' + (d.pts >= d.pass ? '합격' : '불합격') + ' (합격선 ' + d.pass + '점)'),
     h('p', {class:'red-why'}, d.reason || (res === 'ungraded' ? '채점 결과를 받지 못했다.' : '')),
