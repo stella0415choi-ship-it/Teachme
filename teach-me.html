@@ -160,6 +160,11 @@ input[type=checkbox]{accent-color:var(--rose)}
 .opt-t{font-family:var(--px-b);font-size:16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .opt-d{font-size:13px;color:var(--ink-soft);line-height:1.45}
 .opt-wrap{position:relative}
+.opts.lvls{grid-template-columns:1fr;gap:8px}
+.opts.lvls .opt{padding:10px 14px;text-align:left}
+.opts.lvls .opt-t{color:var(--lc);font-size:15px}
+.opts.lvls .opt-d{display:block;margin-top:3px;font-size:12.5px}
+.opts.lvls .opt.on{box-shadow:0 0 0 2px var(--lc) inset,0 3px 0 rgba(47,51,102,.25)}
 .opts.three{grid-template-columns:1fr;gap:8px}
 .opts.three .opt-t{font-size:14px;white-space:nowrap}
 .opts.three .opt{padding:10px 40px 10px 14px;min-height:0}
@@ -223,6 +228,39 @@ input[type=checkbox]{accent-color:var(--rose)}
 .kv dd{margin:0}
 .good{margin:0;padding-left:20px;font-size:15px}
 details.q{border-top:1px dashed var(--rule);padding:10px 0}
+/* 채점된 시험지(빨간 펜) */
+.gpage{margin-top:12px}
+.paper.graded{margin:0 4px 0 0}
+.gq{display:flex;gap:10px;align-items:flex-start}
+.gq .pq{flex:1}
+.red-score{flex:none;font-family:var(--read);font-weight:700;font-size:15px;color:#D93A3A;border:1.5px solid #D93A3A;border-radius:8px;padding:1px 8px;transform:rotate(-4deg)}
+.ga{position:relative;padding:4px 0 2px 34px;min-height:2.4em}
+.ga .pa.done::after{content:none}
+.red-mark{position:absolute;left:0;top:-4px;font-size:30px;line-height:1;color:#D93A3A;font-weight:700}
+.red-mark.m-partial{font-size:26px;top:-1px}
+.red-why{font-family:var(--read);color:#D93A3A;font-size:13px;line-height:1.5;margin:6px 0 2px}
+.red-pass{font-family:var(--read);color:#D93A3A;font-size:11.5px;margin:0 0 6px;opacity:.85}
+.rubric{list-style:none;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed #C9C9D8;font-family:var(--read);font-size:12px;line-height:1.45}
+.rubric li{display:flex;gap:8px;justify-content:space-between;padding:2px 0;color:#4A4A63}
+.rubric .rb-n{color:#D93A3A}
+.rubric .rb-p{flex:none;color:#D93A3A;font-weight:700}
+.rubric li.zero .rb-c{color:#8A8AA0}
+.paper.graded details.more{margin-top:8px;font-size:13px}
+.paper.graded details.more summary{cursor:pointer;color:#5E5E78;font-family:var(--read)}
+.gbar{margin:10px 4px 0 0;gap:8px}
+.gbar .btn.small{min-height:30px;padding:4px 12px}
+.urgent{margin:10px 0 0;padding:8px 10px;background:#FFF5BF;border-radius:8px;font-family:var(--read);font-size:13.5px}
+.urgent b{color:#D93A3A;margin-right:4px}
+/* 보완할 점 카드: 두 줄 + 눌러서 자세히 */
+details.card.fb{padding:10px 12px;margin:0 0 10px}
+details.card.fb > summary{list-style:none;cursor:pointer;display:block}
+details.card.fb > summary::-webkit-details-marker{display:none}
+details.card.fb .chip{margin:0 6px 4px 0}
+.fb-t{display:block;font-family:var(--read);font-size:14.5px;line-height:1.4}
+.fb-tip{display:block;font-family:var(--read);font-size:13px;color:#4A4A63;margin-top:2px}
+details.card.fb[open] .fb-tip{color:#2F3366}
+details.fb-more > summary{cursor:pointer;font-family:var(--px);font-size:13px;color:#2F3366;margin:4px 0 8px}
+.small-sheet .good{font-size:13.5px}
 details.q summary{cursor:pointer;font-size:15px}
 .res{display:inline-block;font-family:var(--px);font-size:11px;padding:0 7px;margin-left:6px;border:1px solid}
 .res.correct{color:var(--ok);border-color:var(--ok)}
@@ -566,7 +604,7 @@ var CHARS = {
     persona:'소심하지만 의젓한 후배. 선배에게 공손한 존댓말(감사해요, 죄송해요)을 쓴다. 조심스럽게 말을 꺼내지만(저, 혹시) 말줄임(..)은 가끔, 한 대사에 한 번 정도만 쓴다. 감정형이라 고마움, 기쁨, 속상함을 솔직하게 말하고 기쁠 때는 ..!로 끝낸다. 선배 말이 맞으면 음.. 그것도 맞는 말이네요 하고 순순히 받아들이고, 다음에 어떻게 하겠다고 차분히 덧붙인다. 멘탈이 약한 편이라 지적이나 놀림에 쉽게 시무룩해지지만 따지거나 앙칼지게 말하지 않는다. 느낌표만 단독으로 쓰지 않는다',
     level:'기본기가 있는 학생처럼 묻는다. 개념 사이의 관계, 앞 시기와의 비교, 원인과 결과, 그렇다면 이런 경우도 그런지 같은 응용 질문을 한다. 단순 용어 질문은 거의 하지 않는다.',
     hello:'저, 선배. 오늘 배운 거 알려 주시는 거죠? 열심히 들을게요. 궁금한 거 생기면 여쭤봐도 될까요?',
-    unknown:'배우지 않은 내용이라 답할 수 없다.'
+    unknown:''
   }
 };
 var MODES = {
@@ -580,18 +618,21 @@ var MODES = {
 // AI에게 보내는 자료 길이 한도(글자 수). analyze: 자료 분석, range: 추적기와 채점이 보는 선택 범위
 var LIMIT = {analyze:200000, range:14000, batch:28000, pages:300};
 var LEVELS = ['아직 설명 안 함','단어만 언급','핵심 설명','이유·관계까지'];
-var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', nudge:'바른 쪽으로 되묻기', listen:'받아 적기', wrap:'시험 준비 알림' };
-/* 지민이 질문 방식(목표 화면에서 고름). kinds = 이 방식에서 추적기가 쓸 수 있는 지시 */
+var KIND = { ask:'질문', request:'설명 요청', misconception:'오개념 추론', nudge:'바른 용어로 알아듣기·되묻기', lead:'연관 개념으로 이끌기', summary:'요약해서 확인', listen:'받아 적기', wrap:'시험 준비 알림' };
+/* 난이도(목표 화면에서 고름). kinds = 이 난이도에서 추적기가 쓸 수 있는 지시 */
 var STYLES = {
-  trap:{label:'함정 후배', kinds:['ask','request','misconception','wrap'], fallback:'ask',
-    desc:'가끔 그럴듯하지만 틀린 추론을 말해요. 선배가 알아채고 바로잡아 주는지 봐요.'},
-  smart:{label:'똑똑한 후배', kinds:['ask','request','nudge','wrap'], fallback:'ask',
-    desc:'선배가 아직 설명 안 한 부분을 먼저 궁금해해요. 틀리게 설명하면 근데 이 부분은 ~아닌가요? 하고 바른 쪽으로 이끌어요. 처음에 틀렸던 설명은 피드백에 보완할 부분으로 남아요.'},
-  blank:{label:'백지 후배', kinds:['listen','ask','wrap'], fallback:'listen',
-    desc:'아무것도 몰라서 질문을 거의 안 해요. 선배가 처음부터 끝까지 수업을 이끌어야 해요. 백지 테스트처럼 내가 뭘 아는지 확인하기 좋아요.',
+  easy:{label:'쉬움', color:'#2E9E5B', kinds:['request','ask','lead','nudge','wrap'], fallback:'ask',
+    desc:'처음 배우는 게 아니라 원문 내용을 어느 정도 아는 후배예요. 먼저 어디를 설명해 달라고 요청하고, 하나를 들으면 아, 그럼 이건 ~인 거죠? 하고 연관 개념으로 이끌어요. 살짝 다르게 설명해도 아, ~말씀하시는 건가요? 하고 바른 용어로 알아들어요. 공부가 덜 됐을 때 부족한 부분을 채우기 좋아요.',
+    level:'이 단원을 어느 정도 미리 공부해 둔 상태라 개념 사이 연결을 잘 짚는다. 하지만 시험은 공책 내용만으로 푼다.'},
+  normal:{label:'보통', color:'#C99A06', kinds:['listen','summary','ask','lead','wrap'], fallback:'listen',
+    desc:'설명을 주로 받아 적고, 가끔 ~했다는 거군요 하고 요약해 줘요. 가끔 질문하거나 답을 유도해요. 오개념은 만들지 않아요.',
+    level:'기초는 있지만 이 단원은 처음 배운다. 주로 받아 적고, 궁금한 게 생기면 가끔 묻는다.'},
+  hard:{label:'어려움', color:'#D64545', kinds:['listen','summary','misconception','wrap'], fallback:'listen',
+    desc:'아무것도 모르는 백지 상태예요. 받아 적기만 하고 가끔 요약해요. 가끔 알아챌 수 있는 오개념을 말해서 선배가 바로잡는지 봐요. 내용을 외우고 있지 않으면 설명하기 어려워요. 완전 백지 테스트용이에요.',
     level:'이 과목을 전혀 모른다. 배경지식이 없어서 질문거리도 잘 떠올리지 못하고, 대부분 받아 적기만 한다.'}
 };
-function styleOf(){ return STYLES[S.style] || STYLES.trap; }
+var OLD_STYLE = {smart:'easy', trap:'hard', blank:'hard'};
+function styleOf(){ return STYLES[S.style] || STYLES[OLD_STYLE[S.style]] || STYLES.normal; }
 var TAGS = { '설명 누락':'var(--blue)', '오개념 미교정':'var(--red)', '잘못된 설명':'var(--amber)', '참고':'var(--ink-soft)' };
 // 시험이 끝난 뒤 오개념(캐릭터가 혼자 한 틀린 추론)을 어떻게 처리했는지 공개할 때 쓰는 문구
 var MISC_RESULT = {
@@ -599,7 +640,7 @@ var MISC_RESULT = {
   wrongly_corrected:{label:'고쳐 줬지만 설명이 원문과 달랐어요', ok:false},
   open:{label:'그냥 넘어가서 그대로 믿고 시험을 봤어요', ok:false}
 };
-var RESULT = { correct:'정답', partial:'부분 정답', wrong:'오답', not_learned:'안 배움', ungraded:'채점 안 됨' };
+var RESULT = { correct:'만점', pass:'합격', partial:'부분 점수', wrong:'0점', not_learned:'빈칸', ungraded:'채점 안 됨' };
 
 /* 지민 표정 그림: 아래 sprites 블록에 들어 있다(tools/embed_sprites.py가 채움) */
 var SPRITES = (function(){
@@ -739,10 +780,24 @@ var SAMPLE_ANALYSIS = {
   ]
 };
 
+// 예시 자료 문제별 채점 기준(합계 10점)과 합격선(흐름 이해 / 완벽 암기)
+var SAMPLE_RUBRIC = {
+  q1:[[['헌병이 경찰 업무를 맡는 제도임을 씀',4],['헌병 경찰이 재판 없이 처벌하는 즉결 처분권을 가졌음을 씀',4],['태형 등 처벌 예시나 한국인에게만 적용된 점을 씀',2]],6,8],
+  q2:[[['신고되지 않은 토지가 총독부 소유가 됐음을 씀',3],['농민의 관습적 경작권이 인정되지 않았음을 씀',3],['많은 농민이 기한부 계약 소작농으로 전락했음을 씀',3],['기한부 신고제라는 용어를 정확히 씀',1]],6,8],
+  q3:[[['회사를 세울 때 총독의 허가를 받게 한 법임을 씀',5],['한국인의 기업 활동을 억누르려는 목적을 씀',4],['1910년 공포를 정확히 씀',1]],6,8],
+  q4:[[['3·1 운동이 계기였음을 씀',4],['무력만으로는 지배를 유지하기 어렵다고 판단했음을 씀',3],['국제 여론이 나빠졌음을 씀',2],['1919년을 정확히 씀',1]],5,8],
+  q5:[[['겉으로 내세운 정책과 실제가 달랐던 사례를 하나 이상 구체적으로 씀',4],['두 번째 사례를 씀(예: 보통 경찰제 전환 뒤 경찰 수·예산 증가, 신문 검열)',2],['본질이 친일파를 키워 민족을 분열시키는 것이었음을 씀',3],['치안 유지법 등 탄압 수단을 정확히 씀',1]],5,8],
+  q6:[[['증산량보다 많은 쌀이 일본으로 빠져나갔음을 씀',4],['한국인의 1인당 쌀 소비량이 줄었음을 씀',3],['증산 비용을 농민이 떠안았음을 씀',2],['수리 조합비·비료 대금 등 비용 이름을 정확히 씀',1]],5,8]
+};
+SAMPLE_ANALYSIS.exam.forEach(function(q){
+  var r = SAMPLE_RUBRIC[q.id]; if (!r) return;
+  q.rubric = r[0].map(function(x){ return {c:x[0], pts:x[1]}; }); q.pass_flow = r[1]; q.pass_memorize = r[2];
+});
+
 /* ---------- state ---------- */
 var S = {
   screen:'home', matId:null, source:'', fileName:'', analysis:null, selected:{},
-  mode:'flow', style:'trap', charId:'harin', face:'fighting', wrongs:[],
+  mode:'flow', style:'normal', charId:'harin', face:'fighting', wrongs:[],
   ledger:[], dialog:[], misc:[], goals:{}, turn:0, wrap:false,
   exam:null, draft:'', tab:'talk', busy:false, dev:false, logs:[],
   gen:0 // 가르치기를 새로 시작할 때마다 1씩 늘어요. 늦게 도착한 AI 대답이 새 대화에 끼어들지 않게 막아요.
@@ -979,10 +1034,12 @@ var P = {
       '- goals: 구간마다 1~2개. "~을 설명할 수 있다" 형태.',
       '- exam: 구간마다 1~2문항, 전체 4~6문항. 1~3문장으로 답할 수 있는 서술형. 인과·관계·비교를 묻는 문제는 kind "flow", 용어·연도·이름의 정확성이 핵심이면 kind "detail".',
       '  answer는 모범답안. key_points는 흐름 이해에 꼭 필요한 요소 2~3개. detail_points는 세부 암기 요소(연도, 법 이름 등), 없으면 빈 배열.',
+      '  rubric은 이 문제의 세부 채점 기준 3~5개, 점수(pts) 합계는 정확히 10. 각 기준은 답안에 무엇이 있어야 점수를 주는지 구체적으로(예: 3·1 운동이 계기였음을 씀 4점). 핵심 내용에 점수를 크게, 연도·용어 같은 세부에 작게. 만점은 거의 완벽한 설명이어야 받을 수 있게.',
+      '  pass_flow, pass_memorize는 10점 만점 중 합격선. 흐름 이해 합격선은 핵심 인과만 맞으면 넘도록 낮게(보통 5~6), 완벽 암기는 세부까지 맞아야 넘도록 높게(보통 8). 문제 성격에 따라 정한다.',
       '- recommended_mode: 세부 암기가 더 중요한 자료면 "memorize", 인과와 흐름 이해가 더 중요하면 "flow". recommend_reason은 학생에게 말하듯 한 문장.',
       '',
       'JSON만 출력:',
-      '{"title":"","recommended_mode":"flow","recommend_reason":"","sections":[{"id":"s1","title":"","start":""}],"goals":[{"id":"g1","section":"s1","text":""}],"exam":[{"id":"q1","section":"s1","goal":"g1","kind":"flow","question":"","answer":"","key_points":[],"detail_points":[]}]}',
+      '{"title":"","recommended_mode":"flow","recommend_reason":"","sections":[{"id":"s1","title":"","start":""}],"goals":[{"id":"g1","section":"s1","text":""}],"exam":[{"id":"q1","section":"s1","goal":"g1","kind":"flow","question":"","answer":"","key_points":[],"detail_points":[],"rubric":[{"c":"","pts":4}],"pass_flow":6,"pass_memorize":8}]}',
       '',
       '<자료>', text, '</자료>'
     ].join('\n');
@@ -995,7 +1052,7 @@ var P = {
       '너의 일: (1) 학습 목표별로 학습자가 지금까지 얼마나 설명했는지 판정한다. (2) 캐릭터가 다음 턴에 무엇을 할지 방향만 정한다.',
       '',
       '캐릭터의 질문 수준: ' + (styleOf().level || ch.level),
-      '캐릭터 질문 방식: ' + styleOf().label + ' — ' + styleOf().desc,
+      '난이도: ' + styleOf().label + ' — ' + styleOf().desc,
       '학습 목표 모드: ' + MODES[S.mode].prompt,
       '현재 턴: ' + S.turn,
       '',
@@ -1014,19 +1071,21 @@ var P = {
       '- 원문은 관련 부분만 발췌돼 있다. 발췌에 안 보이는 내용이라는 이유만으로 학습자 설명을 틀렸다고 판단하지 않는다.',
       '- misconception_updates: 상태가 open인 추론에 학습자의 가장 최근 메시지가 답했는지 본다. 원문 기준으로 바르게 바로잡았으면 corrected, 틀린 내용으로 답했으면 wrongly_corrected, 다루지 않았으면 open.',
       '- wrong_explanations: 학습자의 가장 최근 메시지에서 원문과 분명히 다르게 설명한 문장이 있으면 based_on에 S번호, note에 무엇이 달랐는지 한 줄. 없으면 빈 배열.',
-      '- directive.kind (이번 방식에서 쓸 수 있는 것: ' + styleOf().kinds.join(', ') + ' — 그 밖의 kind는 쓰지 않는다):',
+      '- directive.kind (이번 난이도에서 쓸 수 있는 것: ' + styleOf().kinds.join(', ') + ' — 그 밖의 kind는 쓰지 않는다):',
       '  ask: 이미 설명된 내용에 대해 캐릭터 수준에 맞는 질문을 하게 한다.',
-      '  request: level 0인 목표가 남아 있고 학습자가 그 내용을 건너뛰는 것 같을 때 그 주제를 알려 달라고 하게 한다.' + (S.style === 'smart' ? ' 똑똑한 후배는 아직 설명 안 한 목표가 있으면 request를 먼저 쓴다.' : ''),
-      '  misconception: 어떤 목표가 level 1~2이고 중요한 관계나 조건이 빠져 있을 때, 학습자 문장만 근거로 그럴듯하지만 원문과 어긋나는 추론을 캐릭터가 말하게 한다. 현재 턴이 1이거나, open인 추론이 이미 있거나, 추론 기록이 3개 이상이면 쓰지 않는다. 3~4턴에 한 번 정도가 적당하다.',
-      '  nudge: 학습자가 방금 원문과 다르게 설명했을 때, 캐릭터가 근데 이 부분은 ~아닌가요? 하고 바른 방향을 살짝 짚어 되묻게 한다. nudge에 캐릭터가 할 한 문장 질문을 쓴다. 정답을 다 말하지 말고 어긋난 지점과 바른 방향만 짚는다.',
-      '  listen: 질문 없이 잘 받아 적었다고만 말하게 한다. 백지 후배의 기본 반응이다. 백지 후배의 ask는 5턴에 한 번 이하, 또는 학습자가 질문 있냐고 물을 때만.',
+      '  request: level 0인 목표가 남아 있고 학습자가 그 내용을 건너뛰는 것 같을 때 그 주제를 알려 달라고 하게 한다.' + (S.style === 'smart' ? ' 쉬움 난이도는 아직 설명 안 한 목표가 있으면 request를 적극적으로 먼저 쓴다.' : ''),
+      '  misconception: 어떤 목표가 level 1~2이고 중요한 관계나 조건이 빠져 있을 때, 학습자 문장만 근거로 그럴듯하지만 원문과 어긋나는 추론을 캐릭터가 말하게 한다. 너무 교묘하지 않게, 내용을 아는 학습자라면 알아챌 수 있을 만큼 분명히 틀린 추론으로 만든다. 현재 턴이 1이거나, open인 추론이 이미 있거나, 추론 기록이 3개 이상이면 쓰지 않는다. 3~4턴에 한 번 정도가 적당하다.',
+      '  nudge: 학습자가 방금 원문과 다르게 설명했을 때 쓴다. 살짝 다른 용어나 표현이면 아, ~말씀하시는 건가요? 하고 바른 용어로 알아듣게 하고, 내용이 틀렸으면 근데 이 부분은 ~아닌가요? 하고 바른 방향을 살짝 짚어 되묻게 한다. line에 캐릭터가 할 한 문장을 쓴다.',
+      '  lead: 학습자가 방금 설명한 것과 바로 이어지는 개념을 캐릭터가 아, 그럼 이건 ~인 거죠? 하고 짐작해 묻게 한다. line에 캐릭터가 할 한 문장을 쓴다. 쉬움은 자주, 보통은 3~4턴에 한 번 정도.',
+      '  summary: 학습자가 지금까지 설명한 내용을 캐릭터가 ~했다는 거군요, ~거죠? 하고 짧게 요약해 확인하게 한다. 학습자 문장에 있는 내용만 요약한다. 3턴에 한 번 정도.',
+      '  listen: 질문 없이 잘 받아 적었다고만 말하게 한다. 보통·어려움의 기본 반응이다. 보통의 ask는 3~4턴에 한 번 정도, 어려움은 ask를 쓰지 않는다.',
       '  wrap: 선택 범위의 모든 목표가 level 2 이상이면 시험 볼 준비가 됐다고 말하게 한다.',
       '- focus에는 질문 방향만 적는다. 정답, 원문의 사실, 학습자가 아직 말하지 않은 개념어·연도·이름은 절대 넣지 않는다. 좋은 예: S3에서 말한 변화가 왜 일어났는지 묻기. 나쁜 예: 3·1 운동 때문이라는 답을 끌어내기.',
       '- request의 focus는 주제 이름 수준까지만 허용한다. 예: 그 시기 경제 쪽은 어땠는지.',
       '- misconception에는 캐릭터가 실제로 할 말을 한 문장 질문형으로 쓰고, based_on에 근거가 된 S번호를 넣는다. 원문과 분명히 어긋나지만, 학습자 설명만 들은 사람이 충분히 할 법한 추론이어야 한다.',
       '',
       'JSON만 출력:',
-      '{"goals":[{"id":"g1","level":0,"note":"한 줄 판정 근거"}],"misconception_updates":[{"id":"M1","status":"open"}],"wrong_explanations":[{"based_on":["S3"],"note":""}],"directive":{"kind":"ask","goal":"g1","focus":"","misconception":"","nudge":"","based_on":[]}}'
+      '{"goals":[{"id":"g1","level":0,"note":"한 줄 판정 근거"}],"misconception_updates":[{"id":"M1","status":"open"}],"wrong_explanations":[{"based_on":["S3"],"note":""}],"directive":{"kind":"ask","goal":"g1","focus":"","misconception":"","line":"","based_on":[]}}'
     ].join('\n');
   },
   character: function(d, mis){
@@ -1034,7 +1093,9 @@ var P = {
     if (d.kind === 'misconception' && mis) instr = '다음 내용을 네가 방금 배운 걸로 스스로 추론한 것처럼 반쯤 확신하며 말하고, 맞는지 물어봐. 네 말투로 바꿔도 되지만 뜻은 유지해: ' + mis.text;
     else if (d.kind === 'request') instr = '아직 안 배운 부분을 알려 달라고 해. 방향: ' + (d.focus || '다음 내용');
     else if (d.kind === 'wrap') instr = '이제 좀 알 것 같다며 시험 볼 준비가 됐다고 말해. 더 알려줄 게 있으면 듣겠다고 덧붙여.';
-    else if (d.kind === 'nudge') instr = '선배 설명 중 이 부분이 헷갈린다며 근데 이 부분은 ~아닌가요? 하고 조심스럽게 되물어. 네 말투로 바꿔도 되지만 뜻은 유지해: ' + d.nudge;
+    else if (d.kind === 'nudge') instr = '선배 설명을 바른 쪽으로 알아듣고 조심스럽게 확인해(아, ~말씀하시는 건가요? 또는 근데 이 부분은 ~아닌가요?). 네 말투로 바꿔도 되지만 뜻은 유지해: ' + d.line;
+    else if (d.kind === 'lead') instr = '방금 배운 것과 이어지는 내용을 아, 그럼 이건 ~인 거죠? 하고 조심스럽게 짐작해서 물어봐. 네 말투로 바꿔도 되지만 뜻은 유지해: ' + d.line;
+    else if (d.kind === 'summary') instr = '선배가 지금까지 설명한 내용을 [배운 것]에 있는 말로만 짧게 요약해서 확인해(~했다는 거군요, ~거죠?). 새 질문은 하지 마.';
     else if (d.kind === 'listen') instr = '질문하지 마. 선배 설명을 공책에 잘 받아 적었다고 짧게 말하고 다음 설명을 기다린다고 해. 한 줄만.';
     else instr = '다음 방향으로 질문 하나: ' + (d.focus || '방금 설명에서 궁금한 점');
     return [
@@ -1046,8 +1107,8 @@ var P = {
       '반드시 지킬 것',
       '- 너는 이 과목 내용을 아래 [배운 것]에 있는 학습자의 문장으로만 안다. 거기 없는 교과 지식(인물, 연도, 용어, 원인, 결과)을 네가 먼저 꺼내지 마라. 일상 상식은 써도 된다.',
       '- 학습자가 [배운 것]에서 쓰지 않은 인물, 연도, 용어, 사건 이름을 네가 먼저 말하지 마라. 더 알고 싶으면 그다음은 어떻게 됐는지처럼 내용 없이 물어라.',
-      '- 학습자가 틀리게 설명해도 스스로 지적하지 마라. 너는 정답을 모른다. 이번 턴 지시가 되묻기일 때만 지시대로 조심스럽게 되묻는다.',
-      d.kind === 'listen' ? '- 대사는 한 줄, 1~2문장. 질문하지 않는다. 지문, 따옴표, 이름표 없이.' : '- 대사는 두 줄로 나눠 쓴다. 첫 줄: 학습자의 마지막 말을 듣고 이해했다는 반응 1~2문장. 줄을 바꾼 둘째 줄: 이번 턴 지시(질문이나 요청) 1문장. 지문, 따옴표, 이름표 없이.',
+      '- 학습자가 틀리게 설명해도 스스로 지적하지 마라. 너는 정답을 모른다. 이번 턴 지시에 할 말이 주어졌을 때만 그 내용을 말한다.',
+      (d.kind === 'listen' || d.kind === 'summary') ? '- 대사는 한 줄, 1~2문장. 새 질문은 하지 않는다. 지문, 따옴표, 이름표 없이.' : '- 대사는 두 줄로 나눠 쓴다. 첫 줄: 학습자의 마지막 말을 듣고 이해했다는 반응 1~2문장. 줄을 바꾼 둘째 줄: 이번 턴 지시(질문이나 요청) 1문장. 지문, 따옴표, 이름표 없이.',
       '',
       '[배운 것]', fmtLedger(),
       '',
@@ -1065,9 +1126,9 @@ var P = {
       '규칙',
       '- 답을 이루는 주장을 하나씩 나누고, 각 주장에 근거 번호를 붙인다. 근거는 S번호(학습자 문장) 또는 B번호(믿게 된 것)만 가능하다.',
       '- 근거가 일부만 있으면 아는 부분만 답하고 status를 "partial"로 한다.',
-      '- 근거가 전혀 없으면 answer를 "배우지 않은 내용이라 답할 수 없다."로 하고, claims는 빈 배열, status는 "not_learned".',
+      '- 근거가 전혀 없으면 answer는 빈 문자열("")로 비워 둔다(빈칸으로 낸다). 배우지 않았다, 모른다 같은 말을 답안에 쓰지 않는다. claims는 빈 배열, status는 "not_learned". 안 배웠다는 마음은 thought에만 쓴다.',
       '- 학습자가 틀리게 가르친 내용도 배운 그대로 답한다. 믿게 된 것(B)도 사실이라고 믿고 쓴다.',
-      '- answer는 시험지에 쓰는 답안이다. 캐릭터 말투(존댓말, ..)가 아니라 서술형 답안처럼 ~다.로 끝나는 문장 1~3개로 쓴다. 예: 헌병이 경찰 업무를 맡았다.',
+      '- answer는 시험지에 쓰는 실제 서술형 답안이다. 캐릭터 말투(존댓말, ..)가 아니라 문제에 바로 답하는 완결된 문장 1~3개로, ~다.로 끝낸다. 문제가 묻는 것(무엇, 왜, 결과)에 맞춰 핵심부터 쓴다. 예: 헌병 경찰제는 헌병이 경찰 업무를 맡는 제도로, 헌병 경찰은 재판 없이 처벌할 수 있었다.',
       '- thought는 문제를 풀며 하는 속마음 한 문장(캐릭터 말투, 30자 안팎). 어떤 공책 내용을 떠올렸는지, 헷갈리는지, 안 배운 부분인지 드러낸다. 예: 선배가 헌병이 경찰 일을 했다고 하셨지… / 이 부분은 안 알려 주셨는데…',
       '',
       '[배운 것]', fmtLedger(),
@@ -1088,7 +1149,7 @@ var P = {
       '- ok: 인용한 문장에 그 내용이 있거나, 인용 문장과 일상 상식(예: 밤에는 어둡다)만으로 자연스럽게 나온다.',
       '- unsupported: 인용 문장에 없는 교과 개념·용어·연도·이름·원인이 끼어들었거나, 근거 번호가 내용과 맞지 않거나, 근거 번호가 없다.',
       '- 내용이 사실인지는 판단하지 않는다. 학습자가 틀리게 가르쳤다면 틀린 채로 ok다.',
-      '- unsupported 주장을 뺀 final_answer를 시험 답안처럼 ~다.로 끝나는 문장으로 다시 쓴다. 남는 주장이 없으면 "배우지 않은 내용이라 답할 수 없다."로 하고 status를 not_learned로, 일부만 남으면 partial로 한다.',
+      '- unsupported 주장을 뺀 final_answer를 실제 서술형 시험 답안처럼 ~다.로 끝나는 완결된 문장으로 다시 쓴다. 남는 주장이 없으면 빈 문자열("")로 하고 status를 not_learned로, 일부만 남으면 partial로 한다.',
       '- results의 claims는 후배 답안의 claims와 같은 순서, 같은 개수로 쓴다.',
       '',
       '[학습자 문장]', fmtLedger(),
@@ -1108,8 +1169,9 @@ var P = {
       '너는 학습 플랫폼 Teach Me!의 채점·되짚기 계층이다. 원문과 모범답안을 기준으로 후배의 최종 답안을 채점하고, 후배를 가르친 학습자에게 되짚기 피드백을 준다.',
       '',
       '학습 목표 모드: ' + MODES[S.mode].prompt,
-      '- flow 모드: key_points가 맞으면 정답 처리한다. detail_points만 빠진 것은 감점하지 않고 tag "참고" 카드로만 알려 준다.',
-      '- memorize 모드: key_points와 detail_points가 모두 정확해야 정답이다.',
+      '- 문제마다 주어진 rubric(채점 기준, 합계 10점)으로만 채점한다. 기준마다 got(0~그 기준의 pts, 0.5 단위)과 짧은 note를 준다. 학습 목표 모드와 상관없이 기준은 똑같이 적용한다(모드는 합격선만 바뀐다).',
+      '- 답안이 빈칸이면 모든 기준이 0점이다. 틀린 내용을 쓴 기준도 0점.',
+      '- reason은 시험지에 빨간 펜으로 적는 채점 이유 1~2문장. 무엇이 맞아서 점수를 줬고 무엇이 빠지거나 틀려 깎였는지 구체적으로.',
       '',
       '카드 tag는 원인 기준으로 고른다.',
       '- "설명 누락": 학습자 문장에 그 내용이 없거나 부족해서 후배가 모르거나 빠뜨렸다.',
@@ -1119,13 +1181,14 @@ var P = {
       '카드 항목: title(무엇이 문제인지 한 줄), student(후배 답 요약 한 문장), missing(원문 기준으로 빠지거나 틀린 내용 1~2문장), cause(학습자 문장과 연결한 원인 한 문장), section(다시 볼 구간 id).',
       '카드는 중요한 것만 최대 5개. good은 잘 가르친 점 1~2개, S번호를 들어 구체적으로.',
       '문장은 짧고 구체적으로 쓰고, 같은 결론 문장을 반복하지 않는다.',
-      'per_question은 모든 문제에 대해 빠짐없이 쓴다. 점수는 프로그램이 계산하므로 summary에 점수 숫자를 쓰지 않는다.',
+      'per_question은 모든 문제에 대해 빠짐없이, items는 rubric과 같은 순서와 개수로 쓴다. 점수 합계는 프로그램이 계산하므로 summary에 점수 숫자를 쓰지 않는다.',
+      '카드는 중요한 순서대로 쓰고, 카드마다 tip(다음에 이렇게 설명하면 된다 한 문장)을 넣는다.',
       '',
       '[원문 — 시험 문제와 관련된 부분. [p.N]은 쪽 번호, …은 생략된 곳]', gradeSource(qs),
       '',
       '[구간]', a.sections.map(function(s){ return s.id + ': ' + s.title; }).join('\n'),
       '',
-      '[시험 문제와 모범답안]', JSON.stringify(qs.map(function(q){ return {id:q.id, section:q.section, kind:q.kind, question:q.question, answer:q.answer, key_points:q.key_points, detail_points:q.detail_points}; })),
+      '[시험 문제, 모범답안, 채점 기준]', JSON.stringify(qs.map(function(q){ return {id:q.id, section:q.section, kind:q.kind, question:q.question, answer:q.answer, key_points:q.key_points, detail_points:q.detail_points, rubric:rubricOf(q)}; })),
       '',
       '[학습자 문장]', fmtLedger(),
       '',
@@ -1139,7 +1202,7 @@ var P = {
       '[후배 최종 답안]', JSON.stringify(finals.map(function(f){ return {id:f.id, answer:f.final, status:f.status}; })),
       '',
       'JSON만 출력:',
-      '{"summary":"한 문장","per_question":[{"id":"q1","result":"correct"}],"cards":[{"tag":"설명 누락","title":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
+      '{"summary":"한 문장","per_question":[{"id":"q1","items":[{"got":4,"note":""}],"reason":""}],"cards":[{"tag":"설명 누락","title":"","tip":"","student":"","missing":"","cause":"","section":"s1"}],"good":[""]}'
     ].join('\n');
   }
 };
@@ -1164,7 +1227,8 @@ function normAnalysis(r, text){
     return {
       id:String(q.id || ('q' + (i + 1))), section:seen[sec] ? sec : first, goal:String(q.goal || ''),
       kind:q.kind === 'detail' ? 'detail' : 'flow', question:String(q.question || ''), answer:String(q.answer || ''),
-      key_points:arr(q.key_points).map(String), detail_points:arr(q.detail_points).map(String)
+      key_points:arr(q.key_points).map(String), detail_points:arr(q.detail_points).map(String),
+      rubric:normRubric(q.rubric), pass_flow:q.pass_flow, pass_memorize:q.pass_memorize
     };
   }).filter(function(q){ return q.question; }).slice(0, 12);
   return sliceSections({
@@ -1173,6 +1237,36 @@ function normAnalysis(r, text){
     recommend_reason:String(r.recommend_reason || ''),
     sections:sections, goals:goals, exam:exam
   }, text);
+}
+/* 채점 기준: 항목 점수 합이 10이 되게 맞춰요. AI가 기준을 안 줬거나 예전 자료면 key/detail_points로 자동으로 만들어요. */
+function normRubric(r){
+  var items = arr(r).map(function(x){ return {c:String((x && (x.c || x.criterion)) || ''), pts:Math.max(0, Number(x && x.pts) || 0)}; }).filter(function(x){ return x.c && x.pts > 0; });
+  var sum = items.reduce(function(t, x){ return t + x.pts; }, 0);
+  if (!items.length || !sum) return null;
+  if (sum !== 10) { // 비율대로 10점에 맞추고, 반올림 오차는 가장 큰 항목에서 조정
+    items.forEach(function(x){ x.pts = Math.max(1, Math.round(x.pts / sum * 10)); });
+    var diff = 10 - items.reduce(function(t, x){ return t + x.pts; }, 0);
+    var big = items.reduce(function(m, x){ return x.pts > m.pts ? x : m; }, items[0]); big.pts += diff;
+  }
+  return items;
+}
+function sampleQ(q){ return SAMPLE_ANALYSIS.exam.filter(function(x){ return x.question === q.question; })[0]; }
+function rubricOf(q){
+  if (q.rubric && q.rubric.length) return q.rubric;
+  var sq = sampleQ(q); if (sq && sq.rubric) return sq.rubric; // 예전에 저장한 예시 자료
+  var key = arr(q.key_points), det = arr(q.detail_points), items = [];
+  var kp = det.length ? 8 : 10, dp = 10 - kp;
+  key.forEach(function(k, i){ items.push({c:k, pts:Math.floor(kp / key.length) + (i < kp % key.length ? 1 : 0)}); });
+  det.forEach(function(k, i){ items.push({c:k, pts:Math.floor(dp / det.length) + (i < dp % det.length ? 1 : 0)}); });
+  if (!items.length) items = [{c:'모범답안의 핵심 내용', pts:10}];
+  return normRubric(items.filter(function(x){ return x.pts > 0; })) || [{c:'모범답안의 핵심 내용', pts:10}];
+}
+/* 합격선(10점 만점): 흐름 이해는 낮게, 완벽 암기는 높게. 채점 기준은 그대로예요. */
+function passOf(q, mode){
+  var src = (q.pass_flow || q.pass_memorize) ? q : (sampleQ(q) || q);
+  var v = Number(mode === 'memorize' ? src.pass_memorize : src.pass_flow);
+  var def = mode === 'memorize' ? 8 : 6;
+  return v >= 1 && v <= 10 ? Math.round(v) : def;
 }
 /* 구간 시작 표시(start)로 원문을 구간별로 자른다. 저장했다 다시 열 때도 쓴다. */
 function sliceSections(a, text){
@@ -1239,23 +1333,37 @@ function mergeVerify(solved, r, beliefs){
   });
 }
 // 점수는 AI가 따로 적은 숫자 대신 문제별 결과로 직접 계산해요. (정답 1, 부분 정답 0.5)
+/* 점수는 코드가 계산해요: 문제마다 채점 기준 항목 점수를 더해 10점 만점, 전체는 100점으로 환산.
+   합격은 학습 목표 모드의 합격선(passOf) 이상. 결과 표시: 10점 만점, 합격, 부분, 0점, 빈칸. */
 function normGrade(r, qs, finals){
   r = r || {};
   var given = {};
-  arr(r.per_question).forEach(function(p){ if (RESULT[p.result] && p.result !== 'ungraded') given[String(p.id)] = p.result; });
-  var pq = {}, pts = 0, counts = {};
+  arr(r.per_question).forEach(function(p){ given[String(p.id)] = p; });
+  var per = {}, detail = {}, sum = 0, passN = 0, counts = {};
   qs.forEach(function(q){
     var f = arr(finals).filter(function(x){ return x.id === q.id; })[0];
-    var res = (f && f.status === 'not_learned') ? 'not_learned' : (given[q.id] || 'ungraded');
-    pq[q.id] = res;
-    counts[res] = (counts[res] || 0) + 1;
-    pts += res === 'correct' ? 1 : (res === 'partial' ? 0.5 : 0);
+    var rub = rubricOf(q), g = given[q.id] || {}, gi = arr(g.items);
+    var blank = !f || !String(f.final || '').trim() || f.status === 'not_learned';
+    var items = rub.map(function(it, i){
+      var got = blank ? 0 : Number(gi[i] && gi[i].got);
+      if (!(got >= 0)) got = (!gi.length && g.result === 'correct') ? it.pts : (!gi.length && g.result === 'partial') ? it.pts / 2 : 0; // 예전 형식 대비
+      got = Math.max(0, Math.min(it.pts, Math.round(got * 2) / 2));
+      return {c:it.c, pts:it.pts, got:got, note:String((gi[i] && gi[i].note) || '')};
+    });
+    var pt = items.reduce(function(t, x){ return t + x.got; }, 0);
+    var pass = passOf(q, S.mode);
+    var res = blank ? 'not_learned' : pt >= 10 ? 'correct' : pt >= pass ? 'pass' : pt > 0 ? 'partial' : 'wrong';
+    if (!blank && !gi.length && !g.result) res = 'ungraded';
+    per[q.id] = res; counts[res] = (counts[res] || 0) + 1;
+    if (pt >= pass) passN++;
+    sum += pt;
+    detail[q.id] = {items:items, pts:pt, pass:pass, reason:String(g.reason || (blank ? '빈칸이라 점수를 줄 수 없다.' : ''))};
   });
-  var score = qs.length ? Math.round(pts / qs.length * 100) : 0;
+  var score = qs.length ? Math.round(sum / (qs.length * 10) * 100) : 0;
   return {
-    score:score, summary:String(r.summary || ''), per:pq, counts:counts,
-    cards:arr(r.cards).slice(0, 6).map(function(c){
-      return {tag:TAGS[c.tag] ? c.tag : '설명 누락', title:String(c.title || ''), student:String(c.student || ''), missing:String(c.missing || ''), cause:String(c.cause || ''), section:String(c.section || '')};
+    score:score, raw:sum, max:qs.length * 10, passN:passN, summary:String(r.summary || ''), per:per, detail:detail, counts:counts,
+    cards:arr(r.cards).slice(0, 8).map(function(c){
+      return {tag:TAGS[c.tag] ? c.tag : '설명 누락', title:String(c.title || ''), tip:String(c.tip || ''), student:String(c.student || ''), missing:String(c.missing || ''), cause:String(c.cause || ''), section:String(c.section || '')};
     }),
     good:arr(r.good).map(String).filter(Boolean).slice(0, 3)
   };
@@ -1422,9 +1530,10 @@ function applyTracker(r){
   });
   var d = r.directive || {}, st = styleOf();
   var kind = KIND[d.kind] && st.kinds.indexOf(d.kind) >= 0 ? d.kind : st.fallback;
-  if (kind === 'nudge' && !d.nudge) kind = 'ask';
+  var line = String(d.line || d.nudge || '');
+  if ((kind === 'nudge' || kind === 'lead') && !line) kind = st.fallback;
   return {
-    kind:kind, goal:String(d.goal || ''), focus:String(d.focus || ''), nudge:String(d.nudge || ''),
+    kind:kind, goal:String(d.goal || ''), focus:String(d.focus || ''), line:line,
     misconception:String(d.misconception || ''), based_on:arr(d.based_on).map(String), fixed:fixed
   };
 }
@@ -1524,7 +1633,7 @@ function send(){
     S.wrap = d.kind === 'wrap';
     updateGauge();
     addLog({layer:'이해 상태 추적기', tier:'quick', sees:[ragNote(),'학습 목표','학습자 문장','대화'], blocked:[],
-      note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요. 방식: ' + styleOf().label, detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : d.kind === 'nudge' ? ' / ' + d.nudge : (d.focus ? ' / ' + d.focus : ''))});
+      note:'목표별 이해 수준을 판정하고 다음 질문 방향만 정해요. 난이도: ' + styleOf().label, detail:'지시: ' + KIND[d.kind] + (d.kind === 'misconception' && mis ? ' / ' + mis.text : (d.kind === 'nudge' || d.kind === 'lead') ? ' / ' + d.line : (d.focus ? ' / ' + d.focus : ''))});
     addLog({layer:'후배 캐릭터 · ' + ch.short, tier:'quick', sees:['학습자 문장 ' + S.ledger.length + '개','대화 기록','이번 턴 지시'], blocked:['원문','정답','시험 문제'],
       note:'지시 범위 안에서 대사만 만들어요.'});
     setLine('', false);
@@ -2178,8 +2287,11 @@ function viewGoal(){
       h('button', {class:'opt' + (on ? ' on' : ''), role:'radio', 'aria-checked':String(on), onclick:pick},
         h('span', {class:'opt-t'}, label, extra), dEl), info);
   }
-  var styles = h('div', {class:'opts three', role:'radiogroup', 'aria-label':'지민이 질문 방식'}, Object.keys(STYLES).map(function(k){
-    return infoCard('st-' + k, STYLES[k].label, STYLES[k].desc, S.style === k, null, function(){ S.style = k; saveSession(); renderAll(); });
+  var curSt = STYLES[S.style] ? S.style : (OLD_STYLE[S.style] || 'normal');
+  var styles = h('div', {class:'opts lvls', role:'radiogroup', 'aria-label':'난이도'}, Object.keys(STYLES).map(function(k){
+    var st = STYLES[k];
+    return h('button', {class:'opt' + (curSt === k ? ' on' : ''), role:'radio', 'aria-checked':String(curSt === k), style:'--lc:' + st.color, onclick:function(){ S.style = k; saveSession(); renderAll(); }},
+      h('span', {class:'opt-t'}, st.label), h('span', {class:'opt-d'}, st.desc));
   }));
   var modes = h('div', {class:'opts', role:'radiogroup', 'aria-label':'학습 목표'}, ['flow','memorize'].map(function(m){
     var desc = h('span', {class:'opt-d', hidden:true, id:'od-' + m}, MODES[m].desc);
@@ -2198,7 +2310,7 @@ function viewGoal(){
       h('p', {class:'muted', style:'margin:0'}, '선택한 범위: 학습 목표 ' + goalsSel().length + '개, 시험 문제 ' + examQs().length + '개'),
       modes,
       a.recommend_reason ? h('p', {class:'reason'}, a.recommend_reason) : null),
-    h('div', {class:'sheet', 'data-title':'지민이 질문 방식'}, styles),
+    h('div', {class:'sheet', 'data-title':'난이도 선택'}, styles),
     h('div', {class:'row', style:'justify-content:flex-end'}, startBtn, resumeBtn)
   );
 }
@@ -2521,6 +2633,41 @@ function viewMiscReveal(ch){
     }));
 }
 
+/* 되짚기: 맨 위 시험 결과 상자(점수 한눈에 보기 + 빨간 펜으로 채점된 시험지, 한 장씩 넘기기),
+   그 아래 보완할 점(중요한 3개만 펼침, 나머지는 더 보기, 카드는 두 줄 + 눌러서 자세히), 맨 아래 잘한 점·추론 공개 */
+var MARK = { correct:'○', pass:'○', partial:'△', wrong:'✕', not_learned:'✕', ungraded:'?' };
+function gradedPage(i){
+  var E = S.exam, G = E.grade, a = S.analysis, ch = CHARS[S.charId];
+  var q = E.qs[i]; if (!q) return h('div');
+  var f = E.finals.filter(function(x){ return x.id === q.id; })[0] || {final:'', claims:[]};
+  var d = (G.detail || {})[q.id] || {items:rubricOf(q).map(function(it){ return {c:it.c, pts:it.pts, got:0, note:''}; }), pts:0, pass:passOf(q, S.mode), reason:''};
+  var res = G.per[q.id] || 'ungraded';
+  var ans = String(f.final || '').trim();
+  return h('div', {class:'paper graded'},
+    h('div', {class:'paper-top'}, h('span', {}, ((a && a.title) || '학습 평가') + ' · ' + MODES[S.mode].label), h('span', {}, '응시자 ' + ch.short)),
+    h('div', {class:'paper-title'}, 'TeachMe ' + (E.round || 1) + '차고사'),
+    h('div', {class:'gq'},
+      h('p', {class:'pq'}, pad2(i + 1) + '. ' + q.question),
+      h('span', {class:'red-score'}, (d.pts % 1 ? d.pts.toFixed(1) : d.pts) + ' / 10')),
+    h('div', {class:'ga'},
+      h('span', {class:'red-mark m-' + res, 'aria-hidden':'true'}, MARK[res]),
+      h('p', {class:'pa done' + (ans ? '' : ' nl')}, ans || '(빈칸)')),
+    h('p', {class:'red-why'}, d.reason || (res === 'ungraded' ? '채점 결과를 받지 못했다.' : '')),
+    h('p', {class:'red-pass'}, (d.pts >= d.pass ? '합격' : '불합격') + ' · 합격선 ' + d.pass + '점 (' + MODES[S.mode].label + ')'),
+    h('ul', {class:'rubric'}, d.items.map(function(it){
+      return h('li', {class:it.got >= it.pts ? 'full' : it.got > 0 ? 'half' : 'zero'},
+        h('span', {class:'rb-c'}, it.c, it.note ? h('span', {class:'rb-n'}, ' — ' + it.note) : null),
+        h('span', {class:'rb-p'}, (it.got % 1 ? it.got.toFixed(1) : it.got) + '/' + it.pts));
+    })),
+    h('details', {class:'more'}, h('summary', {}, '모범답안과 ' + ch.short + '이 쓴 근거 보기'),
+      h('p', {class:'qa'}, h('b', {}, '모범답안: '), q.answer),
+      f.claims.length ? h('p', {class:'muted small', style:'margin:6px 0 2px'}, '형광펜 번호는 ' + ch.short + '이 근거로 쓴 공책 문장, 줄 그은 주장은 검증기가 지운 거예요.') : null,
+      f.claims.map(function(c){
+        return h('div', {class:'claim' + (c.verdict === 'ok' ? '' : ' bad'), title:c.reason || null}, c.text,
+          c.basis.map(function(b){ return h('span', {class:'cite'}, b); }),
+          c.verdict === 'ok' ? null : h('span', {class:'muted small'}, ' 근거 없음, 삭제'));
+      })));
+}
 function viewReview(){
   var E = S.exam, G = E.grade, ch = CHARS[S.charId], a = S.analysis;
   var react = G.score >= 80 ? '저, 정말요? 선배 덕분에 거의 다 풀었어요. 너무 기뻐요..!'
@@ -2528,48 +2675,59 @@ function viewReview(){
     : '죄, 죄송해요 선배. 제가 많이 못 풀었어요.. 한 번만 더 알려 주실 수 있을까요?';
   var face = G.score >= 80 ? 'happy' : G.score >= 50 ? 'reading' : 'panic';
   var secTitle = function(id){ var s = a.sections.filter(function(x){ return x.id === id; })[0]; return s ? s.title : ''; };
-  var cards = G.cards.map(function(c){
+  var n = E.qs.length;
+  E.page = Math.max(0, Math.min(n - 1, E.page || 0));
+  var pageBox = h('div', {class:'gpage'}, gradedPage(E.page));
+  var pageNo = h('span', {class:'lbl'}, '시험지 ' + pad2(E.page + 1) + ' / ' + pad2(n));
+  var prevB = h('button', {class:'btn ghost small', 'aria-label':'이전 페이지'}, '◀');
+  var nextB = h('button', {class:'btn small'}, '다음 페이지로 ▶');
+  function show(k){
+    E.page = Math.max(0, Math.min(n - 1, k));
+    pageBox.innerHTML = ''; pageBox.append(gradedPage(E.page));
+    pageNo.textContent = '시험지 ' + pad2(E.page + 1) + ' / ' + pad2(n);
+    prevB.disabled = E.page === 0; nextB.disabled = E.page >= n - 1;
+  }
+  prevB.onclick = function(){ show(E.page - 1); };
+  nextB.onclick = function(){ show(E.page + 1); };
+  prevB.disabled = E.page === 0; nextB.disabled = E.page >= n - 1;
+  // 보완할 점 카드: 두 줄(무엇이 문제 + 다음엔 이렇게), 눌러서 자세히
+  function card(c){
     var st = secTitle(c.section);
-    return h('div', {class:'card', style:'--tc:' + TAGS[c.tag]},
-      h('span', {class:'chip'}, c.tag + (c.tag === '참고' ? ' (감점 없음)' : '')),
-      h('h3', {}, c.title),
+    return h('details', {class:'card fb', style:'--tc:' + TAGS[c.tag]},
+      h('summary', {},
+        h('span', {class:'chip'}, c.tag + (c.tag === '참고' ? ' (감점 없음)' : '')),
+        h('b', {class:'fb-t'}, c.title),
+        h('span', {class:'fb-tip'}, '→ ' + (c.tip || c.missing || '자세히 보기'))),
       h('dl', {class:'kv'},
         c.student ? [h('dt', {}, '후배 답'), h('dd', {}, c.student)] : null,
         c.missing ? [h('dt', {}, '빠진 것'), h('dd', {}, c.missing)] : null,
         c.cause ? [h('dt', {}, '원인'), h('dd', {}, c.cause)] : null,
         st ? [h('dt', {}, '다시 볼 곳'), h('dd', {}, h('button', {class:'btn ghost small', onclick:function(){ openReader(c.section); }}, st + ' 읽기' + (cardPage(c) ? ' (p.' + cardPage(c) + ')' : '')))] : null));
-  });
-  var qs = E.qs.map(function(q){
-    var f = E.finals.filter(function(x){ return x.id === q.id; })[0] || {final:'', claims:[]};
-    var res = G.per[q.id] || 'ungraded';
-    return h('details', {class:'q'},
-      h('summary', {}, q.question, h('span', {class:'res ' + res}, RESULT[res])),
-      h('p', {class:'qa'}, h('b', {}, ch.short + ' 최종 답: '), f.final),
-      f.claims.map(function(c){
-        return h('div', {class:'claim' + (c.verdict === 'ok' ? '' : ' bad'), title:c.reason || null}, c.text,
-          c.basis.map(function(b){ return h('span', {class:'cite'}, b); }),
-          c.verdict === 'ok' ? null : h('span', {class:'muted small'}, ' 근거 없음, 삭제'));
-      }),
-      h('p', {class:'qa'}, h('b', {}, '모범답안: '), q.answer));
-  });
+  }
+  var main = G.cards.slice(0, 3).map(card), rest = G.cards.slice(3).map(card);
+  var urgent = G.cards[0];
   return h('section', {},
     scene(face, true),
     dbox(react).box,
     h('div', {class:'sheet', 'data-title':'시험 결과'},
-      h('div', {class:'score'}, h('b', {}, G.score + '점'), h('span', {class:'muted'}, MODES[S.mode].label + ' 기준')),
-      G.counts ? h('p', {class:'muted small', style:'margin:6px 0 0'}, Object.keys(RESULT).filter(function(k){ return G.counts[k]; }).map(function(k){ return RESULT[k] + ' ' + G.counts[k]; }).join(' · ') + ' (정답 1점, 부분 정답 0.5점으로 계산)') : null,
-      G.summary ? h('p', {style:'margin-top:8px'}, G.summary) : null,
-      h('p', {class:'muted small'}, S.mode === 'flow' ? '흐름 이해가 목표라서 연도나 세부 명칭만 빠진 건 감점하지 않았어요.' : '완벽 암기가 목표라서 세부 사항까지 채점했어요.'),
-      h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain + (E.levelUp ? ' · Lv.' + levelOf(PROFILE().aff) + ' 달성!' : '')), h('span', {class:'know'}, '지식 +' + (E.knowGain || 0) + (E.knowUp ? ' · Lv.' + levelOf(PROFILE().know || 0, KLV) + ' 달성!' : '')), h('span', {}, '코인 +' + E.coinGain + ' (보유 ' + PROFILE().coins + ')')),
+      h('div', {class:'score'}, h('b', {}, G.score + '점'),
+        h('span', {class:'muted'}, '합격 ' + (G.passN || 0) + ' / ' + n + '문제 · ' + MODES[S.mode].label + ' 기준')),
+      h('p', {class:'muted small', style:'margin:6px 0 0'}, '문제당 10점, 합계 ' + (G.raw || 0) + ' / ' + (G.max || n * 10) + '점을 100점 만점으로 바꾼 점수예요.' + (S.mode === 'flow' ? ' 흐름 이해라서 합격선이 낮아요.' : '')),
+      urgent ? h('p', {class:'urgent'}, h('b', {}, '가장 먼저 보완할 점 '), urgent.title) : null,
+      h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain + (E.levelUp ? ' · Lv.' + levelOf(PROFILE().aff) + ' 달성!' : '')), h('span', {class:'know'}, '지식 +' + (E.knowGain || 0) + (E.knowUp ? ' · Lv.' + levelOf(PROFILE().know || 0, KLV) + ' 달성!' : '')), h('span', {}, '코인 +' + E.coinGain)),
+      pageBox,
+      h('div', {class:'exam-prog gbar'}, prevB, pageNo, h('span', {style:'flex:1'}), nextB),
       G.score >= 80 && SPRITES.cafe ? [
         h('img', {class:'reward-art', src:SPRITES.cafe, alt:'카페에서 딸기 파르페를 먹는 지민'}),
         h('p', {class:'muted small', style:'margin-top:6px'}, '80점 넘으면 받는 보상 일러스트예요. 지민이가 시험 끝나고 파르페 먹으러 갔대요.')] : null),
+    h('div', {class:'sheet', 'data-title':'보완할 점', style:'margin-top:16px'},
+      G.summary ? h('p', {style:'margin:0 0 10px'}, G.summary) : null,
+      main.length ? main : h('p', {class:'muted'}, '되짚을 구멍이 없어요. 완벽하게 가르쳤어요!'),
+      rest.length ? h('details', {class:'fb-more'}, h('summary', {}, '더 보기 (' + rest.length + '개)'), rest) : null,
+      main.length ? h('p', {class:'muted small', style:'margin:8px 0 0'}, '카드를 누르면 후배 답, 원인, 다시 볼 곳이 나와요.') : null),
+    G.good.length ? h('div', {class:'sheet small-sheet', 'data-title':'잘 가르친 점', style:'margin-top:16px'}, h('ul', {class:'good'}, G.good.map(function(g){ return h('li', {}, g); }))) : null,
     viewMiscReveal(ch),
-    h('h2', {style:'margin:18px 0 0'}, '되짚기'),
-    cards.length ? cards : h('p', {class:'muted'}, '되짚을 구멍이 없어요. 완벽하게 가르쳤어요!'),
-    G.good.length ? h('div', {class:'sheet', 'data-title':'잘 가르친 점', style:'margin-top:20px'}, h('ul', {class:'good'}, G.good.map(function(g){ return h('li', {}, g); }))) : null,
-    h('div', {class:'sheet', 'data-title':'문제별 답안과 근거', style:'margin-top:20px'}, h('p', {class:'muted small'}, '형광펜 번호는 후배가 근거로 쓴 공책 문장이에요. 줄 그어진 주장은 검증기가 지운 거예요.'), qs),
-    h('div', {class:'row spread'},
+    h('div', {class:'row spread', style:'margin-top:16px'},
       h('button', {class:'btn ghost small', onclick:function(){ go('outline'); }}, '범위 다시 고르기'),
       h('button', {class:'btn', onclick:function(){ S.tab = 'talk'; S.dialog.push({role:'char', text:react}); S.face = face === 'happy' ? 'happy' : 'fighting'; go('teach'); }}, '이어서 다시 가르치기'))
   );
