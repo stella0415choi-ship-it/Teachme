@@ -218,7 +218,7 @@ input[type=checkbox]{accent-color:var(--rose)}
 
 /* 결과와 되짚기 */
 .score{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.score b{font-family:var(--px-b);font-weight:400;font-size:46px;line-height:1;color:var(--pink);text-shadow:3px 3px 0 var(--line)}
+.score b{font-family:var(--px-b);font-weight:400;font-size:46px;line-height:1;color:#D93A3A;text-shadow:2px 2px 0 rgba(47,51,102,.25)}
 .reward{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .reward span{font-family:var(--px);font-size:13px;padding:3px 10px;background:var(--yellow);color:#2F3366;border:1px solid #2F3366}
 .card{--tc:var(--blue);position:relative;background:var(--win);border:1.5px solid var(--line);border-top:4px solid var(--tc);box-shadow:5px 5px 0 var(--line);padding:14px;margin:14px 6px 0 0}
@@ -232,13 +232,14 @@ details.q{border-top:1px dashed var(--rule);padding:10px 0}
 /* 채점된 시험지(빨간 펜) */
 .gpage{margin-top:12px}
 .paper.graded{margin:0 4px 0 0}
-.gq{display:flex;gap:10px;align-items:flex-start}
-.gq .pq{flex:1}
+.gq{display:flex;gap:6px;align-items:flex-start}
+.gq .pq{flex:1;margin:0}
+.qno{position:relative;flex:none;font-family:var(--read);font-weight:700;font-size:13.5px;line-height:1.45;color:#22223A}
 .red-score{flex:none;font-family:var(--read);font-weight:700;font-size:15px;color:#D93A3A;border:1.5px solid #D93A3A;border-radius:8px;padding:1px 8px;transform:rotate(-4deg)}
-.ga{position:relative;padding:4px 0 2px 34px;min-height:2.4em}
-.ga .pa.done::after{content:none}
-.red-mark{position:absolute;left:0;top:-4px;font-size:30px;line-height:1;color:#D93A3A;font-weight:700}
-.red-mark.m-partial{font-size:26px;top:-1px}
+.pa.ga{margin:8px 0 2px;min-height:0}
+.pa.done::after{content:none}
+.red-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%) rotate(-8deg);font-size:34px;line-height:1;color:#D93A3A;font-weight:700;opacity:.85;pointer-events:none}
+.red-mark.m-partial{font-size:30px}
 .red-why{font-family:var(--read);color:#D93A3A;font-size:13px;line-height:1.5;margin:6px 0 2px}
 .red-pass{font-family:var(--read);color:#D93A3A;font-size:11.5px;margin:0 0 6px;opacity:.85}
 .rubric{list-style:none;margin:6px 0 0;padding:6px 0 0;border-top:1px dashed #C9C9D8;font-family:var(--read);font-size:12px;line-height:1.45}
@@ -1182,11 +1183,12 @@ var P = {
       '- "오개념 미교정": 후배가 믿게 된 것(B)이 원인이 되어 틀렸다.',
       '- "잘못된 설명": 학습자 문장 자체가 원문과 다르다. cause에 해당 S번호를 적는다.',
       '- "참고": flow 모드에서 세부 사항만 빠진 경우(감점 없음).',
-      '카드 항목: title(무엇이 문제인지 한 줄), student(후배 답 요약 한 문장), missing(원문 기준으로 빠지거나 틀린 내용 1~2문장), cause(학습자 문장과 연결한 원인 한 문장), section(다시 볼 구간 id).',
+      '카드 항목: title(무엇을 더 설명해야 하는지 쉬운 말로 한 줄), student(후배 답 요약 한 문장), missing(원문 기준으로 빠지거나 틀린 내용 1~2문장), cause(학습자 문장과 연결한 원인 한 문장), section(다시 볼 구간 id).',
       '카드는 중요한 것만 최대 5개. good은 잘 가르친 점 1~2개, S번호를 들어 구체적으로.',
       '문장은 짧고 구체적으로 쓰고, 같은 결론 문장을 반복하지 않는다.',
       'per_question은 모든 문제에 대해 빠짐없이, items는 rubric과 같은 순서와 개수로 쓴다. 점수 합계는 프로그램이 계산하므로 summary에 점수 숫자를 쓰지 않는다.',
       '카드는 중요한 순서대로 쓰고, 카드마다 tip(다음에 이렇게 설명하면 된다 한 문장)을 넣는다.',
+      '카드 title은 학생에게 말하듯 쉬운 말로 풀어서 ~에 대한 설명이 필요해요. 형태로 쓴다(예: 3·1 운동이 통치 방식을 바꾼 계기였다는 설명이 필요해요.). 명사만 나열하거나 ~이 없다처럼 딱딱하게 쓰지 않는다.',
       '',
       '[원문 — 시험 문제와 관련된 부분. [p.N]은 쪽 번호, …은 생략된 곳]', gradeSource(qs),
       '',
@@ -2651,21 +2653,19 @@ function gradedPage(i){
     h('div', {class:'paper-top'}, h('span', {}, ((a && a.title) || '학습 평가') + ' · ' + MODES[S.mode].label), h('span', {}, '응시자 ' + ch.short)),
     h('div', {class:'paper-title'}, 'TeachMe ' + (E.round || 1) + '차고사'),
     h('div', {class:'gq'},
-      h('p', {class:'pq'}, pad2(i + 1) + '. ' + q.question),
+      h('span', {class:'qno'}, pad2(i + 1) + '.', h('span', {class:'red-mark m-' + res, 'aria-label':RESULT[res]}, MARK[res])),
+      h('p', {class:'pq'}, q.question),
       h('span', {class:'red-score'}, (d.pts % 1 ? d.pts.toFixed(1) : d.pts) + ' / 10')),
-    h('div', {class:'ga'},
-      h('span', {class:'red-mark m-' + res, 'aria-hidden':'true'}, MARK[res]),
-      h('p', {class:'pa done' + (ans ? '' : ' nl')}, ans || '(빈칸)')),
+    h('p', {class:'pa done ga' + (ans ? '' : ' nl')}, ans || '(빈칸)'),
+    h('details', {class:'more why'}, h('summary', {}, '채점 이유와 기준 보기 · ' + (d.pts >= d.pass ? '합격' : '불합격') + ' (합격선 ' + d.pass + '점)'),
     h('p', {class:'red-why'}, d.reason || (res === 'ungraded' ? '채점 결과를 받지 못했다.' : '')),
-    h('p', {class:'red-pass'}, (d.pts >= d.pass ? '합격' : '불합격') + ' · 합격선 ' + d.pass + '점 (' + MODES[S.mode].label + ')'),
     h('ul', {class:'rubric'}, d.items.map(function(it){
       return h('li', {class:it.got >= it.pts ? 'full' : it.got > 0 ? 'half' : 'zero'},
         h('span', {class:'rb-c'}, it.c, it.note ? h('span', {class:'rb-n'}, ' — ' + it.note) : null),
         h('span', {class:'rb-p'}, (it.got % 1 ? it.got.toFixed(1) : it.got) + '/' + it.pts));
-    })),
+    }))),
     h('details', {class:'more'}, h('summary', {}, '모범답안과 ' + ch.short + '이 쓴 근거 보기'),
       h('p', {class:'qa'}, h('b', {}, '모범답안: '), q.answer),
-      f.claims.length ? h('p', {class:'muted small', style:'margin:6px 0 2px'}, '형광펜 번호는 ' + ch.short + '이 근거로 쓴 공책 문장, 줄 그은 주장은 검증기가 지운 거예요.') : null,
       f.claims.map(function(c){
         return h('div', {class:'claim' + (c.verdict === 'ok' ? '' : ' bad'), title:c.reason || null}, c.text,
           c.basis.map(function(b){ return h('span', {class:'cite'}, b); }),
@@ -2716,19 +2716,18 @@ function viewReview(){
     h('div', {class:'sheet', 'data-title':'시험 결과'},
       h('div', {class:'score'}, h('b', {}, G.score + '점'),
         h('span', {class:'muted'}, '합격 ' + (G.passN || 0) + ' / ' + n + '문제 · ' + MODES[S.mode].label + ' 기준')),
-      h('p', {class:'muted small', style:'margin:6px 0 0'}, '문제당 10점, 합계 ' + (G.raw || 0) + ' / ' + (G.max || n * 10) + '점을 100점 만점으로 바꾼 점수예요.' + (S.mode === 'flow' ? ' 흐름 이해라서 합격선이 낮아요.' : '')),
+      h('p', {class:'muted small', style:'margin:6px 0 0'}, '원점수 ' + (G.raw || 0) + ' / ' + (G.max || n * 10) + '점'),
       urgent ? h('p', {class:'urgent'}, h('b', {}, '가장 먼저 보완할 점 '), urgent.title) : null,
       h('div', {class:'reward'}, h('span', {}, '호감도 +' + E.affGain + (E.levelUp ? ' · Lv.' + levelOf(PROFILE().aff) + ' 달성!' : '')), h('span', {class:'know'}, '지식 +' + (E.knowGain || 0) + (E.knowUp ? ' · Lv.' + levelOf(PROFILE().know || 0, KLV) + ' 달성!' : '')), h('span', {}, '코인 +' + E.coinGain)),
       pageBox,
       h('div', {class:'exam-prog gbar'}, prevB, pageNo, h('span', {style:'flex:1'}), nextB),
       G.score >= 80 && SPRITES.cafe ? [
-        h('img', {class:'reward-art', src:SPRITES.cafe, alt:'카페에서 딸기 파르페를 먹는 지민'}),
-        h('p', {class:'muted small', style:'margin-top:6px'}, '80점 넘으면 받는 보상 일러스트예요. 지민이가 시험 끝나고 파르페 먹으러 갔대요.')] : null),
+        h('img', {class:'reward-art', src:SPRITES.cafe, alt:'카페에서 딸기 파르페를 먹는 지민'})] : null),
     h('div', {class:'sheet', 'data-title':'보완할 점', style:'margin-top:16px'},
       G.summary ? h('p', {style:'margin:0 0 10px'}, G.summary) : null,
       main.length ? main : h('p', {class:'muted'}, '되짚을 구멍이 없어요. 완벽하게 가르쳤어요!'),
       rest.length ? h('details', {class:'fb-more'}, h('summary', {}, '더 보기 (' + rest.length + '개)'), rest) : null,
-      main.length ? h('p', {class:'muted small', style:'margin:8px 0 0'}, '카드를 누르면 후배 답, 원인, 다시 볼 곳이 나와요.') : null),
+      null),
     G.good.length ? h('div', {class:'sheet small-sheet', 'data-title':'잘 가르친 점', style:'margin-top:16px'}, h('ul', {class:'good'}, G.good.map(function(g){ return h('li', {}, g); }))) : null,
     viewMiscReveal(ch),
     h('div', {class:'row spread', style:'margin-top:16px'},
