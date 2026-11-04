@@ -79,7 +79,7 @@ async def main():
         await page.screenshot(path=OUT / "5b-exam-q1.png")
         await page.wait_for_timeout(3800)
         await page.screenshot(path=OUT / "5c-exam-q2.png")
-        await page.wait_for_selector(".score", timeout=30000)
+        await page.wait_for_selector(".verdict", timeout=30000)
         await page.wait_for_timeout(400)
         await page.screenshot(path=OUT / "6-review.png", full_page=True)
         # 내 학습, 업적, 설정
