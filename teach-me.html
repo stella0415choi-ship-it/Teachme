@@ -471,7 +471,7 @@ textarea,.tc-bar textarea{font-size:16px}
 /* 리본 책갈피 */
 .dy-ribbon{position:absolute;left:26px;top:-12px;width:18px;height:60px;background:linear-gradient(90deg,#FF8FB8,#FFB3CE 50%,#FF8FB8);z-index:2;
   clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%)}
-.dy-head{position:relative;display:flex;justify-content:center;align-items:center;padding:20px 40px 6px}
+.dy-head{position:relative;height:44px}
 .dy-title{font-family:var(--px-b);font-weight:400;font-size:15px;color:#fff;letter-spacing:.5px;padding:6px 22px 5px;border-radius:999px;
   background:linear-gradient(#FFB6D0 0 48%,#F48FB6 52%);border:2px solid #fff;box-shadow:0 0 0 2px #F48FB6,0 3px 0 2px #D97CA1;text-shadow:0 1px 0 #D97CA1}
 .dy-close{position:absolute;right:10px;top:16px;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;color:#B85C86;font-family:var(--px-b);
@@ -2914,36 +2914,36 @@ function viewReview(){
    일기는 AI 호출 없이 미리 써 둔 문장으로 기록한다: 홈 잡담(다정한 답, 하루 한 번), 시험(본 자료·점수).
    이야기(스토리) 탭은 기획 중이라 자리만 있다: 첫 만남 → 지식·호감도로 다음 화 열람, 특정 화에서 니트 해금 예정. */
 var DIARY_CHAT = [
-  '선배가 이따 같이 산책하자고 하셨다. 날씨보다 그 말이 더 좋았다.',
-  '배고프다고 했더니 선배가 매점 빵을 사 주셨다. 다음엔 내가 사야지.',
-  '수행평가 때문에 지쳐 있었는데, 선배가 하나씩 같이 하자고 해 주셨다.',
-  '선배도 나를 가르치면서 배운다고 하셨다. 조금 뿌듯했다.',
-  '선배랑 공부할 때 듣는 노래 이야기를 했다. 추천 리스트를 받기로 했다.',
-  '책상에 엎드려 잔 얘기를 했더니 선배가 걱정해 주셨다. 오늘은 일찍 자야지.',
-  '안경 바꾼 걸 선배가 알아봐 주셨다. 잘 어울린대..!',
-  '도서관 창가 자리 얘기를 했다. 다음엔 선배랑 같이 공부하기로 했다.',
-  '꿈을 아직 모르겠다고 했더니, 선배도 찾는 중이니 같이 찾자고 하셨다.',
-  '복도에서 넘어질 뻔한 걸 선배가 걱정해 주셨다. 창피했지만 고마웠다.',
-  '선배랑 딸기 우유 사러 가기로 했다.',
-  '형광펜 무지개 공책을 보여 드렸더니, 색마다 뜻을 정해 보라고 하셨다.',
-  '발표 때 떨렸다고 했는데, 끝까지 한 게 대단하다고 해 주셨다.',
-  '선배가 별 보는 걸 같이 하고 싶다고 하셨다.',
-  '선배는 밤에 집중이 잘 된대. 나랑 똑같다.',
-  '피구에서 마지막까지 남은 얘기를 했더니 에이스라고 해 주셨다.',
-  '선배가 고양이가 나랑 닮았다고 하셨다. 어디가 닮았을까..',
-  '모르는 문제는 언제든 물어보라고 하셨다. 마음이 놓였다.',
-  '빗소리가 집중에 좋다는 걸 선배한테 배웠다.',
-  '주말에 선배랑 같이 공부하기로 했다..!',
-  '몰래 그린 선배 얼굴을 보여 드렸다. 좋아해 주셔서 다행이다.',
-  '선배도 수학이 어렵대. 같이 극복하자고 하셨다.',
-  '선배한테 배운 걸 친구한테 설명해 줬다고 했더니, 그게 진짜 이해한 거라고 하셨다.',
-  '급식 떡볶이 얘기를 선배랑 했다. 선배도 좋아하신대.',
-  '시험 끝나면 같이 맛있는 거 먹으러 가자고 하셨다.',
-  '질문을 많이 해서 귀찮을까 봐 걱정했는데, 질문해 줘서 좋다고 하셨다.',
-  '창밖 노란 고양이를 선배랑 같이 봤다.',
-  '단어 외우기를 선배도 같이 하신대. 힘이 난다.',
-  '선배가 필통을 하나 사 주신다고 하셨다. 정말 감사하다.',
-  '오늘은 공부가 잘 될 것 같다고 했더니 선배가 바로 시작하자고 하셨다.'
+  '선배랑 산책 약속.',
+  '선배가 빵 사 주심.',
+  '지쳤는데 선배가 같이 해 주신대.',
+  '선배도 나한테 배운대. 뿌듯.',
+  '노래 추천받기로 했다.',
+  '선배가 걱정해 주심. 일찍 자기.',
+  '안경 알아봐 주셨다..!',
+  '도서관에서 같이 공부하기로.',
+  '꿈은 같이 찾자고 하셨다.',
+  '넘어질 뻔. 창피했다.',
+  '딸기 우유 사러 가기로!',
+  '형광펜 색마다 뜻 정하기.',
+  '발표, 대단하다고 해 주심.',
+  '같이 별 보기로.',
+  '선배도 밤형이래.',
+  '피구 에이스라고 해 주심.',
+  '내가 고양이 닮았대..',
+  '모르면 언제든 물어보래.',
+  '빗소리가 집중에 좋대.',
+  '주말에 같이 공부!',
+  '선배 얼굴 그림, 좋아해 주심.',
+  '선배도 수학 어렵대.',
+  '설명할 수 있으면 진짜 아는 거래.',
+  '급식 떡볶이 최고.',
+  '시험 끝나면 맛있는 거!',
+  '질문해 줘서 좋대.',
+  '노란 고양이 같이 봤다.',
+  '단어 외우기 같이 하기로.',
+  '필통 사 주신대. 감사.',
+  '바로 공부 시작!'
 ];
 function dayKey(ts){ var d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
 function addDiary(type, text, oncePerDay){
@@ -2955,13 +2955,9 @@ function addDiary(type, text, oncePerDay){
   saveProfile();
 }
 function examDiaryLine(g){
-  var a = S.analysis || {}, title = a.title || '새로운 단원';
-  var taught = goalsSel().filter(function(x){ return ((S.goals[x.id] || {}).level || 0) >= 2; }).length;
-  var first = '오늘은 선배가 ' + title + '에 대해 가르쳐 주셨다.' + (taught ? ' 학습 목표 ' + taught + '개를 제대로 배웠다.' : '');
-  var mood = g.passed && g.score >= (g.passLine || 60) + 10 ? '시험은 ' + g.score + '점, 통과했다! 선배 덕분이다..!'
-    : g.passed ? '시험은 ' + g.score + '점. 아슬아슬하게 통과했다. 헷갈린 부분은 다시 여쭤봐야지.'
-    : '시험은 ' + g.score + '점이었다. 아직 헷갈리는 게 많다. 다음엔 꼭 통과하고 싶다.';
-  return first + ' ' + mood;
+  var title = (S.analysis || {}).title || '새 단원';
+  if (title.length > 14) title = title.slice(0, 14) + '…';
+  return title + ' 배움. 시험 ' + g.score + '점' + (g.passed ? ', 통과!' : ', 다음엔 꼭 통과.');
 }
 var DIARY = {open:false, page:0, tab:'diary'};
 function viewDiary(){
@@ -3016,7 +3012,7 @@ function viewDiary(){
     }
     book.append(tabs, h('div', {class:'dy-inner'},
       h('span', {class:'dy-ribbon', 'aria-hidden':'true'}),
-      h('div', {class:'dy-head'}, h('b', {class:'dy-title'}, '♡ 지민이의 다이어리 ♡'), close),
+      h('div', {class:'dy-head'}, close),
       body,
       h('span', {class:'dy-stk a', 'aria-hidden':'true'}, '✿'), h('span', {class:'dy-stk b', 'aria-hidden':'true'}, '★')));
   }
