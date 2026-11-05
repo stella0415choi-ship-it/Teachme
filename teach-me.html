@@ -1863,7 +1863,7 @@ function runExam(retry){
   p = p.then(function(){
     if (E.stage > 2) return;
     addLog({layer:'채점·되짚기 계층', tier:'default', sees:['원문(문제 관련 부분)','모범답안','학습자 문장','후배 최종 답안'], blocked:[], note:'원인을 세 가지로 나눠 되짚기 카드를 만들어요.'});
-    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'complex', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs, E.finals); E.stage = 3; examStatus(); });
+    return AI.json(P.grade(E.beliefs, E.qs, E.finals), {modelTier:'default', cache:false}).then(function(r){ E.grade = normGrade(r, E.qs, E.finals); E.stage = 3; examStatus(); });
   });
   p.then(function(){
     // 답안을 다 보여 준 뒤에 결과 화면으로 가요(아직 보여 주는 중이면 끝날 때 examAfterPlay가 넘겨요).
